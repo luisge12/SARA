@@ -1,0 +1,48 @@
+/* Estilos Globales y Variables de Diseño Premium (SARA) */
+:root {
+  /* Paleta de Colores (Inspirada en Google Forms y Clinicas Premium) */
+  --primary-color: #673ab7; /* Morado clásico de Google Forms */
+  --primary-hover: #5e35b1;
+  --secondary-color: #3f51b5;
+  
+  --bg-app: #f0ebf8; /* Fondo lavanda muy suave (Google Forms) */
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  
+  --text-main: #202124;
+  --text-muted: #5f6368;
+  --text-light: #80868b;
+  
+  --border-color: #dadce0;
+  --border-focus: #673ab7;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Transiciones suaves en interacciones */
+button, input, select, textarea {
+  font-family: inherit;
+  transition: all 0.2s ease-in-out;
+}
+
+button {
+  cursor: pointer;
+}

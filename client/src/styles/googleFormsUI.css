@@ -1,0 +1,111 @@
+/* Estilos Inspirados en Google Forms (Google Forms UI) */
+
+/* Tarjetas principales de formularios */
+.gf-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Banda de color superior en la primera tarjeta (típica de Google Forms) */
+.gf-card.gf-primary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-color: var(--primary-color);
+}
+
+/* Campos de entrada con borde inferior únicamente */
+.gf-input-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.gf-input {
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--text-main);
+  background-color: transparent;
+  outline: none;
+}
+
+.gf-input:focus {
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Botón de cerrar de la esquina superior derecha */
+.gf-btn-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.gf-btn-close:hover {
+  background-color: #f1f3f4;
+  color: var(--text-main);
+}
+
+/* Fila inferior de botones de acción centrados (Guardar & Guardar y Publicar) */
+.gf-action-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Botones de acción estándar */
+.gf-btn {
+  padding: 8px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.gf-btn-save {
+  background-color: transparent;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.gf-btn-save:hover {
+  background-color: #f3e5f5;
+}
+
+.gf-btn-publish {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.gf-btn-publish:hover {
+  background-color: var(--primary-hover);
+}
