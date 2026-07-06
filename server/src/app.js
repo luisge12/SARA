@@ -55,9 +55,14 @@ app.set('io', io);
 
 // Iniciar Servidor
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Servidor SARA escuchando en el puerto ${PORT}`);
   console.log(`Entorno: ${process.env.NODE_ENV}`);
+  
+  // Inicializar Base de Datos PostgreSQL
+  const { initDatabase } = require('./config/database');
+  await initDatabase();
 });
 
 module.exports = { app, server };
+

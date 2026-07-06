@@ -47,3 +47,7 @@ server/uploads/*
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Database Schema Scripts
+schema.sql
+
