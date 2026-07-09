@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Modulo1_Login/Login';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
 import Modulo2_GestionAdministrativa from './pages/Modulo2_GestionAdministrativa/Modulo2_GestionAdministrativa';
 import Modulo3_RegistroCaja from './pages/Modulo3_RegistroCaja/Modulo3_RegistroCaja';
 import Modulo4_DatosClinicos from './pages/Modulo4_DatosClinicos/Modulo4_DatosClinicos';
@@ -12,6 +13,9 @@ function App() {
       <Routes>
         {/* Ruta del Módulo 1: Login */}
         <Route path="/login" element={<Login />} />
+        
+        {/* Dashboard de SARA */}
+        <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Rutas para los Módulos de SARA */}
         <Route path="/modulo2" element={<Modulo2_GestionAdministrativa />} />
@@ -27,4 +31,3 @@ function App() {
 }
 
 export default App;
-

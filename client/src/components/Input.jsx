@@ -17,6 +17,7 @@ export const Input = React.forwardRef(({
           ref={ref}
           className={`input-field ${icon ? 'has-icon' : ''} ${error ? 'input-error' : ''}`} 
           {...props} 
+          
         />
       </div>
       {error && <span className="input-error-msg">{error}</span>}

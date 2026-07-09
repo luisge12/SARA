@@ -2,11 +2,11 @@
 const { Sequelize } = require('sequelize');
 
 // Leer variables de entorno
-const dbHost = process.env.DB_HOST || 'localhost';
-const dbPort = process.env.DB_PORT || 5432;
-const dbName = process.env.DB_NAME || 'sara';
-const dbUser = process.env.DB_USER || 'postgres';
-const dbPassword = process.env.DB_PASSWORD || 'postgres';
+const dbHost = process.env.DB_HOST;
+const dbPort = process.env.DB_PORT;
+const dbName = process.env.DB_NAME;
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD;
 
 // Inicializar Sequelize con el dialecto Postgres
 const sequelize = new Sequelize(dbName, dbUser, dbPassword, {

@@ -4,6 +4,7 @@ import App from './App.jsx';
 import './styles/main.css';
 import './styles/layout.css';
 import './styles/googleFormsUI.css';
+import './styles/index.css';
 
 // Registro del Service Worker para la PWA de Vite
 import { registerSW } from 'virtual:pwa-register';

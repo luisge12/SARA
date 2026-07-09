@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Calendar, Settings, LogOut, ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import './Sidebar.css';
 
 export function Sidebar() {
@@ -8,10 +8,10 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Patients', path: '/patients', icon: Users },
-    { name: 'Appointments', path: '/appointments', icon: Calendar },
-    { name: 'Flujo de Caja', path: '/cashflow', icon: Wallet },
-    { name: 'Settings', path: '/settings', icon: Settings },
+    { name: 'Gestión Adm. (M2)', path: '/modulo2', icon: ShieldCheck },
+    { name: 'Caja y Registro (M3)', path: '/modulo3', icon: Wallet },
+    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity },
+    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3 },
   ];
 
   return (
@@ -45,12 +45,19 @@ export function Sidebar() {
             </NavLink>
           );
         })}
+        
+        {!isCollapsed && (
+          <div className="sidebar-acronym" style={{ marginTop: 'auto', padding: '1rem 0.5rem 0' }}>
+            <p><strong>SARA</strong></p>
+            <p style={{ fontSize: '0.65rem' }}>Sistema Administrativo y de Registro Automatizado</p>
+          </div>
+        )}
       </nav>
       
       <div className="sidebar-footer">
-        <NavLink to="/" className="sidebar-link logout" title={isCollapsed ? "Log Out" : ""}>
+        <NavLink to="/login" className="sidebar-link logout" title={isCollapsed ? "Cerrar Sesión" : ""}>
           <LogOut size={20} className="sidebar-icon" />
-          <span className="link-text">Log Out</span>
+          <span className="link-text">Cerrar Sesión</span>
         </NavLink>
       </div>
     </aside>

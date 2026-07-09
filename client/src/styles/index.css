@@ -35,20 +35,14 @@
   --radius-md: 0.75rem;
   --radius-lg: 1.25rem;
   --border-color: #e2e8f0;
-}
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font-main);
-  background-color: var(--color-bg-main);
-  color: var(--color-text-main);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Keep legacy variables for older modules if they depend on them */
+  --primary-color: #22505d;
+  --primary-hover: #1b404a;
+  --bg-app: #f4f7f6;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #f8fafc;
 }
 
 /* Glassmorphism Utilities */

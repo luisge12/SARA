@@ -135,6 +135,10 @@
   transition: height 1s ease;
 }
 
+.chart-bar:hover {
+  background-color: var(--color-accent);
+}
+
 .chart-caption {
   margin-top: 1rem;
   font-size: 0.875rem;
