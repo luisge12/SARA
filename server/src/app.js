@@ -26,6 +26,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Importar Rutas de SARA
+const userRoutes = require('./routes/userRoutes');
+const patientRoutes = require('./routes/patientRoutes');
+const clinicalRoutes = require('./routes/clinicalRoutes');
+const billingRoutes = require('./routes/billingRoutes');
+
+// Registrar Rutas de la API
+app.use('/api/users', userRoutes);
+app.use('/api/patients', patientRoutes);
+app.use('/api/clinical', clinicalRoutes);
+app.use('/api/billing', billingRoutes);
+
 // Ruta de estado del servidor
 app.get('/status', (req, res) => {
   res.json({

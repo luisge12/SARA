@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 const { verifyToken, checkRole } = require('../middlewares/authMiddleware');
 
 router.post('/login', userController.login);
+router.get('/', verifyToken, checkRole(['Master']), userController.getUsers);
 router.post('/create', verifyToken, checkRole(['Master']), userController.createUser);
 router.delete('/:id', verifyToken, checkRole(['Master']), userController.deleteUser);
 router.put('/update-password', verifyToken, userController.updatePassword);

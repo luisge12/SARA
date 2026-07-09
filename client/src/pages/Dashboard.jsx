@@ -5,16 +5,28 @@ import { Users, Activity, CalendarCheck, TrendingUp } from 'lucide-react';
 import './Dashboard.css';
 
 export function Dashboard() {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
   return (
     <DashboardLayout>
       <div className="dashboard-container" style={{ padding: 0 }}>
       <header className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Resumen General SARA</h1>
-          <p className="dashboard-subtitle">Bienvenido de nuevo. Aquí está el resumen de la clínica para hoy.</p>
+          <p className="dashboard-subtitle">Bienvenido de nuevo, <strong>{user.name || 'Usuario'}</strong>. Rol: <strong>{user.role || 'Sin rol'}</strong>. Sede: <strong>{user.sedeAtencion || 'No especificada'}</strong>.</p>
         </div>
-        <div className="dashboard-actions">
+        <div className="dashboard-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
           <span className="current-date">{new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          {token ? (
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-success)', background: 'rgba(16, 185, 129, 0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={token}>
+              Token detectado: {token.substring(0, 20)}...
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-alert)', background: 'rgba(239, 68, 68, 0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px' }}>
+              No se detectó token de sesión.
+            </div>
+          )}
         </div>
       </header>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, User, Building } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import api from '../services/api';
 import './Login.css';
 
 const PatientNetworkBg = () => (
@@ -44,6 +45,7 @@ export function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [sede, setSede] = useState('CENTRAL');
+  const [errorMsg, setErrorMsg] = useState('');
   const [dateTime, setDateTime] = useState(new Date());
 
   // Actualizar la fecha y hora cada segundo
@@ -52,15 +54,25 @@ export function Login() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     
-    // Credenciales por defecto (Requerimiento 3.1.2)
-    if (username === 'UNIMECO' && password === '18992791') {
+    try {
+      const response = await api.post('/api/users/login', { username, password });
+      const { token, user } = response.data;
+      
+      // Guardar token, sede y datos de usuario en localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ ...user, sedeAtencion: sede }));
+      
       // Redirigir al Dashboard nuevo de SARA
       navigate('/dashboard');
-    } else {
-      alert('Credenciales incorrectas. Intente con UNIMECO / 18992791');
+    } catch (err) {
+      console.error('Error de login:', err);
+      const errMsg = err.response?.data?.error || 'Error de conexión con el servidor backend';
+      setErrorMsg(errMsg);
+      alert(errMsg);
     }
   };
 

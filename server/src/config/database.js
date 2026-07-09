@@ -27,9 +27,46 @@ const initDatabase = async () => {
     console.log('Conexión con PostgreSQL establecida correctamente.');
 
     // Sincronizar todos los modelos definidos
+    // Importamos los modelos para registrarlos en Sequelize
+    const User = require('../models/User');
+
     // alter: true sincroniza la estructura de las tablas sin perder los datos
     await sequelize.sync({ alter: true });
     console.log('Modelos de base de datos sincronizados con éxito.');
+
+    // Semillar el usuario master por defecto si no existe
+    const bcrypt = require('bcryptjs');
+    const masterUser = process.env.DEFAULT_MASTER_USER || 'UNIMECO';
+    const masterPass = process.env.DEFAULT_MASTER_PASS || '18992791';
+    
+    const unimecoExists = await User.findOne({ where: { username: masterUser } });
+    if (!unimecoExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(masterPass, salt);
+      await User.create({
+        username: masterUser,
+        passwordHash: passwordHash,
+        role: 'Master',
+        name: 'Administrador Master SARA',
+        sedeAtencion: 'CENTRAL'
+      });
+      console.log('Usuario Master (UNIMECO) creado exitosamente.');
+    }
+
+    // Semillar usuario de prueba luisge con clave 1234
+    const luisgeExists = await User.findOne({ where: { username: 'luisge' } });
+    if (!luisgeExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await User.create({
+        username: 'luisge',
+        passwordHash: passwordHash,
+        role: 'Master',
+        name: 'Luis G. SARA Master',
+        sedeAtencion: 'CENTRAL'
+      });
+      console.log('Usuario de prueba Master (luisge) creado exitosamente.');
+    }
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);
   }
