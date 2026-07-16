@@ -8,6 +8,20 @@ import Modulo4_DatosClinicos from './pages/Modulo4_DatosClinicos/Modulo4_DatosCl
 import Modulo7_GestionMedicaEstadistica from './pages/Modulo7_GestionMedicaEstadistica/Modulo7_GestionMedicaEstadistica';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
+// Portal de Pacientes
+import { PortalPacienteLogin } from './pages/PortalPaciente/PortalPacienteLogin';
+import { PortalPacienteDashboard } from './pages/PortalPaciente/PortalPacienteDashboard';
+import { PortalPacienteHistoriaMedica } from './pages/PortalPaciente/PortalPacienteHistoriaMedica';
+import { PortalPacienteProtectedRoute } from './pages/PortalPaciente/PortalPacienteProtectedRoute';
+
+function PortalPacienteIndex() {
+  const token = localStorage.getItem('portal_token');
+  if (!token) {
+    return <Navigate to="/users/login" replace />;
+  }
+  return <Navigate to="/users/dashboard" replace />;
+}
+
 function App() {
   return (
     <Router>
@@ -42,6 +56,20 @@ function App() {
           <ProtectedRoute allowedGroups={['ADMINISTRADOR']}>
             <Modulo7_GestionMedicaEstadistica />
           </ProtectedRoute>
+        } />
+
+        {/* Rutas del Portal del Paciente */}
+        <Route path="/users" element={<PortalPacienteIndex />} />
+        <Route path="/users/login" element={<PortalPacienteLogin />} />
+        <Route path="/users/dashboard" element={
+          <PortalPacienteProtectedRoute>
+            <PortalPacienteDashboard />
+          </PortalPacienteProtectedRoute>
+        } />
+        <Route path="/users/historia-medica" element={
+          <PortalPacienteProtectedRoute>
+            <PortalPacienteHistoriaMedica />
+          </PortalPacienteProtectedRoute>
         } />
         
         {/* Redirección por defecto */}
