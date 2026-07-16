@@ -102,6 +102,10 @@
   gap: 1.5rem;
 }
 
+.dashboard-main-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 1024px) {
   .dashboard-main-grid {
     grid-template-columns: 1fr;

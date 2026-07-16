@@ -40,6 +40,7 @@ const initDatabase = async () => {
     const PatientProfile = require('../models/PatientProfile');
     const Consultation = require('../models/Consultation');
     const AuditLog = require('../models/AuditLog');
+    const Transaction = require('../models/Transaction');
 
     // alter: true sincroniza la estructura de las tablas sin perder los datos
     await sequelize.sync({ alter: true });

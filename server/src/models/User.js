@@ -40,6 +40,13 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(100),
     field: 'sede_atencion'
   },
+  shift: {
+    type: DataTypes.STRING(50) // Turno (Mañana, Tarde, Noche, etc.) para Recepcionistas u otros empleados
+  },
+  academicDegree: {
+    type: DataTypes.STRING(150),
+    field: 'academic_degree' // Título o Grado Académico
+  },
   expiresAt: {
     type: DataTypes.DATE,
     field: 'expires_at'

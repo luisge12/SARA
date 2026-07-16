@@ -2,6 +2,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const PatientProfile = require('../models/PatientProfile');
+const AuditLog = require('../models/AuditLog');
 
 module.exports = {
   getUsers: async (req, res) => {
@@ -56,9 +58,18 @@ module.exports = {
   },
   createUser: async (req, res) => {
     try {
-      const { username, password, role, name, identificationNumber, mppsNumber, medicalCollegeNumber, sedeAtencion } = req.body;
+      const { 
+        username, password, role, name, identificationNumber, mppsNumber, medicalCollegeNumber, sedeAtencion,
+        shift, academicDegree,
+        gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
+      } = req.body;
       if (!username || !password || !role) {
         return res.status(400).json({ error: 'Campos requeridos faltantes' });
+      }
+      
+      // Restringir a Recepcionistas/Médicos para que solo creen Pacientes
+      if (req.user && req.user.role !== 'Master' && role !== 'Paciente') {
+        return res.status(403).json({ error: 'No tienes permisos para crear usuarios de este tipo' });
       }
 
       const existingUser = await User.findOne({ where: { username } });
@@ -77,8 +88,34 @@ module.exports = {
         identificationNumber,
         mppsNumber,
         medicalCollegeNumber,
-        sedeAtencion
+        sedeAtencion,
+        shift,
+        academicDegree
       });
+
+      if (role === 'Paciente') {
+        const newProfile = await PatientProfile.create({
+          userId: newUser.id,
+          gender,
+          dateOfBirth,
+          phone,
+          email,
+          treatingDoctor,
+          referringEntity,
+          nextAppointment,
+          address
+        });
+        
+        await AuditLog.create({
+          patientId: newProfile.id,
+          modifiedByUserId: req.user ? req.user.id : null,
+          actionType: 'CREATE_PATIENT',
+          changesDescription: {
+            message: 'Paciente creado',
+            user: { username: newUser.username, name: newUser.name }
+          }
+        });
+      }
 
       return res.status(201).json({
         message: 'Usuario creado exitosamente',

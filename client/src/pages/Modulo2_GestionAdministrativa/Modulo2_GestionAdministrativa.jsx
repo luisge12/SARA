@@ -19,9 +19,10 @@ function Modulo2_GestionAdministrativa() {
   const [loading, setLoading] = useState(true);
 
   // Form states
+  const initialRole = isMaster ? 'Administrador' : 'Paciente';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Administrador');
+  const [role, setRole] = useState(initialRole);
   const [name, setName] = useState('');
   const [identificationNumber, setIdentificationNumber] = useState('');
   const [mppsNumber, setMppsNumber] = useState('');
@@ -30,13 +31,26 @@ function Modulo2_GestionAdministrativa() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // Paciente specific states
+  const [gender, setGender] = useState('Masculino');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [treatingDoctor, setTreatingDoctor] = useState('');
+  const [referringEntity, setReferringEntity] = useState('');
+  const [nextAppointment, setNextAppointment] = useState('');
+  const [address, setAddress] = useState('');
+
+  // Recepcionista specific states
+  const [shift, setShift] = useState('Mañana');
+  const [academicDegree, setAcademicDegree] = useState('');
+
   // Fetch users if Master
   const fetchUsers = async () => {
-    if (!isMaster) return;
     try {
       setLoading(true);
       const endpoint = isMaster ? '/api/users' : '/api/patients'; // Assuming we have an endpoint for just patients, actually the /api/patients/ returns patients
-      const response = await api.get(isMaster ? '/api/users' : '/api/patients');
+      const response = await api.get(endpoint);
       setUsersList(response.data);
     } catch (err) {
       console.error('Error al obtener lista de usuarios:', err);
@@ -63,7 +77,13 @@ function Modulo2_GestionAdministrativa() {
         identificationNumber,
         mppsNumber,
         medicalCollegeNumber,
-        sedeAtencion
+        sedeAtencion,
+        ...(role === 'Paciente' ? {
+          gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
+        } : {}),
+        ...(role === 'Recepcionista' ? {
+          shift, academicDegree
+        } : {})
       };
       
       const response = await api.post('/api/users/create', payload);
@@ -76,8 +96,20 @@ function Modulo2_GestionAdministrativa() {
       setIdentificationNumber('');
       setMppsNumber('');
       setMedicalCollegeNumber('');
-      setRole('Administrador');
+      setRole(initialRole);
       setSedeAtencion('CENTRAL');
+      
+      setGender('Masculino');
+      setDateOfBirth('');
+      setPhone('');
+      setEmail('');
+      setTreatingDoctor('');
+      setReferringEntity('');
+      setNextAppointment('');
+      setAddress('');
+      
+      setShift('Mañana');
+      setAcademicDegree('');
       
       // Reload user list
       fetchUsers();
@@ -321,6 +353,103 @@ function Modulo2_GestionAdministrativa() {
                     onChange={(e) => setMedicalCollegeNumber(e.target.value)}
                   />
                 </div>
+              )}
+
+              {role === 'Recepcionista' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="input-group">
+                    <label className="input-label">Turno</label>
+                    <select 
+                      className="input-field" 
+                      value={shift} 
+                      onChange={(e) => setShift(e.target.value)}
+                      style={{ height: '39px', padding: '0.5rem 1rem' }}
+                    >
+                      <option value="Mañana">Mañana</option>
+                      <option value="Tarde">Tarde</option>
+                      <option value="Noche">Noche</option>
+                      <option value="Mixto">Mixto</option>
+                    </select>
+                  </div>
+                  <Input 
+                    label="Título o Grado Académico"
+                    type="text"
+                    placeholder="Ej. TSU, Licenciada, etc."
+                    value={academicDegree}
+                    onChange={(e) => setAcademicDegree(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {role === 'Paciente' && (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="input-group">
+                      <label className="input-label">Género</label>
+                      <select 
+                        className="input-field" 
+                        value={gender} 
+                        onChange={(e) => setGender(e.target.value)}
+                        style={{ height: '39px', padding: '0.5rem 1rem' }}
+                      >
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <Input 
+                      label="Fecha de Nacimiento"
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <Input 
+                      label="Teléfono"
+                      type="text"
+                      placeholder="+58 412 1234567"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                    <Input 
+                      label="Email"
+                      type="email"
+                      placeholder="correo@ejemplo.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <Input 
+                      label="Médico Tratante"
+                      type="text"
+                      placeholder="Dr. Nombre Apellido"
+                      value={treatingDoctor}
+                      onChange={(e) => setTreatingDoctor(e.target.value)}
+                    />
+                    <Input 
+                      label="Referente"
+                      type="text"
+                      placeholder="Seguros Mercantil, etc."
+                      value={referringEntity}
+                      onChange={(e) => setReferringEntity(e.target.value)}
+                    />
+                  </div>
+                  <Input 
+                    label="Próxima Cita / Control"
+                    type="datetime-local"
+                    value={nextAppointment}
+                    onChange={(e) => setNextAppointment(e.target.value)}
+                  />
+                  <Input 
+                    label="Dirección"
+                    type="text"
+                    placeholder="Dirección completa"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                </>
               )}
 
               <Button type="submit" fullWidth style={{ marginTop: '0.5rem' }}>

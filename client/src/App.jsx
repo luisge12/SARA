@@ -24,12 +24,12 @@ function App() {
         
         {/* Rutas para los Módulos de SARA */}
         <Route path="/modulo2" element={
-          <ProtectedRoute allowedGroups={['ADMINISTRADOR']}>
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
             <Modulo2_GestionAdministrativa />
           </ProtectedRoute>
         } />
         <Route path="/modulo3" element={
-          <ProtectedRoute allowedGroups={['RECEPCIONISTA']}>
+          <ProtectedRoute allowedGroups={['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER']}>
             <Modulo3_RegistroCaja />
           </ProtectedRoute>
         } />

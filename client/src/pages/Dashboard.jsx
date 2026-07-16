@@ -71,21 +71,23 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="dashboard-main-grid">
-        <Card title="Evolución de Pacientes" className="patient-overview-card">
-          <div className="placeholder-chart">
-             <div className="chart-bars">
-               <div className="chart-bar" style={{height: '60%'}}></div>
-               <div className="chart-bar" style={{height: '80%'}}></div>
-               <div className="chart-bar" style={{height: '40%'}}></div>
-               <div className="chart-bar" style={{height: '90%'}}></div>
-               <div className="chart-bar" style={{height: '70%'}}></div>
-               <div className="chart-bar" style={{height: '100%', backgroundColor: 'var(--color-accent)'}}></div>
-               <div className="chart-bar" style={{height: '50%'}}></div>
-             </div>
-             <p className="chart-caption">Afluencia Semanal de Pacientes</p>
-          </div>
-        </Card>
+      <div className={`dashboard-main-grid ${user.role === 'Recepcionista' ? 'single-column' : ''}`}>
+        {user.role !== 'Recepcionista' && (
+          <Card title="Evolución de Pacientes" className="patient-overview-card">
+            <div className="placeholder-chart">
+               <div className="chart-bars">
+                 <div className="chart-bar" style={{height: '60%'}}></div>
+                 <div className="chart-bar" style={{height: '80%'}}></div>
+                 <div className="chart-bar" style={{height: '40%'}}></div>
+                 <div className="chart-bar" style={{height: '90%'}}></div>
+                 <div className="chart-bar" style={{height: '70%'}}></div>
+                 <div className="chart-bar" style={{height: '100%', backgroundColor: 'var(--color-accent)'}}></div>
+                 <div className="chart-bar" style={{height: '50%'}}></div>
+               </div>
+               <p className="chart-caption">Afluencia Semanal de Pacientes</p>
+            </div>
+          </Card>
+        )}
 
         <Card title="Próximas Citas" action={<button className="btn btn-outline" style={{padding: '0.25rem 0.75rem', fontSize: '0.75rem'}}>Ver Todas</button>}>
           <div className="appointment-list">
