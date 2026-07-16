@@ -16,7 +16,7 @@
   padding: 2rem;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1300px) {
   .layout-main {
     margin-left: 0;
     padding: 1rem;

@@ -201,7 +201,7 @@
 }
 
 /* Mobile Off-canvas */
-@media (max-width: 1080px) {
+@media (max-width: 1300px) {
   .mobile-menu-btn {
     display: flex;
   }
@@ -211,14 +211,17 @@
   }
   
   .sidebar {
-    position: fixed;
-    transform: translateX(-100%); /* HIDDEN BY DEFAULT ON MOBILE */
+    position: sticky;
+    margin-left: -260px; /* Esconde la barra pero en el flujo normal */
+    transform: none;
     z-index: 999;
-    width: 260px !important; /* Siempre ancho completo en móvil cuando sale */
+    width: 260px !important; 
+    transition: margin-left 0.3s ease;
   }
   
   .sidebar.mobile-open {
-    transform: translateX(0); /* SALE AL CLICK */
+    margin-left: 0; /* Empuja el contenido a la derecha al abrirse */
+    transform: none;
   }
   
   /* Make sure internal elements show correctly when mobile menu is open */

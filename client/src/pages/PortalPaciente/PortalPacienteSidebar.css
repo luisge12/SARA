@@ -182,7 +182,7 @@
   opacity: 1;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1300px) {
   .portal-mobile-menu-btn {
     display: flex;
   }
