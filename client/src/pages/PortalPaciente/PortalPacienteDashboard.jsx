@@ -7,7 +7,7 @@ export function PortalPacienteDashboard() {
   const user = JSON.parse(localStorage.getItem('portal_user') || '{}');
 
   return (
-    <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+    <div className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--border-color)', maxWidth: '1200px', margin: '0 auto', width: '100%', alignSelf: 'center' }}>
       <h1 style={{ color: 'var(--color-primary)', fontSize: '2rem', marginBottom: '1rem' }}>Bienvenido al Portal, {user.name}</h1>
       <p style={{ color: 'var(--color-text-muted)' }}>
         En este portal podrás consultar toda tu información médica, parámetros vitales y próximas citas de manera segura y confidencial.

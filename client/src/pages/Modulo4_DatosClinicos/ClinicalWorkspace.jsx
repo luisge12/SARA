@@ -82,7 +82,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const isCancer = (diagText) => diagText.toLowerCase().includes('cáncer') || diagText.toLowerCase().includes('cancer');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto', alignSelf: 'center', paddingBottom: '3rem' }}>
       
       {/* Header and Trazabilidad */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

@@ -47,7 +47,7 @@ function Modulo4_DatosClinicos() {
     <DashboardLayout activeModule={4}>
       
       {!selectedPatient ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto', alignSelf: 'center' }}>
           <header style={{ marginBottom: '0.5rem' }}>
             <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Módulo de Datos Clínicos</h1>
             <p style={{ color: 'var(--color-text-muted)' }}>Seleccione un paciente para abrir su expediente clínico completo.</p>
