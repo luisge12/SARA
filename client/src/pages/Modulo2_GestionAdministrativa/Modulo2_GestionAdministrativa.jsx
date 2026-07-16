@@ -162,7 +162,7 @@ function Modulo2_GestionAdministrativa() {
   // 2. Return Admin Dashboard if Master
   return (
     <DashboardLayout>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
+      <div className="module-container">
         
         <header style={{ marginBottom: '0.5rem' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Registro de Usuarios y Pacientes</h1>
@@ -181,7 +181,7 @@ function Modulo2_GestionAdministrativa() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }} className="admin-grid">
+        <div className="responsive-admin-grid">
           
           {/* USER LIST PANEL */}
           <Card title="Cuentas de Usuarios Registradas" action={<Users size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
@@ -265,7 +265,7 @@ function Modulo2_GestionAdministrativa() {
           <Card title="Registrar Nuevo Usuario" action={<UserPlus size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel">
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="responsive-grid-1-1">
                 <Input 
                   label="Nombre de Usuario *"
                   type="text"
@@ -284,7 +284,7 @@ function Modulo2_GestionAdministrativa() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="responsive-grid-1-1">
                 <div className="input-group">
                   <label className="input-label">Rol del Usuario *</label>
                   <select 
@@ -337,7 +337,7 @@ function Modulo2_GestionAdministrativa() {
               />
 
               {role === 'Médico' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="responsive-grid-1-1">
                   <Input 
                     label="Número MPPS"
                     type="text"
@@ -356,7 +356,7 @@ function Modulo2_GestionAdministrativa() {
               )}
 
               {role === 'Recepcionista' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="responsive-grid-1-1">
                   <div className="input-group">
                     <label className="input-label">Turno</label>
                     <select 
@@ -383,7 +383,7 @@ function Modulo2_GestionAdministrativa() {
 
               {role === 'Paciente' && (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="responsive-grid-1-1">
                     <div className="input-group">
                       <label className="input-label">Género</label>
                       <select 
@@ -404,7 +404,7 @@ function Modulo2_GestionAdministrativa() {
                       onChange={(e) => setDateOfBirth(e.target.value)}
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="responsive-grid-1-1">
                     <Input 
                       label="Teléfono"
                       type="text"
@@ -420,7 +420,7 @@ function Modulo2_GestionAdministrativa() {
                       onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div className="responsive-grid-1-1">
                     <Input 
                       label="Médico Tratante"
                       type="text"

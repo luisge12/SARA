@@ -145,3 +145,52 @@
 .sidebar-logout-btn:hover {
   background-color: rgba(239, 68, 68, 0.1);
 }
+
+.portal-mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+.portal-sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.portal-sidebar-overlay.show {
+  display: block;
+  opacity: 1;
+}
+
+@media (max-width: 1080px) {
+  .portal-mobile-menu-btn {
+    display: flex;
+  }
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 50;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}

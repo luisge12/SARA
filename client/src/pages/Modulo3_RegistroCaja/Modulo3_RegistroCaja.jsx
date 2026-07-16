@@ -162,7 +162,7 @@ function Modulo3_GestionAdministrativa() {
 
   return (
     <DashboardLayout>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto', alignSelf: 'center' }}>
+      <div className="module-container">
         <header style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Gestión Administrativa (Caja)</h1>
@@ -184,7 +184,7 @@ function Modulo3_GestionAdministrativa() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+        <div className="responsive-grid-1-2">
           
           {/* PANEL DE REGISTRO DE INGRESOS */}
           <Card title="Control de Ingresos" action={<Wallet size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel">
@@ -321,7 +321,7 @@ function Modulo3_GestionAdministrativa() {
 
         {/* RESUMEN ANUAL ANCLADO */}
         {summary && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+          <div className="responsive-grid-4" style={{ marginTop: '1rem' }}>
             <Card className="glass-panel" style={{ padding: '1.25rem' }}>
               <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>Ingreso Bruto Anual ({summary.year})</div>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-primary)' }}>${summary.totalGrossUSD.toFixed(2)}</div>

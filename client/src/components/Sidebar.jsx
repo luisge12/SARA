@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import './Sidebar.css';
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -21,14 +22,30 @@ export function Sidebar() {
   );
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <>
+      {/* Botón de hamburguesa exclusivo para móvil */}
       <button 
-        className="sidebar-toggle" 
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        aria-label="Toggle Sidebar"
+        className="mobile-menu-btn" 
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        aria-label="Abrir Menú"
       >
-        {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        <Menu size={24} />
       </button>
+
+      {/* Overlay para móvil cuando el menú está abierto */}
+      <div 
+        className={`sidebar-overlay ${isMobileOpen ? 'show' : ''}`}
+        onClick={() => setIsMobileOpen(false)}
+      ></div>
+
+      <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
+        <button 
+          className="sidebar-toggle desktop-only" 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          aria-label="Toggle Sidebar"
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
 
       <div className="sidebar-header">
         <span className="sidebar-logo-text" style={{ fontSize: isCollapsed ? '1.5rem' : '1.75rem' }}>
@@ -61,11 +78,12 @@ export function Sidebar() {
       </nav>
       
       <div className="sidebar-footer">
-        <NavLink to="/login" className="sidebar-link logout" title={isCollapsed ? "Cerrar Sesión" : ""}>
+        <NavLink to="/login" className="sidebar-link logout" title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}>
           <LogOut size={20} className="sidebar-icon" />
           <span className="link-text">Cerrar Sesión</span>
         </NavLink>
       </div>
     </aside>
+    </>
   );
 }

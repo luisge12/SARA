@@ -10,8 +10,8 @@ export function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="dashboard-container" style={{ padding: 0 }}>
-      <header className="dashboard-header">
+      <div className="module-container" style={{ padding: 0 }}>
+      <header className="dashboard-header" style={{ flexWrap: 'wrap' }}>
         <div>
           <h1 className="dashboard-title">Resumen General SARA</h1>
           <p className="dashboard-subtitle">Bienvenido de nuevo, <strong>{user.name || 'Usuario'}</strong>. Rol: <strong>{user.role || 'Sin rol'}</strong>. Sede: <strong>{user.sedeAtencion || 'No especificada'}</strong>.</p>
@@ -71,7 +71,7 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className={`dashboard-main-grid ${user.role === 'Recepcionista' ? 'single-column' : ''}`}>
+      <div className={`responsive-grid-1-2 ${user.role === 'Recepcionista' ? 'single-column' : ''}`}>
         {user.role !== 'Recepcionista' && (
           <Card title="Evolución de Pacientes" className="patient-overview-card">
             <div className="placeholder-chart">

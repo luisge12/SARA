@@ -4,6 +4,7 @@ import { Activity, LayoutDashboard, LogOut, User } from 'lucide-react';
 import './PortalPacienteSidebar.css';
 
 export function PortalPacienteSidebar() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const navigate = useNavigate();
   const userStr = localStorage.getItem('portal_user');
   const user = userStr ? JSON.parse(userStr) : null;
@@ -15,7 +16,18 @@ export function PortalPacienteSidebar() {
   };
 
   return (
-    <aside className="sidebar">
+    <>
+      <button 
+        className="portal-mobile-menu-btn" 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        <LayoutDashboard size={24} />
+      </button>
+      <div 
+        className={`portal-sidebar-overlay ${isMobileMenuOpen ? 'show' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      ></div>
+      <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <Activity size={24} className="sidebar-logo-icon" />
@@ -58,5 +70,6 @@ export function PortalPacienteSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

@@ -82,7 +82,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const isCancer = (diagText) => diagText.toLowerCase().includes('cáncer') || diagText.toLowerCase().includes('cancer');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1200px', margin: '0 auto', alignSelf: 'center', paddingBottom: '3rem' }}>
+    <div className="module-container" style={{ paddingBottom: '3rem' }}>
       
       {/* Header and Trazabilidad */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -101,7 +101,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
       {showAudit && <AuditLogModal patientId={patient.id} onClose={() => setShowAudit(false)} />}
 
       {/* Read-Only Secciones 1 y 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="responsive-grid-1-1">
         <Card title="Sección 1: Demográficos (Recepción)" className="glass-panel">
           {loadingProfile ? <p>Cargando...</p> : (
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -133,7 +133,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
       <Card title="3. Motivo de Consulta y Enfermedad Actual" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {reasonForVisit.map((row, idx) => (
-            <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) auto', gap: '0.5rem', alignItems: 'center' }}>
+            <div key={idx} className="dynamic-row-7">
               <Input placeholder="Inicio Síntomas" value={row.onset} onChange={e=>updateReason(idx, 'onset', e.target.value)} />
               <select className="input-field" value={row.symptom} onChange={e=>updateReason(idx, 'symptom', e.target.value)} style={{ padding: '0.5rem' }}>
                 <option value="">Síntoma...</option>
@@ -184,7 +184,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {diagnoses.map((row, idx) => (
             <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr auto', gap: '1rem', alignItems: 'flex-start' }}>
+              <div className="dynamic-row-4">
                 <Input label="Diagnóstico" value={row.diagnosis} onChange={e=>updateDiagnosis(idx, 'diagnosis', e.target.value)} />
                 <Input label="Clasificación/Tipo" value={row.classification} onChange={e=>updateDiagnosis(idx, 'classification', e.target.value)} />
                 <Input label="Complicado con" value={row.complication} onChange={e=>updateDiagnosis(idx, 'complication', e.target.value)} />
@@ -192,7 +192,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
               </div>
               
               {isCancer(row.diagnosis) && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px dashed var(--color-alert)' }}>
+                <div className="responsive-grid-1-1" style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px dashed var(--color-alert)' }}>
                   <Input label="Tipo Histológico (Cáncer)" value={row.histologicType} onChange={e=>updateDiagnosis(idx, 'histologicType', e.target.value)} />
                   <Input label="Estadio (Cáncer)" value={row.stage} onChange={e=>updateDiagnosis(idx, 'stage', e.target.value)} />
                 </div>
@@ -209,7 +209,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
       <Card title="6. Plan de Trabajo (Tratamiento)" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {treatmentPlan.map((row, idx) => (
-            <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr 1fr auto', gap: '0.5rem', alignItems: 'center' }}>
+            <div key={idx} className="dynamic-row-5">
               <Input placeholder="Medicamento" value={row.medication} onChange={e=>updateTreatment(idx, 'medication', e.target.value)} />
               <Input placeholder="Presentación" value={row.presentation} onChange={e=>updateTreatment(idx, 'presentation', e.target.value)} />
               <Input placeholder="Indicación" value={row.indication} onChange={e=>updateTreatment(idx, 'indication', e.target.value)} />

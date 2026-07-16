@@ -16,9 +16,10 @@
   padding: 2rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1080px) {
   .layout-main {
     margin-left: 0;
     padding: 1rem;
+    padding-top: 4rem;
   }
 }

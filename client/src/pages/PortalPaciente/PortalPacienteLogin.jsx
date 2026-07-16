@@ -60,7 +60,7 @@ export function PortalPacienteLogin() {
         </p>
       </div>
 
-      <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2.5rem', textAlign: 'center', zIndex: 1, backgroundColor: 'var(--color-bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border-color)' }}>
+      <div className="glass-panel" style={{ maxWidth: '400px', width: '90%', padding: '2.5rem', textAlign: 'center', zIndex: 1, backgroundColor: 'var(--color-bg-card)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--color-primary)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px rgba(34, 80, 93, 0.2)' }}>
             <Activity size={32} color="var(--color-accent)" />
