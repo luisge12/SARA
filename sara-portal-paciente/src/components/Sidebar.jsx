@@ -1,0 +1,62 @@
+import React from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Activity, LayoutDashboard, LogOut, User } from 'lucide-react';
+import './Sidebar.css';
+
+export function Sidebar() {
+  const navigate = useNavigate();
+  const userStr = localStorage.getItem('portal_user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  const handleLogout = () => {
+    localStorage.removeItem('portal_token');
+    localStorage.removeItem('portal_user');
+    navigate('/login');
+  };
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="sidebar-logo">
+          <Activity size={24} className="sidebar-logo-icon" />
+          <h2>SARA</h2>
+        </div>
+        <p className="sidebar-subtitle">Portal del Paciente</p>
+      </div>
+
+      <div className="sidebar-user-info">
+        <div className="sidebar-user-avatar">
+          <User size={20} />
+        </div>
+        <div className="sidebar-user-details">
+          <span className="sidebar-user-name">{user?.name || 'Paciente'}</span>
+          <span className="sidebar-user-role">{user?.role}</span>
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
+        <ul>
+          <li>
+            <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <LayoutDashboard size={20} />
+              <span>Dashboard Principal</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/historia-medica" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <Activity size={20} />
+              <span>Historia Médica</span>
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div className="sidebar-footer">
+        <button onClick={handleLogout} className="sidebar-logout-btn">
+          <LogOut size={20} />
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+  );
+}

@@ -1,0 +1,23 @@
+PORT=4000
+NODE_ENV=development
+JWT_SECRET=supersecretkey_sara_18992791
+CORS_ORIGIN=http://localhost:5173
+
+# Credenciales Iniciales Master (UNIMECO)
+DEFAULT_MASTER_USER=UNIMECO
+DEFAULT_MASTER_PASS=18992791
+
+# Configuración de Base de Datos PostgreSQL
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=SARA
+DB_USER=postgres
+DB_PASSWORD=123456
+
+
+
+# Configuración de Email (Resumen diario de las 19:00 VET)
+EMAIL_SERVICE=gmail
+EMAIL_USER=pagos.unimeco@gmail.com
+EMAIL_PASS=tu_contraseña_de_aplicacion
+EMAIL_RECEIVER=pagos.unimeco@gmail.com

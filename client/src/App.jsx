@@ -6,6 +6,7 @@ import Modulo2_GestionAdministrativa from './pages/Modulo2_GestionAdministrativa
 import Modulo3_RegistroCaja from './pages/Modulo3_RegistroCaja/Modulo3_RegistroCaja';
 import Modulo4_DatosClinicos from './pages/Modulo4_DatosClinicos/Modulo4_DatosClinicos';
 import Modulo7_GestionMedicaEstadistica from './pages/Modulo7_GestionMedicaEstadistica/Modulo7_GestionMedicaEstadistica';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -15,13 +16,33 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Dashboard de SARA */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
         
         {/* Rutas para los Módulos de SARA */}
-        <Route path="/modulo2" element={<Modulo2_GestionAdministrativa />} />
-        <Route path="/modulo3" element={<Modulo3_RegistroCaja />} />
-        <Route path="/modulo4" element={<Modulo4_DatosClinicos />} />
-        <Route path="/modulo7" element={<Modulo7_GestionMedicaEstadistica />} />
+        <Route path="/modulo2" element={
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR']}>
+            <Modulo2_GestionAdministrativa />
+          </ProtectedRoute>
+        } />
+        <Route path="/modulo3" element={
+          <ProtectedRoute allowedGroups={['RECEPCIONISTA']}>
+            <Modulo3_RegistroCaja />
+          </ProtectedRoute>
+        } />
+        <Route path="/modulo4" element={
+          <ProtectedRoute allowedGroups={['MEDICO', 'RECEPCIONISTA']}>
+            <Modulo4_DatosClinicos />
+          </ProtectedRoute>
+        } />
+        <Route path="/modulo7" element={
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR']}>
+            <Modulo7_GestionMedicaEstadistica />
+          </ProtectedRoute>
+        } />
         
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/login" replace />} />

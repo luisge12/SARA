@@ -8,12 +8,20 @@ const dbName = process.env.DB_NAME;
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD;
 
+const dbSSL = process.env.DB_SSL === 'true';
+
 // Inicializar Sequelize con el dialecto Postgres
 const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
   host: dbHost,
   port: dbPort,
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  dialectOptions: dbSSL ? {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  } : {},
   define: {
     timestamps: true, // Agrega createdAt y updatedAt automáticamente
     underscored: true // Usa snake_case para nombres de columnas generados
@@ -29,6 +37,9 @@ const initDatabase = async () => {
     // Sincronizar todos los modelos definidos
     // Importamos los modelos para registrarlos en Sequelize
     const User = require('../models/User');
+    const PatientProfile = require('../models/PatientProfile');
+    const Consultation = require('../models/Consultation');
+    const AuditLog = require('../models/AuditLog');
 
     // alter: true sincroniza la estructura de las tablas sin perder los datos
     await sequelize.sync({ alter: true });
@@ -38,7 +49,7 @@ const initDatabase = async () => {
     const bcrypt = require('bcryptjs');
     const masterUser = process.env.DEFAULT_MASTER_USER || 'UNIMECO';
     const masterPass = process.env.DEFAULT_MASTER_PASS || '18992791';
-    
+
     const unimecoExists = await User.findOne({ where: { username: masterUser } });
     if (!unimecoExists) {
       const salt = await bcrypt.genSalt(10);

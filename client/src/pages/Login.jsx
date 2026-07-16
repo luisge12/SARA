@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, Building } from 'lucide-react';
+import { Lock, User, AlertTriangle, ExternalLink, X } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import api from '../services/api';
@@ -44,13 +44,13 @@ export function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [sede, setSede] = useState('CENTRAL');
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPatientModal, setShowPatientModal] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
 
-  // Actualizar la fecha y hora cada segundo
+  // Actualizar la fecha y hora cada minuto
   useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
+    const timer = setInterval(() => setDateTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
@@ -62,9 +62,15 @@ export function Login() {
       const response = await api.post('/api/users/login', { username, password });
       const { token, user } = response.data;
       
-      // Guardar token, sede y datos de usuario en localStorage
+      // Bloqueo de Pacientes en la App Principal (Clínica)
+      if (user.role === 'Paciente') {
+        setShowPatientModal(true);
+        return;
+      }
+      
+      // Guardar token y datos de usuario en localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ ...user, sedeAtencion: sede }));
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Redirigir al Dashboard nuevo de SARA
       navigate('/dashboard');
@@ -72,7 +78,6 @@ export function Login() {
       console.error('Error de login:', err);
       const errMsg = err.response?.data?.error || 'Error de conexión con el servidor backend';
       setErrorMsg(errMsg);
-      alert(errMsg);
     }
   };
 
@@ -85,7 +90,6 @@ export function Login() {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
       hour12: true
     });
   };
@@ -128,34 +132,38 @@ export function Login() {
             required
           />
 
-          <div className="input-group">
-            <label className="input-label">Sede de Atención</label>
-            <div className="input-wrapper">
-              <span className="input-icon"><Building size={18} /></span>
-              <select
-                className="input-field has-icon"
-                value={sede}
-                onChange={(e) => setSede(e.target.value)}
-                style={{ cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-              >
-                <option value="CENTRAL">CENTRAL</option>
-                <option value="GMSP">GMSP</option>
-                <option value="CCMLA">CCMLA</option>
-                <option value="PLA">PLA</option>
-              </select>
-            </div>
-          </div>
-
           <Button type="submit" fullWidth className="login-submit">
             Ingresar
           </Button>
         </form>
       </div>
 
+      {showPatientModal && (
+        <div className="patient-modal-overlay">
+          <div className="patient-modal-content">
+            <button className="patient-modal-close" onClick={() => setShowPatientModal(false)}>
+              <X size={20} />
+            </button>
+            <div className="patient-modal-icon-wrapper">
+              <AlertTriangle size={32} className="patient-modal-icon" />
+            </div>
+            <h2 className="patient-modal-title">Acceso Denegado</h2>
+            <p className="patient-modal-text">
+              Tu cuenta está registrada como <strong>Paciente</strong>. Por motivos de seguridad y privacidad, el acceso a esta plataforma administrativa está restringido.
+            </p>
+            <p className="patient-modal-text">
+              Por favor, dirígete al <strong>Portal de Usuarios</strong> para consultar tu información clínica, citas y documentos.
+            </p>
+            <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" className="patient-modal-link-btn">
+              Ir al Portal de Usuarios <ExternalLink size={16} style={{ marginLeft: '8px' }} />
+            </a>
+          </div>
+        </div>
+      )}
+
       <footer className="login-footer-text">
         <p>
-          Producto Desarrollado por la División Tecnológica de <strong>UNICO®</strong> / 
-          UNICO® es una marca registrada de UNIMECO, C.A. Todos los derechos reservados.
+          Producto Desarrollado por FrailejonDEV
         </p>
       </footer>
     </div>

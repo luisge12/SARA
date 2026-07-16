@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { hasAccess } from './ProtectedRoute';
 import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import './Sidebar.css';
 
@@ -8,11 +9,16 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Gestión Adm. (M2)', path: '/modulo2', icon: ShieldCheck },
-    { name: 'Caja y Registro (M3)', path: '/modulo3', icon: Wallet },
-    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity },
-    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3 },
+    { name: 'Registro de Usuarios/Pacientes', path: '/modulo2', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO'] },
+    { name: 'Caja y Registro (M3)', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA'] },
+    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA'] },
+    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR'] },
   ];
+  
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const visibleNavItems = navItems.filter(item => 
+    !item.allowedGroups || hasAccess(user.role, item.allowedGroups)
+  );
 
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -31,7 +37,7 @@ export function Sidebar() {
       </div>
       
       <nav className="sidebar-nav">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink 

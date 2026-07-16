@@ -6,9 +6,13 @@ import { Button } from '../../components/Button';
 import api from '../../services/api';
 import { Trash2, UserPlus, ShieldAlert, Users } from 'lucide-react';
 
+import { PatientProfileEditor } from './PatientProfileEditor';
+
 function Modulo2_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isMaster = currentUser.role === 'Master';
+  const hasAccess = ['Master', 'Administrador', 'Recepcionista', 'Médico'].includes(currentUser.role);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   // State lists
   const [usersList, setUsersList] = useState([]);
@@ -31,7 +35,8 @@ function Modulo2_GestionAdministrativa() {
     if (!isMaster) return;
     try {
       setLoading(true);
-      const response = await api.get('/api/users');
+      const endpoint = isMaster ? '/api/users' : '/api/patients'; // Assuming we have an endpoint for just patients, actually the /api/patients/ returns patients
+      const response = await api.get(isMaster ? '/api/users' : '/api/patients');
       setUsersList(response.data);
     } catch (err) {
       console.error('Error al obtener lista de usuarios:', err);
@@ -102,8 +107,8 @@ function Modulo2_GestionAdministrativa() {
     }
   };
 
-  // 1. Return Access Denied if user role is not Master
-  if (!isMaster) {
+  // 1. Return Access Denied if user has no access
+  if (!hasAccess) {
     return (
       <DashboardLayout>
         <div className="card glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
@@ -112,8 +117,7 @@ function Modulo2_GestionAdministrativa() {
           </div>
           <h3 style={{ color: 'var(--color-text-main)', fontSize: '1.75rem', fontWeight: '700', marginBottom: '1rem' }}>Acceso Restringido</h3>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '1rem', lineHeight: '1.6' }}>
-            Este módulo de administración contiene información confidencial de auditoría, gestión financiera y control de roles.
-            El acceso está estrictamente limitado a usuarios con privilegios de <strong>Master</strong>.
+            Tu rol actual no tiene privilegios para acceder al módulo de gestión de usuarios o pacientes.
           </p>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '1rem' }}>
             Tu rol actual registrado es: <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{currentUser.role || 'Invitado'}</span>
@@ -129,8 +133,8 @@ function Modulo2_GestionAdministrativa() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%' }}>
         
         <header style={{ marginBottom: '0.5rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Gestión Administrativa</h1>
-          <p style={{ color: 'var(--color-text-muted)' }}>Crea y gestiona cuentas de usuarios, accesos y sucursales de atención.</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Registro de Usuarios y Pacientes</h1>
+          <p style={{ color: 'var(--color-text-muted)' }}>Crea y gestiona cuentas, roles y expedientes base de pacientes.</p>
         </header>
 
         {successMsg && (
@@ -179,25 +183,46 @@ function Modulo2_GestionAdministrativa() {
                         Sede: {usr.sedeAtencion || 'No especificada'} {usr.mppsNumber && `| MPPS: ${usr.mppsNumber}`}
                       </p>
                     </div>
-                    <button 
-                      onClick={() => handleDeleteUser(usr.id, usr.username)} 
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        color: 'var(--color-alert)', 
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      className="delete-user-btn"
-                      title="Eliminar Cuenta"
-                      disabled={currentUser.id === usr.id}
-                    >
-                      <Trash2 size={18} style={{ opacity: currentUser.id === usr.id ? 0.3 : 1 }} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {usr.role === 'Paciente' && (
+                        <button 
+                          onClick={() => setSelectedPatient(usr)} 
+                          style={{ 
+                            background: 'var(--color-primary)', 
+                            border: 'none', 
+                            color: '#fff', 
+                            cursor: 'pointer',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          Ver/Editar Datos
+                        </button>
+                      )}
+                      {isMaster && (
+                        <button 
+                          onClick={() => handleDeleteUser(usr.id, usr.username)} 
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: 'var(--color-alert)', 
+                            cursor: 'pointer',
+                            padding: '0.5rem',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          className="delete-user-btn"
+                          title="Eliminar Cuenta"
+                          disabled={currentUser.id === usr.id}
+                        >
+                          <Trash2 size={18} style={{ opacity: currentUser.id === usr.id ? 0.3 : 1 }} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -235,11 +260,16 @@ function Modulo2_GestionAdministrativa() {
                     value={role} 
                     onChange={(e) => setRole(e.target.value)}
                     style={{ height: '39px', padding: '0.5rem 1rem' }}
+                    disabled={!isMaster && role !== 'Paciente'}
                   >
-                    <option value="Master">Master</option>
-                    <option value="Administrador">Administrador</option>
-                    <option value="Medico">Médico</option>
-                    <option value="Asistente">Asistente</option>
+                    {isMaster && (
+                      <>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Médico">Médico</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                      </>
+                    )}
+                    <option value="Paciente">Paciente</option>
                   </select>
                 </div>
                 <div className="input-group">
@@ -274,22 +304,24 @@ function Modulo2_GestionAdministrativa() {
                 onChange={(e) => setIdentificationNumber(e.target.value)}
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <Input 
-                  label="Número MPPS"
-                  type="text"
-                  placeholder="Ministerio"
-                  value={mppsNumber}
-                  onChange={(e) => setMppsNumber(e.target.value)}
-                />
-                <Input 
-                  label="Colegio de Médicos"
-                  type="text"
-                  placeholder="Número de Registro"
-                  value={medicalCollegeNumber}
-                  onChange={(e) => setMedicalCollegeNumber(e.target.value)}
-                />
-              </div>
+              {role === 'Médico' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <Input 
+                    label="Número MPPS"
+                    type="text"
+                    placeholder="Ministerio"
+                    value={mppsNumber}
+                    onChange={(e) => setMppsNumber(e.target.value)}
+                  />
+                  <Input 
+                    label="Colegio de Médicos"
+                    type="text"
+                    placeholder="Número de Registro"
+                    value={medicalCollegeNumber}
+                    onChange={(e) => setMedicalCollegeNumber(e.target.value)}
+                  />
+                </div>
+              )}
 
               <Button type="submit" fullWidth style={{ marginTop: '0.5rem' }}>
                 Crear Usuario
@@ -299,6 +331,16 @@ function Modulo2_GestionAdministrativa() {
           
         </div>
       </div>
+      
+      {selectedPatient && (
+        <PatientProfileEditor 
+          patient={selectedPatient} 
+          onClose={() => {
+            setSelectedPatient(null);
+            fetchUsers();
+          }} 
+        />
+      )}
     </DashboardLayout>
   );
 }
