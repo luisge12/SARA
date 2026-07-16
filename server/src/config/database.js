@@ -9,24 +9,43 @@ const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASSWORD;
 
 const dbSSL = process.env.DB_SSL === 'true';
+const databaseUrl = process.env.DATABASE_URL;
 
-// Inicializar Sequelize con el dialecto Postgres
-const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
-  host: dbHost,
-  port: dbPort,
-  dialect: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  dialectOptions: dbSSL ? {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
+let sequelize;
+
+if (databaseUrl) {
+  sequelize = new Sequelize(databaseUrl, {
+    dialect: 'postgres',
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    define: {
+      timestamps: true, // Agrega createdAt y updatedAt automáticamente
+      underscored: true // Usa snake_case para nombres de columnas generados
     }
-  } : {},
-  define: {
-    timestamps: true, // Agrega createdAt y updatedAt automáticamente
-    underscored: true // Usa snake_case para nombres de columnas generados
-  }
-});
+  });
+} else {
+  sequelize = new Sequelize(dbName, dbUser, dbPassword, {
+    host: dbHost,
+    port: dbPort,
+    dialect: 'postgres',
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
+    dialectOptions: dbSSL ? {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    } : {},
+    define: {
+      timestamps: true, // Agrega createdAt y updatedAt automáticamente
+      underscored: true // Usa snake_case para nombres de columnas generados
+    }
+  });
+}
 
 // Función para inicializar y verificar la base de datos
 const initDatabase = async () => {
@@ -42,9 +61,11 @@ const initDatabase = async () => {
     const AuditLog = require('../models/AuditLog');
     const Transaction = require('../models/Transaction');
 
-    // alter: true sincroniza la estructura de las tablas sin perder los datos
-    await sequelize.sync({ alter: true });
-    console.log('Modelos de base de datos sincronizados con éxito.');
+    // Sincronizar modelos solo si se solicita explícitamente en el entorno
+    if (process.env.DB_SYNC === 'true') {
+      await sequelize.sync({ alter: true });
+      console.log('Modelos de base de datos sincronizados con éxito.');
+    }
 
     // Semillar el usuario master por defecto si no existe
     const bcrypt = require('bcryptjs');
