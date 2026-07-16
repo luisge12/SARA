@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User, AlertTriangle, ExternalLink, X } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
@@ -154,9 +154,9 @@ export function Login() {
             <p className="patient-modal-text">
               Por favor, dirígete al <strong>Portal de Usuarios</strong> para consultar tu información clínica, citas y documentos.
             </p>
-            <a href="http://localhost:5174" target="_blank" rel="noopener noreferrer" className="patient-modal-link-btn">
+            <Link to="/users" className="patient-modal-link-btn">
               Ir al Portal de Usuarios <ExternalLink size={16} style={{ marginLeft: '8px' }} />
-            </a>
+            </Link>
           </div>
         </div>
       )}
