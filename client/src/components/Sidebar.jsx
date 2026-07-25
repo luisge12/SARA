@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import './Sidebar.css';
 
 export function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location]);
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -27,9 +33,9 @@ export function Sidebar() {
       <button 
         className="mobile-menu-btn" 
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        aria-label="Abrir Menú"
+        aria-label={isMobileOpen ? "Cerrar Menú" : "Abrir Menú"}
       >
-        <Menu size={24} />
+        {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Overlay para móvil cuando el menú está abierto */}
@@ -47,43 +53,50 @@ export function Sidebar() {
           {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
 
-      <div className="sidebar-header">
-        <span className="sidebar-logo-text" style={{ fontSize: isCollapsed ? '1.5rem' : '1.75rem' }}>
-          {isCollapsed ? 'S' : 'SARA'}
-        </span>
-      </div>
-      
-      <nav className="sidebar-nav">
-        {visibleNavItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink 
-              key={item.name} 
-              to={item.path}
-              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-              title={isCollapsed ? item.name : ''}
-            >
-              <Icon size={20} className="sidebar-icon" />
-              <span className="link-text">{item.name}</span>
-            </NavLink>
-          );
-        })}
+        <div className="sidebar-header">
+          <span className="sidebar-logo-text">
+            {isCollapsed && !isMobileOpen ? 'S' : 'SARA'}
+          </span>
+        </div>
         
-        {!isCollapsed && (
-          <div className="sidebar-acronym" style={{ marginTop: 'auto', padding: '1rem 0.5rem 0' }}>
-            <p><strong>SARA</strong></p>
-            <p style={{ fontSize: '0.65rem' }}>Sistema Administrativo y de Registro Automatizado</p>
-          </div>
-        )}
-      </nav>
-      
-      <div className="sidebar-footer">
-        <NavLink to="/login" className="sidebar-link logout" title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}>
-          <LogOut size={20} className="sidebar-icon" />
-          <span className="link-text">Cerrar Sesión</span>
-        </NavLink>
-      </div>
-    </aside>
+        <nav className="sidebar-nav">
+          {visibleNavItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink 
+                key={item.name} 
+                to={item.path}
+                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                title={isCollapsed && !isMobileOpen ? item.name : ''}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Icon size={20} className="sidebar-icon" />
+                <span className="link-text">{item.name}</span>
+              </NavLink>
+            );
+          })}
+          
+          {(!isCollapsed || isMobileOpen) && (
+            <div className="sidebar-acronym" style={{ marginTop: 'auto', padding: '1rem 0.5rem 0' }}>
+              <p><strong>SARA</strong></p>
+              <p style={{ fontSize: '0.65rem' }}>Sistema Administrativo y de Registro Automatizado</p>
+            </div>
+          )}
+        </nav>
+        
+        <div className="sidebar-footer">
+          <NavLink 
+            to="/login" 
+            className="sidebar-link logout" 
+            title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}
+            onClick={() => setIsMobileOpen(false)}
+          >
+            <LogOut size={20} className="sidebar-icon" />
+            <span className="link-text">Cerrar Sesión</span>
+          </NavLink>
+        </div>
+      </aside>
     </>
   );
 }
+
