@@ -8,16 +8,31 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  position: sticky;
+  max-height: 100vh;
+  position: fixed; /* Pinned fixed to screen when scrolling down */
   top: 0;
+  left: 0;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
   z-index: 100;
   transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar.collapsed {
   width: 80px;
+}
+
+/* Ajuste dinámico del área principal para acompañar al sidebar fijo */
+.sidebar ~ .main-content {
+  margin-left: 260px;
+  transition: margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  min-width: 0;
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 80px;
 }
 
 .sidebar-toggle {
@@ -80,6 +95,7 @@
   gap: 0.5rem;
   overflow-x: hidden;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .sidebar-link {
@@ -250,6 +266,11 @@
 
 /* Mobile Off-canvas Drawer */
 @media (max-width: 1300px) {
+  .sidebar ~ .main-content,
+  .sidebar.collapsed ~ .main-content {
+    margin-left: 0 !important;
+  }
+
   .mobile-menu-btn {
     display: flex;
   }
@@ -319,4 +340,28 @@
     margin-bottom: 1rem !important;
   }
 }
+
+/* Custom Scrollbar for Sidebar */
+.sidebar::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.sidebar-nav::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(42, 183, 202, 0.4);
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
 

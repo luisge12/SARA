@@ -62,7 +62,8 @@ const initDatabase = async () => {
     const Transaction = require('../models/Transaction');
     const Appointment = require('../models/Appointment');
 
-    // Sincronizar modelo Appointment automáticamente
+    // Sincronizar modelos automáticamente
+    await User.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo User:', err));
     await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
 
     // Sincronizar modelos solo si se solicita explícitamente en el entorno

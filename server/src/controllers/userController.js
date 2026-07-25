@@ -22,17 +22,17 @@ module.exports = {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
-        return res.status(400).json({ error: 'Usuario y contraseña son requeridos' });
+        return res.status(400).json({ error: 'El usuario y la contraseña son requeridos.' });
       }
 
       const user = await User.findOne({ where: { username } });
       if (!user) {
-        return res.status(401).json({ error: 'Credenciales inválidas' });
+        return res.status(404).json({ error: 'El usuario ingresado no existe en el sistema.' });
       }
 
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) {
-        return res.status(401).json({ error: 'Credenciales inválidas' });
+        return res.status(401).json({ error: 'La contraseña ingresada es incorrecta. Verifique sus datos.' });
       }
 
       const token = jwt.sign(
@@ -60,7 +60,7 @@ module.exports = {
     try {
       const { 
         username, password, role, name, identificationNumber, mppsNumber, medicalCollegeNumber, sedeAtencion,
-        shift, academicDegree,
+        shift, academicDegree, specialty,
         gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
       } = req.body;
       if (!username || !password || !role) {
@@ -90,7 +90,8 @@ module.exports = {
         medicalCollegeNumber,
         sedeAtencion,
         shift,
-        academicDegree
+        academicDegree,
+        specialty
       });
 
       if (role === 'Paciente') {

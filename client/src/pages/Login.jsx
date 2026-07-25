@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, User, AlertTriangle, ExternalLink, X } from 'lucide-react';
+import { Lock, User, AlertTriangle, ExternalLink, X, AlertCircle } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import api from '../services/api';
@@ -112,13 +112,33 @@ export function Login() {
         </div>
 
         <form onSubmit={handleLogin} className="login-form">
+          {errorMsg && (
+            <div style={{
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: 'var(--color-alert)',
+              fontWeight: '600',
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              marginBottom: '0.5rem',
+              animation: 'fadeIn 0.3s ease-in-out'
+            }}>
+              <AlertCircle size={20} style={{ flexShrink: 0 }} />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           <Input 
             label="Usuario"
             type="text" 
             placeholder="Ingrese su usuario" 
             icon={<User size={18} />}
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }}
             required
           />
           
@@ -128,7 +148,7 @@ export function Login() {
             placeholder="••••••••" 
             icon={<Lock size={18} />}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
             required
           />
 

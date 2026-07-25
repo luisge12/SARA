@@ -8,6 +8,7 @@ import { Trash2, UserPlus, ShieldAlert, Users, Calendar, CalendarPlus, Clock, Ch
 
 import { PatientProfileEditor } from './PatientProfileEditor';
 import { AppointmentModal } from '../../components/AppointmentModal';
+import { COMMON_SPECIALTIES } from '../../data/clinicalTemplates';
 
 function Modulo2_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -18,6 +19,7 @@ function Modulo2_GestionAdministrativa() {
   // Citas states
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [appointmentPatientId, setAppointmentPatientId] = useState(null);
+  const [appointmentToEdit, setAppointmentToEdit] = useState(null);
   const [appointmentsList, setAppointmentsList] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
 
@@ -35,6 +37,7 @@ function Modulo2_GestionAdministrativa() {
   const [mppsNumber, setMppsNumber] = useState('');
   const [medicalCollegeNumber, setMedicalCollegeNumber] = useState('');
   const [sedeAtencion, setSedeAtencion] = useState('CENTRAL');
+  const [specialty, setSpecialty] = useState('Coloproctología');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -108,6 +111,7 @@ function Modulo2_GestionAdministrativa() {
         mppsNumber,
         medicalCollegeNumber,
         sedeAtencion,
+        specialty,
         ...(role === 'Paciente' ? {
           gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
         } : {}),
@@ -448,6 +452,22 @@ function Modulo2_GestionAdministrativa() {
                     value={medicalCollegeNumber}
                     onChange={(e) => setMedicalCollegeNumber(e.target.value)}
                   />
+                  <div className="input-group">
+                    <label className="input-label">Especialidad Médica</label>
+                    <input 
+                      className="input-field" 
+                      list="specialties-list"
+                      placeholder="Seleccione o escriba..." 
+                      value={specialty} 
+                      onChange={(e) => setSpecialty(e.target.value)}
+                      style={{ height: '39px', padding: '0.5rem 1rem' }}
+                    />
+                    <datalist id="specialties-list">
+                      {COMMON_SPECIALTIES.map((sp, idx) => (
+                        <option key={idx} value={sp} />
+                      ))}
+                    </datalist>
+                  </div>
                 </div>
               )}
 
@@ -570,9 +590,11 @@ function Modulo2_GestionAdministrativa() {
       {showAppointmentModal && (
         <AppointmentModal 
           initialPatientId={appointmentPatientId}
+          appointmentToEdit={appointmentToEdit}
           onClose={() => {
             setShowAppointmentModal(false);
             setAppointmentPatientId(null);
+            setAppointmentToEdit(null);
           }}
           onSuccess={() => {
             fetchAppointments();

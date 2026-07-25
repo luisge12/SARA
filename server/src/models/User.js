@@ -47,6 +47,10 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(150),
     field: 'academic_degree' // Título o Grado Académico
   },
+  specialty: {
+    type: DataTypes.STRING(150),
+    field: 'specialty' // Especialidad médica (ej. Coloproctología, Ginecología, etc.)
+  },
   expiresAt: {
     type: DataTypes.DATE,
     field: 'expires_at'

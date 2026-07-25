@@ -43,7 +43,10 @@ module.exports = {
   // Crear una nueva cita
   createAppointment: async (req, res) => {
     try {
-      const { patientId, doctorId, sedeAtencion, appointmentDate, reason, status, notes } = req.body;
+      const { 
+        patientId, doctorId, sedeAtencion, appointmentDate, reason, status, notes,
+        totalAmount, paidAmount, paymentMethod, paymentStatus 
+      } = req.body;
 
       if (!patientId || !appointmentDate) {
         return res.status(400).json({ error: 'El paciente y la fecha/hora de la cita son obligatorios.' });
@@ -55,6 +58,17 @@ module.exports = {
         return res.status(404).json({ error: 'El paciente seleccionado no existe.' });
       }
 
+      const tot = parseFloat(totalAmount || 0);
+      const paid = parseFloat(paidAmount || 0);
+      const pending = Math.max(0, tot - paid);
+
+      let computedPayStatus = paymentStatus;
+      if (!computedPayStatus) {
+        if (paid >= tot && tot > 0) computedPayStatus = 'Pagado';
+        else if (paid > 0) computedPayStatus = 'Parcial';
+        else computedPayStatus = 'Pendiente';
+      }
+
       const newAppointment = await Appointment.create({
         patientId,
         doctorId: doctorId || null,
@@ -63,6 +77,11 @@ module.exports = {
         reason: reason || 'Consulta General',
         status: status || 'Confirmada',
         notes: notes || '',
+        totalAmount: tot,
+        paidAmount: paid,
+        pendingAmount: pending,
+        paymentMethod: paymentMethod || 'Efectivo (USD)',
+        paymentStatus: computedPayStatus,
         createdById: req.user ? req.user.id : null
       });
 
@@ -94,19 +113,44 @@ module.exports = {
   updateAppointment: async (req, res) => {
     try {
       const { id } = req.params;
-      const { doctorId, sedeAtencion, appointmentDate, reason, status, notes } = req.body;
+      const { 
+        patientId, doctorId, sedeAtencion, appointmentDate, reason, status, notes,
+        totalAmount, paidAmount, paymentMethod, paymentStatus
+      } = req.body;
 
       const appointment = await Appointment.findByPk(id);
       if (!appointment) {
         return res.status(404).json({ error: 'Cita no encontrada.' });
       }
 
+      if (patientId) appointment.patientId = patientId;
       if (doctorId !== undefined) appointment.doctorId = doctorId;
       if (sedeAtencion) appointment.sedeAtencion = sedeAtencion;
       if (appointmentDate) appointment.appointmentDate = appointmentDate;
       if (reason) appointment.reason = reason;
       if (status) appointment.status = status;
       if (notes !== undefined) appointment.notes = notes;
+
+      // Actualizar campos financieros si se proporcionan
+      if (totalAmount !== undefined || paidAmount !== undefined) {
+        const tot = totalAmount !== undefined ? parseFloat(totalAmount) : parseFloat(appointment.totalAmount || 0);
+        const paid = paidAmount !== undefined ? parseFloat(paidAmount) : parseFloat(appointment.paidAmount || 0);
+        appointment.totalAmount = tot;
+        appointment.paidAmount = paid;
+        appointment.pendingAmount = Math.max(0, tot - paid);
+
+        if (paymentStatus) {
+          appointment.paymentStatus = paymentStatus;
+        } else {
+          if (paid >= tot && tot > 0) appointment.paymentStatus = 'Pagado';
+          else if (paid > 0) appointment.paymentStatus = 'Parcial';
+          else appointment.paymentStatus = 'Pendiente';
+        }
+      } else if (paymentStatus) {
+        appointment.paymentStatus = paymentStatus;
+      }
+
+      if (paymentMethod) appointment.paymentMethod = paymentMethod;
 
       await appointment.save();
 

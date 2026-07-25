@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Lock, User } from 'lucide-react';
+import { Activity, Lock, User, AlertCircle } from 'lucide-react';
 import { portalApi } from '../../services/api';
 
 const MedicalCrossBg = () => (
@@ -70,8 +70,9 @@ export function PortalPacienteLogin() {
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '2rem' }}>Acceso exclusivo</p>
         
         {errorMsg && (
-          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-alert)', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.875rem' }}>
-            {errorMsg}
+          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: 'var(--color-alert)', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.875rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', textAlign: 'left' }}>
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{errorMsg}</span>
           </div>
         )}
         
@@ -83,7 +84,7 @@ export function PortalPacienteLogin() {
             <input 
               placeholder="Usuario" 
               value={username} 
-              onChange={e => setUsername(e.target.value)} 
+              onChange={e => { setUsername(e.target.value); setErrorMsg(''); }} 
               required 
               style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' }}
             />
@@ -97,7 +98,7 @@ export function PortalPacienteLogin() {
               type="password" 
               placeholder="Contraseña" 
               value={password} 
-              onChange={e => setPassword(e.target.value)} 
+              onChange={e => { setPassword(e.target.value); setErrorMsg(''); }} 
               required 
               style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' }}
             />

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card } from '../components/Card';
-import { Users, Activity, CalendarCheck, FileText, Calendar } from 'lucide-react';
+import { Users, Activity, CalendarCheck, FileText, Calendar, Edit3 } from 'lucide-react';
+import { AppointmentModal } from '../components/AppointmentModal';
 import api from '../services/api';
 import './Dashboard.css';
 
@@ -15,6 +16,8 @@ export function Dashboard() {
     upcomingAppointments: []
   });
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [appointmentToEdit, setAppointmentToEdit] = useState(null);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -122,8 +125,32 @@ export function Dashboard() {
                         <h4>{apt.patient?.name || apt.patient?.username || 'Paciente Desconocido'}</h4>
                         <p>{apt.reason || 'Consulta Médica'} | Dr: {apt.doctor?.name || 'Por asignar'}</p>
                       </div>
-                      <div className={`appointment-status status-${(apt.status || 'confirmada').toLowerCase()}`}>
-                        {apt.status}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className={`appointment-status status-${(apt.status || 'confirmada').toLowerCase()}`}>
+                          {apt.status}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setAppointmentToEdit(apt);
+                            setShowModal(true);
+                          }}
+                          style={{
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '0.4rem 0.75rem',
+                            fontWeight: '600',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem'
+                          }}
+                          title="Editar Cita / Pagos"
+                        >
+                          <Edit3 size={14} /> Editar
+                        </button>
                       </div>
                     </div>
                   );
@@ -133,6 +160,19 @@ export function Dashboard() {
           </Card>
         </div>
       </div>
+
+      {showModal && (
+        <AppointmentModal 
+          appointmentToEdit={appointmentToEdit}
+          onClose={() => {
+            setShowModal(false);
+            setAppointmentToEdit(null);
+          }}
+          onSuccess={() => {
+            window.dispatchEvent(new Event('appointmentCreated'));
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }

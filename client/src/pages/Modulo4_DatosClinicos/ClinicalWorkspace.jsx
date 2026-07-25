@@ -3,8 +3,15 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Save, Clock, ArrowLeft, Plus, Trash } from 'lucide-react';
+import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText } from 'lucide-react';
 import { AuditLogModal } from './AuditLogModal';
+import { 
+  CLINICAL_TEMPLATES, 
+  COMMON_DIAGNOSES, 
+  COMMON_MEDICATIONS, 
+  COMMON_PRESENTATIONS, 
+  COMMON_SYMPTOMS 
+} from '../../data/clinicalTemplates';
 
 export function ClinicalWorkspace({ patient, onBack }) {
   const [profile, setProfile] = useState({});
@@ -21,8 +28,30 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [treatmentPlan, setTreatmentPlan] = useState([]);
   const [evolutionaryReport, setEvolutionaryReport] = useState('');
 
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [saving, setSaving] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
+
+  // Auto-fill template loader
+  const handleApplyTemplate = (tmplId) => {
+    const tmpl = CLINICAL_TEMPLATES.find(t => t.id === tmplId);
+    if (!tmpl) return;
+
+    if (reasonForVisit.length > 0 || diagnoses.length > 0 || physicalInspection) {
+      if (!window.confirm(`¿Desea rellenar automáticamente la historia con la plantilla "${tmpl.name}"? Los datos actuales serán reemplazados.`)) {
+        return;
+      }
+    }
+
+    setReasonForVisit(tmpl.reasonForVisit || []);
+    setPhysicalInspection(tmpl.physicalInspection || '');
+    setPhysicalPalpation(tmpl.physicalPalpation || '');
+    setRectalExamination(tmpl.rectalExamination || '');
+    setAnoscopy(tmpl.anoscopy || '');
+    setDiagnoses(tmpl.diagnoses || []);
+    setTreatmentPlan(tmpl.treatmentPlan || []);
+    setEvolutionaryReport(tmpl.evolutionaryReport || '');
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -127,7 +156,72 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </Card>
       </div>
 
-      <hr style={{ borderColor: 'var(--border-color)', margin: '1rem 0' }} />
+      {/* PANEL DE RELLENADO AUTOMÁTICO Y PLANTILLAS RÁPIDAS POR ESPECIALIDAD */}
+      <div style={{ 
+        margin: '1.5rem 0',
+        padding: '1.25rem',
+        borderRadius: 'var(--radius-lg)',
+        backgroundColor: 'rgba(42, 183, 202, 0.08)',
+        border: '1px solid rgba(42, 183, 202, 0.3)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ padding: '0.6rem', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: '#fff', display: 'flex' }}>
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: 'var(--color-primary)' }}>
+              Rellenado Automático y Plantillas por Especialidad
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+              Cargue diagnósticos, hallazgos físicos y tratamientos frecuentes con 1-clic.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <select 
+            className="input-field" 
+            value={selectedTemplateId} 
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            style={{ minWidth: '260px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
+          >
+            <option value="">-- Seleccionar Plantilla Médica --</option>
+            {CLINICAL_TEMPLATES.map(t => (
+              <option key={t.id} value={t.id}>
+                [{t.specialty}] {t.name}
+              </option>
+            ))}
+          </select>
+
+          <Button 
+            type="button"
+            disabled={!selectedTemplateId}
+            onClick={() => handleApplyTemplate(selectedTemplateId)}
+            style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <FileText size={16} /> Cargar Plantilla
+          </Button>
+        </div>
+      </div>
+
+      {/* DATALISTS PARA AUTOCOMPLETADO */}
+      <datalist id="symptoms-list">
+        {COMMON_SYMPTOMS.map((sym, i) => <option key={i} value={sym} />)}
+      </datalist>
+      <datalist id="diagnoses-list">
+        {COMMON_DIAGNOSES.map((diag, i) => <option key={i} value={diag} />)}
+      </datalist>
+      <datalist id="medications-list">
+        {COMMON_MEDICATIONS.map((med, i) => <option key={i} value={med} />)}
+      </datalist>
+      <datalist id="presentations-list">
+        {COMMON_PRESENTATIONS.map((pres, i) => <option key={i} value={pres} />)}
+      </datalist>
 
       {/* SECCIÓN 3 */}
       <Card title="3. Motivo de Consulta y Enfermedad Actual" className="glass-panel">
@@ -135,14 +229,14 @@ export function ClinicalWorkspace({ patient, onBack }) {
           {reasonForVisit.map((row, idx) => (
             <div key={idx} className="dynamic-row-7">
               <Input placeholder="Inicio Síntomas" value={row.onset} onChange={e=>updateReason(idx, 'onset', e.target.value)} />
-              <select className="input-field" value={row.symptom} onChange={e=>updateReason(idx, 'symptom', e.target.value)} style={{ padding: '0.5rem' }}>
-                <option value="">Síntoma...</option>
-                <option value="Dolor">Dolor</option>
-                <option value="Ardor">Ardor</option>
-                <option value="Sangrado">Sangrado</option>
-                <option value="Fiebre">Fiebre</option>
-                <option value="Otro">Otro</option>
-              </select>
+              <input 
+                className="input-field" 
+                list="symptoms-list"
+                placeholder="Síntoma..." 
+                value={row.symptom} 
+                onChange={e=>updateReason(idx, 'symptom', e.target.value)} 
+                style={{ padding: '0.5rem', height: '42px' }} 
+              />
               <Input placeholder="Complemento" value={row.complement} onChange={e=>updateReason(idx, 'complement', e.target.value)} />
               <Input placeholder="Región General" value={row.regionGeneral} onChange={e=>updateReason(idx, 'regionGeneral', e.target.value)} />
               <Input placeholder="Reg. Específica" value={row.regionSpecific} onChange={e=>updateReason(idx, 'regionSpecific', e.target.value)} />
@@ -185,7 +279,17 @@ export function ClinicalWorkspace({ patient, onBack }) {
           {diagnoses.map((row, idx) => (
             <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
               <div className="dynamic-row-4">
-                <Input label="Diagnóstico" value={row.diagnosis} onChange={e=>updateDiagnosis(idx, 'diagnosis', e.target.value)} />
+                <div className="input-group">
+                  <label className="input-label">Diagnóstico</label>
+                  <input 
+                    className="input-field"
+                    list="diagnoses-list"
+                    placeholder="Escriba o seleccione un diagnóstico..."
+                    value={row.diagnosis}
+                    onChange={e=>updateDiagnosis(idx, 'diagnosis', e.target.value)}
+                    style={{ height: '42px', padding: '0.5rem 1rem' }}
+                  />
+                </div>
                 <Input label="Clasificación/Tipo" value={row.classification} onChange={e=>updateDiagnosis(idx, 'classification', e.target.value)} />
                 <Input label="Complicado con" value={row.complication} onChange={e=>updateDiagnosis(idx, 'complication', e.target.value)} />
                 <button type="button" onClick={() => removeDiagnosis(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer', marginTop: '1.5rem' }}><Trash size={18} /></button>
@@ -210,8 +314,22 @@ export function ClinicalWorkspace({ patient, onBack }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {treatmentPlan.map((row, idx) => (
             <div key={idx} className="dynamic-row-5">
-              <Input placeholder="Medicamento" value={row.medication} onChange={e=>updateTreatment(idx, 'medication', e.target.value)} />
-              <Input placeholder="Presentación" value={row.presentation} onChange={e=>updateTreatment(idx, 'presentation', e.target.value)} />
+              <input 
+                className="input-field" 
+                list="medications-list"
+                placeholder="Medicamento / Estudio" 
+                value={row.medication} 
+                onChange={e=>updateTreatment(idx, 'medication', e.target.value)} 
+                style={{ padding: '0.5rem', height: '42px' }}
+              />
+              <input 
+                className="input-field" 
+                list="presentations-list"
+                placeholder="Presentación" 
+                value={row.presentation} 
+                onChange={e=>updateTreatment(idx, 'presentation', e.target.value)} 
+                style={{ padding: '0.5rem', height: '42px' }}
+              />
               <Input placeholder="Indicación" value={row.indication} onChange={e=>updateTreatment(idx, 'indication', e.target.value)} />
               <Input placeholder="Duración" value={row.duration} onChange={e=>updateTreatment(idx, 'duration', e.target.value)} />
               <button type="button" onClick={() => removeTreatment(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer' }}><Trash size={18} /></button>

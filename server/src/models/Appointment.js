@@ -48,6 +48,36 @@ const Appointment = sequelize.define('Appointment', {
   notes: {
     type: DataTypes.TEXT
   },
+  totalAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    field: 'total_amount'
+  },
+  paidAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    field: 'paid_amount'
+  },
+  pendingAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    field: 'pending_amount'
+  },
+  paymentMethod: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Efectivo (USD)',
+    field: 'payment_method'
+  },
+  paymentStatus: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Pendiente', // 'Pendiente', 'Parcial', 'Pagado'
+    field: 'payment_status'
+  },
   createdById: {
     type: DataTypes.INTEGER,
     allowNull: true,

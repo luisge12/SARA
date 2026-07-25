@@ -7,7 +7,7 @@ import { AppointmentModal } from '../../components/AppointmentModal';
 import api from '../../services/api';
 import { 
   Calendar, CalendarPlus, CheckCircle, Clock, XCircle, Filter, Search, 
-  Trash2, Building2, User, Activity, AlertCircle, RefreshCw 
+  Trash2, Building2, User, Activity, AlertCircle, RefreshCw, Edit3, CreditCard, DollarSign 
 } from 'lucide-react';
 
 function Modulo_CitasMedicas() {
@@ -16,6 +16,7 @@ function Modulo_CitasMedicas() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState(null);
+  const [appointmentToEdit, setAppointmentToEdit] = useState(null);
 
   // Filtros
   const [selectedSede, setSelectedSede] = useState('Todas');
@@ -112,7 +113,7 @@ function Modulo_CitasMedicas() {
             <Button variant="outline" onClick={fetchAppointments} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <RefreshCw size={16} /> Refrescar
             </Button>
-            <Button onClick={() => { setSelectedPatientId(null); setShowModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Button onClick={() => { setSelectedPatientId(null); setAppointmentToEdit(null); setShowModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <CalendarPlus size={18} /> Agendar Nueva Cita
             </Button>
           </div>
@@ -287,6 +288,64 @@ function Modulo_CitasMedicas() {
                             Notas: {apt.notes}
                           </p>
                         )}
+
+                        {/* RESUMEN FINANCIERO / PAGO */}
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem', alignItems: 'center', fontSize: '0.78rem' }}>
+                          <span style={{ 
+                            padding: '0.2rem 0.55rem', 
+                            borderRadius: '12px', 
+                            backgroundColor: 'rgba(34, 80, 93, 0.08)', 
+                            color: 'var(--color-primary)', 
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}>
+                            <CreditCard size={13} /> {apt.paymentMethod || 'Efectivo'}
+                          </span>
+
+                          <span style={{ 
+                            padding: '0.2rem 0.55rem', 
+                            borderRadius: '12px', 
+                            backgroundColor: 'rgba(0, 0, 0, 0.05)', 
+                            color: 'var(--color-text-main)', 
+                            fontWeight: '600'
+                          }}>
+                            Total: ${parseFloat(apt.totalAmount || 0).toFixed(2)}
+                          </span>
+
+                          <span style={{ 
+                            padding: '0.2rem 0.55rem', 
+                            borderRadius: '12px', 
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)', 
+                            color: 'var(--color-success)', 
+                            fontWeight: '600'
+                          }}>
+                            Abonado: ${parseFloat(apt.paidAmount || 0).toFixed(2)}
+                          </span>
+
+                          {parseFloat(apt.pendingAmount || 0) > 0 ? (
+                            <span style={{ 
+                              padding: '0.2rem 0.55rem', 
+                              borderRadius: '12px', 
+                              backgroundColor: 'rgba(239, 68, 68, 0.15)', 
+                              color: 'var(--color-alert)', 
+                              fontWeight: '700'
+                            }}>
+                              Pendiente: ${parseFloat(apt.pendingAmount).toFixed(2)}
+                            </span>
+                          ) : (
+                            <span style={{ 
+                              padding: '0.2rem 0.55rem', 
+                              borderRadius: '12px', 
+                              backgroundColor: 'rgba(16, 185, 129, 0.15)', 
+                              color: 'var(--color-success)', 
+                              fontWeight: '700'
+                            }}>
+                              ✓ Pagado Totalmente
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -323,22 +382,46 @@ function Modulo_CitasMedicas() {
                       </div>
 
                       <button 
-                        onClick={() => handleDeleteAppointment(apt.id, patientName)}
+                        onClick={() => { setAppointmentToEdit(apt); setShowModal(true); }}
                         style={{ 
-                          background: 'none', 
+                          backgroundColor: 'var(--color-primary)', 
                           border: 'none', 
-                          color: 'var(--color-alert)', 
+                          color: '#ffffff', 
                           cursor: 'pointer',
-                          padding: '0.5rem',
-                          borderRadius: '50%',
+                          padding: '0.5rem 0.9rem',
+                          borderRadius: '8px',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 0.2s'
+                          gap: '0.4rem',
+                          fontWeight: '700',
+                          fontSize: '0.88rem',
+                          boxShadow: '0 4px 10px rgba(34, 80, 93, 0.25)',
+                          transition: 'all 0.2s ease'
                         }}
-                        title="Cancelar / Eliminar Cita"
+                        title="Editar Cita / Registrar Pagos"
                       >
-                        <Trash2 size={18} />
+                        <Edit3 size={16} /> Editar Cita
+                      </button>
+
+                      <button 
+                        onClick={() => handleDeleteAppointment(apt.id, patientName)}
+                        style={{ 
+                          backgroundColor: 'rgba(239, 68, 68, 0.12)', 
+                          border: '1px solid rgba(239, 68, 68, 0.3)', 
+                          color: 'var(--color-alert)', 
+                          cursor: 'pointer',
+                          padding: '0.5rem 0.8rem',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                          fontWeight: '600',
+                          fontSize: '0.85rem',
+                          transition: 'all 0.2s ease'
+                        }}
+                        title="Cancelar / Eliminar Cita Médica"
+                      >
+                        <Trash2 size={16} /> Eliminar
                       </button>
 
                     </div>
@@ -355,7 +438,8 @@ function Modulo_CitasMedicas() {
       {showModal && (
         <AppointmentModal 
           initialPatientId={selectedPatientId}
-          onClose={() => setShowModal(false)}
+          appointmentToEdit={appointmentToEdit}
+          onClose={() => { setShowModal(false); setAppointmentToEdit(null); }}
           onSuccess={() => {
             fetchAppointments();
           }}
