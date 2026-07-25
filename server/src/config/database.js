@@ -60,6 +60,10 @@ const initDatabase = async () => {
     const Consultation = require('../models/Consultation');
     const AuditLog = require('../models/AuditLog');
     const Transaction = require('../models/Transaction');
+    const Appointment = require('../models/Appointment');
+
+    // Sincronizar modelo Appointment automáticamente
+    await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
 
     // Sincronizar modelos solo si se solicita explícitamente en el entorno
     if (process.env.DB_SYNC === 'true') {
@@ -99,6 +103,27 @@ const initDatabase = async () => {
         sedeAtencion: 'CENTRAL'
       });
       console.log('Usuario de prueba Master (luisge) creado exitosamente.');
+    }
+
+    // Semillar usuario master con clave 1234
+    const masterExists = await User.findOne({ where: { username: 'master' } });
+    if (!masterExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await User.create({
+        username: 'master',
+        passwordHash: passwordHash,
+        role: 'Master',
+        name: 'Usuario Master SARA',
+        sedeAtencion: 'CENTRAL'
+      });
+      console.log('Usuario Master (master) creado exitosamente.');
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      masterExists.passwordHash = await bcrypt.hash('1234', salt);
+      masterExists.role = 'Master';
+      await masterExists.save();
+      console.log('Usuario Master (master) actualizado exitosamente.');
     }
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);

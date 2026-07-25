@@ -9,8 +9,8 @@ export const ROLES = {
 
 export const hasAccess = (userRole, allowedGroups) => {
   if (!userRole) return false;
-  // Master siempre tiene acceso a todo en PWA
-  if (userRole === 'Master') return true;
+  // Master siempre tiene acceso a todo en SARA PWA
+  if (userRole.toLowerCase() === 'master') return true;
   
   for (const group of allowedGroups) {
     if (ROLES[group] && ROLES[group].includes(userRole)) {

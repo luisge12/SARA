@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, CalendarPlus } from 'lucide-react';
+import { AppointmentModal } from './AppointmentModal';
 import './Sidebar.css';
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const location = useLocation();
 
   // Cerrar menú móvil al cambiar de ruta
@@ -16,16 +18,18 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Registro de Usuarios/Pacientes', path: '/modulo2', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO'] },
+    { name: 'Registro de Usuarios/Pacientes', path: '/modulo2', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
-    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA'] },
-    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR'] },
+    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'MASTER'] },
+    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
   
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const visibleNavItems = navItems.filter(item => 
     !item.allowedGroups || hasAccess(user.role, item.allowedGroups)
   );
+
+  const canSchedule = hasAccess(user.role, ['RECEPCIONISTA', 'ADMINISTRADOR', 'MEDICO', 'MASTER']);
 
   return (
     <>
@@ -60,6 +64,20 @@ export function Sidebar() {
         </div>
         
         <nav className="sidebar-nav">
+          {canSchedule && (
+            <button 
+              className="sidebar-action-btn"
+              onClick={() => {
+                setIsMobileOpen(false);
+                setShowAppointmentModal(true);
+              }}
+              title={isCollapsed && !isMobileOpen ? "Agendar Nueva Cita" : ""}
+            >
+              <CalendarPlus size={20} className="sidebar-icon" />
+              <span className="link-text">Agendar Nueva Cita</span>
+            </button>
+          )}
+
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -96,7 +114,18 @@ export function Sidebar() {
           </NavLink>
         </div>
       </aside>
+
+      {showAppointmentModal && (
+        <AppointmentModal 
+          onClose={() => setShowAppointmentModal(false)}
+          onSuccess={() => {
+            setShowAppointmentModal(false);
+            window.dispatchEvent(new Event('appointmentCreated'));
+          }}
+        />
+      )}
     </>
   );
 }
+
 

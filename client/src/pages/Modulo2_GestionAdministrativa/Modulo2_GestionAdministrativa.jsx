@@ -4,15 +4,22 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Trash2, UserPlus, ShieldAlert, Users } from 'lucide-react';
+import { Trash2, UserPlus, ShieldAlert, Users, Calendar, CalendarPlus, Clock, CheckCircle } from 'lucide-react';
 
 import { PatientProfileEditor } from './PatientProfileEditor';
+import { AppointmentModal } from '../../components/AppointmentModal';
 
 function Modulo2_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isMaster = currentUser.role === 'Master';
   const hasAccess = ['Master', 'Administrador', 'Recepcionista', 'Médico'].includes(currentUser.role);
   const [selectedPatient, setSelectedPatient] = useState(null);
+
+  // Citas states
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [appointmentPatientId, setAppointmentPatientId] = useState(null);
+  const [appointmentsList, setAppointmentsList] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
 
   // State lists
   const [usersList, setUsersList] = useState([]);
@@ -49,7 +56,7 @@ function Modulo2_GestionAdministrativa() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const endpoint = isMaster ? '/api/users' : '/api/patients'; // Assuming we have an endpoint for just patients, actually the /api/patients/ returns patients
+      const endpoint = isMaster ? '/api/users' : '/api/patients';
       const response = await api.get(endpoint);
       setUsersList(response.data);
     } catch (err) {
@@ -59,9 +66,32 @@ function Modulo2_GestionAdministrativa() {
     }
   };
 
+  const fetchAppointments = async () => {
+    try {
+      setLoadingAppointments(true);
+      const res = await api.get('/api/appointments');
+      setAppointmentsList(res.data);
+    } catch (err) {
+      console.error('Error al obtener citas:', err);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchAppointments();
+
+    window.addEventListener('appointmentCreated', fetchAppointments);
+    return () => {
+      window.removeEventListener('appointmentCreated', fetchAppointments);
+    };
   }, []);
+
+  const handleOpenAppointmentModal = (patientId = null) => {
+    setAppointmentPatientId(patientId);
+    setShowAppointmentModal(true);
+  };
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
@@ -164,9 +194,14 @@ function Modulo2_GestionAdministrativa() {
     <DashboardLayout>
       <div className="module-container">
         
-        <header style={{ marginBottom: '0.5rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Registro de Usuarios y Pacientes</h1>
-          <p style={{ color: 'var(--color-text-muted)' }}>Crea y gestiona cuentas, roles y expedientes base de pacientes.</p>
+        <header style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Gestión Recepción y Citas Médicas</h1>
+            <p style={{ color: 'var(--color-text-muted)' }}>Crea pacientes, agenda citas y administra los registros del sistema.</p>
+          </div>
+          <Button onClick={() => handleOpenAppointmentModal()} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CalendarPlus size={18} /> Agendar Cita Médica
+          </Button>
         </header>
 
         {successMsg && (
@@ -181,10 +216,47 @@ function Modulo2_GestionAdministrativa() {
           </div>
         )}
 
+        {/* Citas Médicas Agendadas Panel */}
+        <Card title="Citas Médicas Programadas" action={<Calendar size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel" style={{ marginBottom: '1.5rem' }}>
+          {loadingAppointments ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--color-text-muted)' }}>Cargando agenda de citas...</div>
+          ) : appointmentsList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--color-text-muted)' }}>
+              No hay citas programadas actualmente. Haz clic en "Agendar Cita Médica" para crear una.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '350px', overflowY: 'auto' }}>
+              {appointmentsList.map(apt => {
+                const dateObj = new Date(apt.appointmentDate);
+                return (
+                  <div key={apt.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-main)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h4 style={{ fontWeight: '600', color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
+                        {apt.patient?.name || apt.patient?.username || 'Paciente Desconocido'}
+                      </h4>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                        Fecha: <strong>{dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> | Sede: <strong>{apt.sedeAtencion}</strong> | Dr: <strong>{apt.doctor?.name || 'Por asignar'}</strong>
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.1rem' }}>
+                        Motivo: {apt.reason || 'Sin especificar'}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', borderRadius: '12px', fontWeight: '600', backgroundColor: apt.status === 'Confirmada' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: apt.status === 'Confirmada' ? 'var(--color-success)' : 'var(--color-alert)' }}>
+                        {apt.status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
         <div className="responsive-admin-grid">
           
           {/* USER LIST PANEL */}
-          <Card title="Cuentas de Usuarios Registradas" action={<Users size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
+          <Card title="Cuentas de Usuarios y Pacientes" action={<Users size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
             {loading ? (
               <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>Cargando usuarios...</div>
             ) : usersList.length === 0 ? (
@@ -201,7 +273,9 @@ function Modulo2_GestionAdministrativa() {
                       padding: '1rem', 
                       borderRadius: 'var(--radius-md)', 
                       border: '1px solid var(--border-color)', 
-                      backgroundColor: 'var(--color-bg-main)' 
+                      backgroundColor: 'var(--color-bg-main)',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
                     }}
                   >
                     <div>
@@ -215,23 +289,44 @@ function Modulo2_GestionAdministrativa() {
                         Sede: {usr.sedeAtencion || 'No especificada'} {usr.mppsNumber && `| MPPS: ${usr.mppsNumber}`}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {usr.role === 'Paciente' && (
-                        <button 
-                          onClick={() => setSelectedPatient(usr)} 
-                          style={{ 
-                            background: 'var(--color-primary)', 
-                            border: 'none', 
-                            color: '#fff', 
-                            cursor: 'pointer',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '8px',
-                            fontWeight: '600',
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          Ver/Editar Datos
-                        </button>
+                        <>
+                          <button 
+                            onClick={() => handleOpenAppointmentModal(usr.id)}
+                            style={{ 
+                              background: 'var(--color-accent)', 
+                              border: 'none', 
+                              color: '#fff', 
+                              cursor: 'pointer',
+                              padding: '0.4rem 0.75rem',
+                              borderRadius: '8px',
+                              fontWeight: '600',
+                              fontSize: '0.8rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                          >
+                            <CalendarPlus size={14} /> Agendar Cita
+                          </button>
+
+                          <button 
+                            onClick={() => setSelectedPatient(usr)} 
+                            style={{ 
+                              background: 'var(--color-primary)', 
+                              border: 'none', 
+                              color: '#fff', 
+                              cursor: 'pointer',
+                              padding: '0.4rem 0.75rem',
+                              borderRadius: '8px',
+                              fontWeight: '600',
+                              fontSize: '0.8rem'
+                            }}
+                          >
+                            Ver/Editar Datos
+                          </button>
+                        </>
                       )}
                       {isMaster && (
                         <button 
@@ -263,6 +358,7 @@ function Modulo2_GestionAdministrativa() {
 
           {/* CREATE USER PANEL */}
           <Card title="Registrar Nuevo Usuario" action={<UserPlus size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel">
+
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               
               <div className="responsive-grid-1-1">
@@ -470,8 +566,22 @@ function Modulo2_GestionAdministrativa() {
           }} 
         />
       )}
+
+      {showAppointmentModal && (
+        <AppointmentModal 
+          initialPatientId={appointmentPatientId}
+          onClose={() => {
+            setShowAppointmentModal(false);
+            setAppointmentPatientId(null);
+          }}
+          onSuccess={() => {
+            fetchAppointments();
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 }
 
 export default Modulo2_GestionAdministrativa;
+

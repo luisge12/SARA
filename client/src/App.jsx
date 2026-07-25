@@ -38,7 +38,7 @@ function App() {
         
         {/* Rutas para los Módulos de SARA */}
         <Route path="/modulo2" element={
-          <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO']}>
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER']}>
             <Modulo2_GestionAdministrativa />
           </ProtectedRoute>
         } />
@@ -48,12 +48,12 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="/modulo4" element={
-          <ProtectedRoute allowedGroups={['MEDICO', 'RECEPCIONISTA']}>
+          <ProtectedRoute allowedGroups={['MEDICO', 'RECEPCIONISTA', 'MASTER']}>
             <Modulo4_DatosClinicos />
           </ProtectedRoute>
         } />
         <Route path="/modulo7" element={
-          <ProtectedRoute allowedGroups={['ADMINISTRADOR']}>
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'MASTER']}>
             <Modulo7_GestionMedicaEstadistica />
           </ProtectedRoute>
         } />
