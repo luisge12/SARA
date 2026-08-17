@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import api from '../services/api';
 import { 
   Sparkles, 
   X, 
@@ -294,19 +295,14 @@ export const SaraAiChat = () => {
       let botResponseText = '';
 
       try {
-        const res = await fetch('/api/ai/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: query })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          botResponseText = data.response;
+        const res = await api.post('/api/ai/chat', { message: query });
+        if (res.data && res.data.response) {
+          botResponseText = res.data.response;
         } else {
           botResponseText = generateSaraAiResponse(query);
         }
       } catch (err) {
+        console.error('Error enviando mensaje a SARA-AI backend:', err);
         botResponseText = generateSaraAiResponse(query);
       }
 
