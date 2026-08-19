@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, CalendarPlus } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, CalendarPlus, Calendar, FileText } from 'lucide-react';
 import { AppointmentModal } from './AppointmentModal';
 import './Sidebar.css';
 
@@ -18,9 +18,11 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Citas Médicas', path: '/citas', icon: Calendar, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Registro de Usuarios/Pacientes', path: '/modulo2', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'MASTER'] },
+    { name: 'Estudios y Procedimientos (M6)', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
   

@@ -2,9 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import Modulo_CitasMedicas from './pages/Modulo_CitasMedicas/Modulo_CitasMedicas';
 import Modulo2_GestionAdministrativa from './pages/Modulo2_GestionAdministrativa/Modulo2_GestionAdministrativa';
 import Modulo3_RegistroCaja from './pages/Modulo3_RegistroCaja/Modulo3_RegistroCaja';
 import Modulo4_DatosClinicos from './pages/Modulo4_DatosClinicos/Modulo4_DatosClinicos';
+import Modulo6_EstudiosProcedimientos from './pages/Modulo6_EstudiosProcedimientos/Modulo6_EstudiosProcedimientos';
 import Modulo7_GestionMedicaEstadistica from './pages/Modulo7_GestionMedicaEstadistica/Modulo7_GestionMedicaEstadistica';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -37,6 +39,11 @@ function App() {
         } />
         
         {/* Rutas para los Módulos de SARA */}
+        <Route path="/citas" element={
+          <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER']}>
+            <Modulo_CitasMedicas />
+          </ProtectedRoute>
+        } />
         <Route path="/modulo2" element={
           <ProtectedRoute allowedGroups={['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER']}>
             <Modulo2_GestionAdministrativa />
@@ -50,6 +57,11 @@ function App() {
         <Route path="/modulo4" element={
           <ProtectedRoute allowedGroups={['MEDICO', 'RECEPCIONISTA', 'MASTER']}>
             <Modulo4_DatosClinicos />
+          </ProtectedRoute>
+        } />
+        <Route path="/modulo6" element={
+          <ProtectedRoute allowedGroups={['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER']}>
+            <Modulo6_EstudiosProcedimientos />
           </ProtectedRoute>
         } />
         <Route path="/modulo7" element={
