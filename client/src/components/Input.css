@@ -64,3 +64,19 @@
   font-size: 0.75rem;
   color: var(--color-alert);
 }
+
+/* Ocultar flechas/spinners en inputs de tipo number */
+.input-field[type="number"]::-webkit-outer-spin-button,
+.input-field[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-field[type="number"],
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+

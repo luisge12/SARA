@@ -99,5 +99,18 @@ module.exports = {
       console.error('Error al obtener resumen anual:', error);
       return res.status(500).json({ error: 'Error al obtener resumen financiero' });
     }
+  },
+
+  getBcvExchangeRate: async (req, res) => {
+    try {
+      const { getBcvRate } = require('../services/bcvService');
+      const forceRefresh = req.query.refresh === 'true';
+      const bcvData = await getBcvRate(forceRefresh);
+      return res.json(bcvData);
+    } catch (error) {
+      console.error('Error al consultar tasa BCV:', error.message);
+      return res.status(500).json({ error: 'No se pudo obtener la tasa oficial del BCV', details: error.message });
+    }
   }
 };
+

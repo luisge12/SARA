@@ -474,7 +474,7 @@ export function Dashboard() {
                         }}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
                       >
-                        <FileText size={15} /> Abrir Historia Clínica (M4)
+                        <FileText size={15} /> Abrir Historia Clínica
                       </Button>
 
                       <Button 

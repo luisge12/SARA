@@ -7,8 +7,10 @@ const { verifyToken, checkRole } = require('../middlewares/authMiddleware');
 // Solo Master, Administrador y Recepcionista tienen acceso
 const allowedRoles = ['Master', 'Administrador', 'Recepcionista'];
 
+router.get('/bcv-rate', billingController.getBcvExchangeRate);
 router.post('/transactions', verifyToken, checkRole(allowedRoles), billingController.registerPayment);
 router.get('/transactions', verifyToken, checkRole(allowedRoles), billingController.getTransactions);
 router.get('/summary', verifyToken, checkRole(allowedRoles), billingController.getAnnualSummary);
 
 module.exports = router;
+

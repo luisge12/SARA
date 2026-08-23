@@ -39,21 +39,33 @@ function Modulo3_GestionAdministrativa() {
   
   const [loading, setLoading] = useState(true);
   const [loadingRate, setLoadingRate] = useState(false);
+  const [bcvDateInfo, setBcvDateInfo] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const fetchBCVRate = async () => {
+  const fetchBCVRate = async (force = false) => {
     try {
       setLoadingRate(true);
-      const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.promedio) {
-          setExchangeRate(data.promedio.toString());
-        }
+      const url = force ? '/api/billing/bcv-rate?refresh=true' : '/api/billing/bcv-rate';
+      const res = await api.get(url);
+      if (res.data && res.data.rate) {
+        setExchangeRate(res.data.rate.toString());
+        setBcvDateInfo(res.data.fechaValor || '');
       }
     } catch (err) {
-      console.error('Error fetching BCV rate:', err);
+      console.warn('Backend BCV falló, probando fallback DolarAPI:', err);
+      try {
+        const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.promedio) {
+            setExchangeRate(data.promedio.toString());
+            setBcvDateInfo('BCV Oficial');
+          }
+        }
+      } catch (fallbackErr) {
+        console.error('Error fetching BCV rate fallback:', fallbackErr);
+      }
     } finally {
       setLoadingRate(false);
     }
@@ -229,17 +241,33 @@ function Modulo3_GestionAdministrativa() {
                 <Input label="Monto Total (USD) *" type="number" step="0.01" value={totalAmountUSD} onChange={(e) => setTotalAmountUSD(e.target.value)} required />
                 
                 <div className="input-group">
-                  <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Tasa BCV (Bs/USD) *</span>
+                  <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      Tasa BCV (Bs/USD) *
+                      {bcvDateInfo && (
+                        <small style={{ fontSize: '0.72rem', color: 'var(--color-primary)', fontWeight: '600' }}>
+                          ({bcvDateInfo})
+                        </small>
+                      )}
+                    </span>
                     {loadingRate ? (
                       <RefreshCw size={14} className="spin" style={{ color: 'var(--color-primary)' }} />
                     ) : (
-                      <button type="button" onClick={fetchBCVRate} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }} title="Actualizar Tasa BCV">
+                      <button type="button" onClick={() => fetchBCVRate(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-primary)' }} title="Actualizar Tasa BCV (En Vivo)">
                         <RefreshCw size={14} />
                       </button>
                     )}
                   </label>
-                  <input className="input-field" type="number" step="0.01" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} required />
+                  <input 
+                    className="input-field" 
+                    type="number" 
+                    step="0.01" 
+                    value={exchangeRate} 
+                    onChange={(e) => setExchangeRate(e.target.value)} 
+                    onKeyDown={(e) => (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.preventDefault()}
+                    onWheel={(e) => e.target.blur()}
+                    required 
+                  />
                 </div>
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'right' }}>

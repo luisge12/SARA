@@ -21,9 +21,9 @@ export function Sidebar() {
     { name: 'Citas Médicas', path: '/citas', icon: Calendar, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Registro de Usuarios/Pacientes', path: '/modulo2', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
-    { name: 'Datos Clínicos (M4)', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'MASTER'] },
-    { name: 'Estudios y Procedimientos (M6)', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
-    { name: 'Estadísticas (M7)', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
+    { name: 'Datos Clínicos', path: '/modulo4', icon: Activity, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'MASTER'] },
+    { name: 'Estudios y Procedimientos', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
+    { name: 'Estadísticas', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
   
   const user = JSON.parse(localStorage.getItem('user') || '{}');
