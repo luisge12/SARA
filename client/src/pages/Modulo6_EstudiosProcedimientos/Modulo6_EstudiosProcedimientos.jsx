@@ -23,31 +23,16 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [showNewModal, setShowNewModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [loadingStudies, setLoadingStudies] = useState(true);
+  const [savingStudy, setSavingStudy] = useState(false);
 
   // Lista de estudios y procedimientos
-  const [studies, setStudies] = useState([
-    {
-      id: 1,
-      patientId: 1,
-      patientName: 'Juan Pérez',
-      patientCedula: 'V-18.452.190',
-      studyType: 'Colonoscopia Diagnóstica',
-      doctorName: user.name || 'Dr. Carlos Mendoza',
-      date: new Date().toISOString().split('T')[0],
-      sede: 'CENTRAL',
-      findings: 'Mucosa rectal y colónica de aspecto habitual. Se observa pólipo sésil de 5mm en colon sigmoides.',
-      biopsySample: 'Sí (Pólipo sigmoides - Frasco 1)',
-      diagnosticImpression: 'Pólipo de colon sigmoides resecado / Mucosa colónica normal.',
-      recommendations: 'Control en 1 año previa evaluación del resultado de biopsia.',
-      status: 'Completado',
-      attachments: []
-    }
-  ]);
+  const [studies, setStudies] = useState([]);
 
   // Formulario nuevo estudio
   const [formData, setFormData] = useState({
     patientId: propPatientId || '',
-    studyType: 'Endoscopia Digestiva Superior',
+    studyType: '',
     doctorName: user.name || '',
     sede: user.sedeAtencion || 'CENTRAL',
     date: new Date().toISOString().split('T')[0],
@@ -60,12 +45,13 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
   useEffect(() => {
     fetchPatients();
+    fetchStudies();
   }, []);
 
   const fetchPatients = async () => {
     try {
       const res = await api.get('/api/patients');
-      setPatients(res.data);
+      setPatients(res.data || []);
       if (propPatientId) {
         setSelectedPatientId(propPatientId);
         setFormData(prev => ({ ...prev, patientId: propPatientId }));
@@ -75,58 +61,82 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     }
   };
 
-  const handleSaveStudy = (e) => {
+  const fetchStudies = async () => {
+    try {
+      setLoadingStudies(true);
+      const res = await api.get('/api/studies');
+      setStudies(res.data || []);
+    } catch (err) {
+      console.error('Error al cargar estudios desde el servidor:', err);
+    } finally {
+      setLoadingStudies(false);
+    }
+  };
+
+  const handleSaveStudy = async (e) => {
     e.preventDefault();
     if (!formData.patientId) {
       alert('Por favor seleccione un paciente.');
       return;
     }
 
-    const patient = patients.find(p => p.id === parseInt(formData.patientId) || p.id === formData.patientId);
+    try {
+      setSavingStudy(true);
+      const payload = {
+        patientId: parseInt(formData.patientId),
+        studyType: formData.studyType,
+        sede: formData.sede,
+        date: formData.date,
+        findings: formData.findings,
+        biopsySample: formData.biopsySample || 'No se tomó muestra',
+        diagnosticImpression: formData.diagnosticImpression,
+        recommendations: formData.recommendations,
+        status: formData.status,
+        attachments: []
+      };
 
-    const newStudy = {
-      id: Date.now(),
-      patientId: formData.patientId,
-      patientName: patient ? patient.name : 'Paciente Registrado',
-      patientCedula: patient ? (patient.identificationNumber || 'S/N') : 'S/N',
-      studyType: formData.studyType,
-      doctorName: formData.doctorName || user.name || 'Médico Tratante',
-      date: formData.date,
-      sede: formData.sede,
-      findings: formData.findings,
-      biopsySample: formData.biopsySample || 'No se tomó muestra',
-      diagnosticImpression: formData.diagnosticImpression,
-      recommendations: formData.recommendations,
-      status: formData.status,
-      attachments: []
-    };
-
-    setStudies([newStudy, ...studies]);
-    setShowNewModal(false);
-    setFormData({
-      patientId: '',
-      studyType: 'Endoscopia Digestiva Superior',
-      doctorName: user.name || '',
-      sede: user.sedeAtencion || 'CENTRAL',
-      date: new Date().toISOString().split('T')[0],
-      findings: '',
-      biopsySample: '',
-      diagnosticImpression: '',
-      recommendations: '',
-      status: 'Completado'
-    });
-    alert('¡Estudio / Procedimiento registrado exitosamente!');
+      const res = await api.post('/api/studies', payload);
+      if (res.data && res.data.study) {
+        setStudies(prev => [res.data.study, ...prev]);
+        setShowNewModal(false);
+        setFormData({
+          patientId: '',
+          studyType: '',
+          doctorName: user.name || '',
+          sede: user.sedeAtencion || 'CENTRAL',
+          date: new Date().toISOString().split('T')[0],
+          findings: '',
+          biopsySample: '',
+          diagnosticImpression: '',
+          recommendations: '',
+          status: 'Completado'
+        });
+        alert('¡Estudio / Procedimiento registrado exitosamente en la base de datos!');
+      }
+    } catch (err) {
+      console.error('Error al guardar estudio:', err);
+      alert('Error al guardar el estudio: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setSavingStudy(false);
+    }
   };
 
   const filteredStudies = studies.filter(item => {
-    const matchesType = filterType === 'Todos' || item.studyType.toLowerCase().includes(filterType.toLowerCase());
+    const pName = item.patient?.name || item.patientName || '';
+    const pCedula = item.patient?.identificationNumber || item.patientCedula || '';
+    const dName = item.doctor?.name || item.doctorName || '';
+    const sType = item.studyType || '';
+    const dImpression = item.diagnosticImpression || '';
+
+    const matchesType = filterType === 'Todos' || sType.toLowerCase().includes(filterType.toLowerCase());
     const matchesStatus = filterStatus === 'Todos' || item.status === filterStatus;
     const query = searchTerm.toLowerCase();
     const matchesSearch = 
-      item.patientName.toLowerCase().includes(query) ||
-      item.patientCedula.toLowerCase().includes(query) ||
-      item.studyType.toLowerCase().includes(query) ||
-      item.diagnosticImpression.toLowerCase().includes(query);
+      pName.toLowerCase().includes(query) ||
+      pCedula.toLowerCase().includes(query) ||
+      sType.toLowerCase().includes(query) ||
+      dImpression.toLowerCase().includes(query) ||
+      dName.toLowerCase().includes(query);
 
     return matchesType && matchesStatus && matchesSearch;
   });
@@ -237,7 +247,10 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                   </div>
 
                   <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: 'var(--color-text-main)', margin: '0.25rem 0' }}>
-                    {study.patientName} <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>({study.patientCedula})</span>
+                    {study.patient?.name || study.patientName || 'Paciente'} 
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
+                      ({study.patient?.identificationNumber || study.patientCedula || 'S/N'})
+                    </span>
                   </h3>
 
                   <p style={{ fontSize: '0.88rem', color: 'var(--color-text-main)', marginTop: '0.5rem' }}>
@@ -255,7 +268,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                   )}
 
                   <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
-                    Especialista: <strong>{study.doctorName}</strong>
+                    Especialista: <strong>{study.doctor?.name || study.doctorName || 'Médico Tratante'}</strong>
                   </p>
                 </div>
 
@@ -265,7 +278,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                     onClick={() => setSelectedReport(study)}
                     style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}
                   >
-                    <Eye size={15} /> Ver Informe Completo
+                    <Eye size={15} /> Ver Informe
                   </Button>
                 </div>
               </div>
@@ -335,20 +348,29 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                   <label style={{ display: 'block', fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
                     Tipo de Procedimiento / Estudio *
                   </label>
-                  <select 
+                  <input 
+                    type="text"
+                    list="procedure-types-list"
                     className="input-field" 
+                    placeholder="Escriba o seleccione un procedimiento..."
                     value={formData.studyType} 
                     onChange={(e) => setFormData({ ...formData, studyType: e.target.value })}
                     required
-                  >
-                    <option value="Endoscopia Digestiva Superior">Endoscopia Digestiva Superior</option>
-                    <option value="Colonoscopia Diagnóstica y Terapéutica">Colonoscopia Diagnóstica y Terapéutica</option>
-                    <option value="Rectosigmoidoscopia">Rectosigmoidoscopia</option>
-                    <option value="Ecografía Abdominal / Pélvica">Ecografía Abdominal / Pélvica</option>
-                    <option value="Toma de Biopsia / Citología">Toma de Biopsia / Citología</option>
-                    <option value="Procedimiento Quirúrgico Menor">Procedimiento Quirúrgico Menor</option>
-                    <option value="Anoscopia de Alta Resolución">Anoscopia de Alta Resolución</option>
-                  </select>
+                  />
+                  <datalist id="procedure-types-list">
+                    <option value="Endoscopia Digestiva Superior" />
+                    <option value="Colonoscopia Diagnóstica y Terapéutica" />
+                    <option value="Rectosigmoidoscopia" />
+                    <option value="Ecografía Abdominal / Pélvica" />
+                    <option value="Toma de Biopsia / Citología" />
+                    <option value="Procedimiento Quirúrgico Menor" />
+                    <option value="Anoscopia de Alta Resolución" />
+                    <option value="Polipectomía Endoscópica" />
+                    <option value="Ligadura de Hemorroides" />
+                    <option value="Biopsia Guiada por Ecografía" />
+                    <option value="Drenaje de Absceso" />
+                    <option value="Laparoscopia Exploratoria" />
+                  </datalist>
                 </div>
               </div>
 
@@ -499,9 +521,9 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.95rem' }}>
               <div style={{ backgroundColor: 'rgba(34, 80, 93, 0.05)', padding: '0.85rem', borderRadius: '8px' }}>
-                <p><strong>Paciente:</strong> {selectedReport.patientName}</p>
-                <p><strong>Cédula:</strong> {selectedReport.patientCedula}</p>
-                <p><strong>Médico Responsable:</strong> {selectedReport.doctorName}</p>
+                <p><strong>Paciente:</strong> {selectedReport.patient?.name || selectedReport.patientName || 'Paciente'}</p>
+                <p><strong>Cédula:</strong> {selectedReport.patient?.identificationNumber || selectedReport.patientCedula || 'S/N'}</p>
+                <p><strong>Médico Responsable:</strong> {selectedReport.doctor?.name || selectedReport.doctorName || 'Médico Tratante'}</p>
                 <p><strong>Procedimiento:</strong> {selectedReport.studyType}</p>
               </div>
 

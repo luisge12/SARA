@@ -34,6 +34,7 @@ const billingRoutes = require('./routes/billingRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const studyRoutes = require('./routes/studyRoutes');
 
 // Registrar Rutas de la API
 app.use('/api/users', userRoutes);
@@ -43,6 +44,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/studies', studyRoutes);
 
 // Ruta de estado del servidor
 app.get('/status', (req, res) => {
