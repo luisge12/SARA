@@ -282,7 +282,7 @@ export const CLINICAL_TEMPLATES = [
   },
   {
     id: 'gastro_gastritis',
-    specialty: 'Gastroenterología',
+    specialty: 'Gastroenterología y Hepatología',
     name: 'Gastritis Crónica / Síndrome Dispéptico',
     description: 'Epigastralgia, pirosis y saciedad precoz.',
     reasonForVisit: [
@@ -369,5 +369,2018 @@ export const CLINICAL_TEMPLATES = [
       }
     ],
     evolutionaryReport: 'Se inicia tratamiento antihipertensivo oral. Se recomiendan hábitos de vida saludable, dieta hiposódica y control tensional diario.'
-  }
+  },
+  {
+    id: 'tmpl_alergolog_a_e_inmuno',
+    specialty: 'Alergología e Inmunología Clínica',
+    name: 'Consulta Integral - Alergología e Inmunología Clínica',
+    description: 'Plantilla de evaluación general adaptada para Alergología e Inmunología Clínica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_anatom_a_patol_gica',
+    specialty: 'Anatomía Patológica',
+    name: 'Consulta Integral - Anatomía Patológica',
+    description: 'Plantilla de evaluación general adaptada para Anatomía Patológica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_anestesiolog_a_y_rea',
+    specialty: 'Anestesiología y Reanimación',
+    name: 'Consulta Integral - Anestesiología y Reanimación',
+    description: 'Plantilla de evaluación general adaptada para Anestesiología y Reanimación.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_angiolog_a_y_cirug_a',
+    specialty: 'Angiología y Cirugía Vascular',
+    name: 'Consulta Integral - Angiología y Cirugía Vascular',
+    description: 'Plantilla de evaluación general adaptada para Angiología y Cirugía Vascular.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cardiolog_a',
+    specialty: 'Cardiología',
+    name: 'Consulta Integral - Cardiología',
+    description: 'Plantilla de evaluación general adaptada para Cardiología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cardiolog_a_interven',
+    specialty: 'Cardiología Intervencionista',
+    name: 'Consulta Integral - Cardiología Intervencionista',
+    description: 'Plantilla de evaluación general adaptada para Cardiología Intervencionista.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_bariatrica_y',
+    specialty: 'Cirugía Bariatrica y Metabólica',
+    name: 'Consulta Integral - Cirugía Bariatrica y Metabólica',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Bariatrica y Metabólica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_cardiovascul',
+    specialty: 'Cirugía Cardiovascular',
+    name: 'Consulta Integral - Cirugía Cardiovascular',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Cardiovascular.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_colorrectal_',
+    specialty: 'Cirugía Colorrectal / Coloproctología',
+    name: 'Consulta Integral - Cirugía Colorrectal / Coloproctología',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Colorrectal / Coloproctología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_general',
+    specialty: 'Cirugía General',
+    name: 'Consulta Integral - Cirugía General',
+    description: 'Plantilla de evaluación general adaptada para Cirugía General.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_maxilofacial',
+    specialty: 'Cirugía Maxilofacial',
+    name: 'Consulta Integral - Cirugía Maxilofacial',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Maxilofacial.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_oncol_gica',
+    specialty: 'Cirugía Oncológica',
+    name: 'Consulta Integral - Cirugía Oncológica',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Oncológica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_pedi_trica',
+    specialty: 'Cirugía Pediátrica',
+    name: 'Consulta Integral - Cirugía Pediátrica',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Pediátrica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_pl_stica__re',
+    specialty: 'Cirugía Plástica, Reconstructiva y Estética',
+    name: 'Consulta Integral - Cirugía Plástica, Reconstructiva y Estética',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Plástica, Reconstructiva y Estética.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_tor_cica',
+    specialty: 'Cirugía Torácica',
+    name: 'Consulta Integral - Cirugía Torácica',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Torácica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_cirug_a_vascular_y_e',
+    specialty: 'Cirugía Vascular y Endovascular',
+    name: 'Consulta Integral - Cirugía Vascular y Endovascular',
+    description: 'Plantilla de evaluación general adaptada para Cirugía Vascular y Endovascular.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_dermatolog_a',
+    specialty: 'Dermatología',
+    name: 'Consulta Integral - Dermatología',
+    description: 'Plantilla de evaluación general adaptada para Dermatología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_endocrinolog_a_y_met',
+    specialty: 'Endocrinología y Metabolismo',
+    name: 'Consulta Integral - Endocrinología y Metabolismo',
+    description: 'Plantilla de evaluación general adaptada para Endocrinología y Metabolismo.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_endodoncia__odontolo',
+    specialty: 'Endodoncia (Odontología)',
+    name: 'Consulta Integral - Endodoncia (Odontología)',
+    description: 'Plantilla de evaluación general adaptada para Endodoncia (Odontología).',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_fisiatr_a___medicina',
+    specialty: 'Fisiatría / Medicina Física y Rehabilitación',
+    name: 'Consulta Integral - Fisiatría / Medicina Física y Rehabilitación',
+    description: 'Plantilla de evaluación general adaptada para Fisiatría / Medicina Física y Rehabilitación.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_gen_tica_m_dica',
+    specialty: 'Genética Médica',
+    name: 'Consulta Integral - Genética Médica',
+    description: 'Plantilla de evaluación general adaptada para Genética Médica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_geriatr_a',
+    specialty: 'Geriatría',
+    name: 'Consulta Integral - Geriatría',
+    description: 'Plantilla de evaluación general adaptada para Geriatría.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_ginecolog_a_y_obstet',
+    specialty: 'Ginecología y Obstetricia',
+    name: 'Consulta Integral - Ginecología y Obstetricia',
+    description: 'Plantilla de evaluación general adaptada para Ginecología y Obstetricia.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_ginecolog_a_oncol_gi',
+    specialty: 'Ginecología Oncológica',
+    name: 'Consulta Integral - Ginecología Oncológica',
+    description: 'Plantilla de evaluación general adaptada para Ginecología Oncológica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_hematolog_a',
+    specialty: 'Hematología',
+    name: 'Consulta Integral - Hematología',
+    description: 'Plantilla de evaluación general adaptada para Hematología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_infectolog_a',
+    specialty: 'Infectología',
+    name: 'Consulta Integral - Infectología',
+    description: 'Plantilla de evaluación general adaptada para Infectología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_mastolog_a___senolog',
+    specialty: 'Mastología / Senología',
+    name: 'Consulta Integral - Mastología / Senología',
+    description: 'Plantilla de evaluación general adaptada para Mastología / Senología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_de_emergenc',
+    specialty: 'Medicina de Emergencias y Desastres',
+    name: 'Consulta Integral - Medicina de Emergencias y Desastres',
+    description: 'Plantilla de evaluación general adaptada para Medicina de Emergencias y Desastres.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_del_deporte',
+    specialty: 'Medicina del Deporte',
+    name: 'Consulta Integral - Medicina del Deporte',
+    description: 'Plantilla de evaluación general adaptada para Medicina del Deporte.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_est_tica',
+    specialty: 'Medicina Estética',
+    name: 'Consulta Integral - Medicina Estética',
+    description: 'Plantilla de evaluación general adaptada para Medicina Estética.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_familiar_y_',
+    specialty: 'Medicina Familiar y Comunitaria',
+    name: 'Consulta Integral - Medicina Familiar y Comunitaria',
+    description: 'Plantilla de evaluación general adaptada para Medicina Familiar y Comunitaria.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_intensiva__',
+    specialty: 'Medicina Intensiva / Cuidados Intensivos',
+    name: 'Consulta Integral - Medicina Intensiva / Cuidados Intensivos',
+    description: 'Plantilla de evaluación general adaptada para Medicina Intensiva / Cuidados Intensivos.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_interna',
+    specialty: 'Medicina Interna',
+    name: 'Consulta Integral - Medicina Interna',
+    description: 'Plantilla de evaluación general adaptada para Medicina Interna.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_legal_y_for',
+    specialty: 'Medicina Legal y Forense',
+    name: 'Consulta Integral - Medicina Legal y Forense',
+    description: 'Plantilla de evaluación general adaptada para Medicina Legal y Forense.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_nuclear',
+    specialty: 'Medicina Nuclear',
+    name: 'Consulta Integral - Medicina Nuclear',
+    description: 'Plantilla de evaluación general adaptada para Medicina Nuclear.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_ocupacional',
+    specialty: 'Medicina Ocupacional y del Trabajo',
+    name: 'Consulta Integral - Medicina Ocupacional y del Trabajo',
+    description: 'Plantilla de evaluación general adaptada para Medicina Ocupacional y del Trabajo.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_medicina_paliativa_y',
+    specialty: 'Medicina Paliativa y Dolor',
+    name: 'Consulta Integral - Medicina Paliativa y Dolor',
+    description: 'Plantilla de evaluación general adaptada para Medicina Paliativa y Dolor.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_nefrolog_a',
+    specialty: 'Nefrología',
+    name: 'Consulta Integral - Nefrología',
+    description: 'Plantilla de evaluación general adaptada para Nefrología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_neonatolog_a',
+    specialty: 'Neonatología',
+    name: 'Consulta Integral - Neonatología',
+    description: 'Plantilla de evaluación general adaptada para Neonatología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_neumonolog_a___neumo',
+    specialty: 'Neumonología / Neumología',
+    name: 'Consulta Integral - Neumonología / Neumología',
+    description: 'Plantilla de evaluación general adaptada para Neumonología / Neumología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_neurocirug_a',
+    specialty: 'Neurocirugía',
+    name: 'Consulta Integral - Neurocirugía',
+    description: 'Plantilla de evaluación general adaptada para Neurocirugía.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_neurolog_a',
+    specialty: 'Neurología',
+    name: 'Consulta Integral - Neurología',
+    description: 'Plantilla de evaluación general adaptada para Neurología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_nutrici_n_y_diet_tic',
+    specialty: 'Nutrición y Dietética Clínica',
+    name: 'Consulta Integral - Nutrición y Dietética Clínica',
+    description: 'Plantilla de evaluación general adaptada para Nutrición y Dietética Clínica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_obstetricia',
+    specialty: 'Obstetricia',
+    name: 'Consulta Integral - Obstetricia',
+    description: 'Plantilla de evaluación general adaptada para Obstetricia.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_oftalmolog_a',
+    specialty: 'Oftalmología',
+    name: 'Consulta Integral - Oftalmología',
+    description: 'Plantilla de evaluación general adaptada para Oftalmología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_oncolog_a_m_dica',
+    specialty: 'Oncología Médica',
+    name: 'Consulta Integral - Oncología Médica',
+    description: 'Plantilla de evaluación general adaptada para Oncología Médica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_oncolog_a_radioter_p',
+    specialty: 'Oncología Radioterápica',
+    name: 'Consulta Integral - Oncología Radioterápica',
+    description: 'Plantilla de evaluación general adaptada para Oncología Radioterápica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_ortopedia_y_traumato',
+    specialty: 'Ortopedia y Traumatología',
+    name: 'Consulta Integral - Ortopedia y Traumatología',
+    description: 'Plantilla de evaluación general adaptada para Ortopedia y Traumatología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_otorrinolaringolog_a',
+    specialty: 'Otorrinolaringología',
+    name: 'Consulta Integral - Otorrinolaringología',
+    description: 'Plantilla de evaluación general adaptada para Otorrinolaringología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_pediatr_a',
+    specialty: 'Pediatría',
+    name: 'Consulta Integral - Pediatría',
+    description: 'Plantilla de evaluación general adaptada para Pediatría.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_perinatolog_a_y_medi',
+    specialty: 'Perinatología y Medicina Materno-Fetal',
+    name: 'Consulta Integral - Perinatología y Medicina Materno-Fetal',
+    description: 'Plantilla de evaluación general adaptada para Perinatología y Medicina Materno-Fetal.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_podolog_a_m_dica',
+    specialty: 'Podología Médica',
+    name: 'Consulta Integral - Podología Médica',
+    description: 'Plantilla de evaluación general adaptada para Podología Médica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_psiquiatr_a',
+    specialty: 'Psiquiatría',
+    name: 'Consulta Integral - Psiquiatría',
+    description: 'Plantilla de evaluación general adaptada para Psiquiatría.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_psicolog_a_cl_nica',
+    specialty: 'Psicología Clínica',
+    name: 'Consulta Integral - Psicología Clínica',
+    description: 'Plantilla de evaluación general adaptada para Psicología Clínica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_radiolog_a_e_imageno',
+    specialty: 'Radiología e Imagenología',
+    name: 'Consulta Integral - Radiología e Imagenología',
+    description: 'Plantilla de evaluación general adaptada para Radiología e Imagenología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_radiolog_a_intervenc',
+    specialty: 'Radiología Intervencionista',
+    name: 'Consulta Integral - Radiología Intervencionista',
+    description: 'Plantilla de evaluación general adaptada para Radiología Intervencionista.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_reumatolog_a',
+    specialty: 'Reumatología',
+    name: 'Consulta Integral - Reumatología',
+    description: 'Plantilla de evaluación general adaptada para Reumatología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_sexolog_a_m_dica',
+    specialty: 'Sexología Médica',
+    name: 'Consulta Integral - Sexología Médica',
+    description: 'Plantilla de evaluación general adaptada para Sexología Médica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_toxicolog_a_m_dica',
+    specialty: 'Toxicología Médica',
+    name: 'Consulta Integral - Toxicología Médica',
+    description: 'Plantilla de evaluación general adaptada para Toxicología Médica.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_traumatolog_a',
+    specialty: 'Traumatología',
+    name: 'Consulta Integral - Traumatología',
+    description: 'Plantilla de evaluación general adaptada para Traumatología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
+  {
+    id: 'tmpl_urolog_a',
+    specialty: 'Urología',
+    name: 'Consulta Integral - Urología',
+    description: 'Plantilla de evaluación general adaptada para Urología.',
+    reasonForVisit: [{
+      onset: '1 semana',
+      symptom: 'Evaluación / Control',
+      complement: 'Consulta de seguimiento',
+      regionGeneral: 'General',
+      regionSpecific: '',
+      relatedTo: '',
+      additionalInfo: 'Paciente acude para revisión por su especialista.'
+    }],
+    physicalInspection: 'Paciente en buenas condiciones generales, orientado y cooperador.',
+    physicalPalpation: 'Examen físico dentro de la normalidad para la patología base. Sin hallazgos agudos.',
+    rectalExamination: 'N/A',
+    anoscopy: 'N/A',
+    diagnoses: [{
+      diagnosis: 'Control de salud y evaluación médica',
+      classification: 'General',
+      complication: 'Ninguna',
+      histologicType: '',
+      stage: ''
+    }],
+    treatmentPlan: [{
+      medication: 'Indicaciones Generales',
+      presentation: 'Consejería médica',
+      indication: 'Mantener tratamiento base y estilo de vida saludable.',
+      duration: 'Continuo'
+    }],
+    evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
+  },
 ];

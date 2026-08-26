@@ -10,7 +10,8 @@ import {
   COMMON_DIAGNOSES, 
   COMMON_MEDICATIONS, 
   COMMON_PRESENTATIONS, 
-  COMMON_SYMPTOMS 
+  COMMON_SYMPTOMS,
+  COMMON_SPECIALTIES
 } from '../../data/clinicalTemplates';
 
 export function ClinicalWorkspace({ patient, onBack }) {
@@ -28,6 +29,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [treatmentPlan, setTreatmentPlan] = useState([]);
   const [evolutionaryReport, setEvolutionaryReport] = useState('');
 
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [saving, setSaving] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
@@ -186,17 +188,31 @@ export function ClinicalWorkspace({ patient, onBack }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           <select 
             className="input-field" 
-            value={selectedTemplateId} 
-            onChange={(e) => setSelectedTemplateId(e.target.value)}
-            style={{ minWidth: '260px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
+            value={selectedSpecialty} 
+            onChange={(e) => { setSelectedSpecialty(e.target.value); setSelectedTemplateId(''); }}
+            style={{ minWidth: '220px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
           >
-            <option value="">-- Seleccionar Plantilla Médica --</option>
-            {CLINICAL_TEMPLATES.map(t => (
-              <option key={t.id} value={t.id}>
-                [{t.specialty}] {t.name}
-              </option>
+            <option value="">-- Especialidad Médica --</option>
+            {Array.from(new Set(CLINICAL_TEMPLATES.map(t => t.specialty))).sort().map((spec, i) => (
+              <option key={i} value={spec}>{spec}</option>
             ))}
           </select>
+
+          {selectedSpecialty && (
+            <select 
+              className="input-field" 
+              value={selectedTemplateId} 
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              style={{ minWidth: '260px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
+            >
+              <option value="">-- Seleccionar Plantilla --</option>
+              {CLINICAL_TEMPLATES.filter(t => t.specialty === selectedSpecialty).map(t => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <Button 
             type="button"
