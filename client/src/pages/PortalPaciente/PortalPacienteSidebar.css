@@ -164,7 +164,7 @@
   height: 44px;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
 
@@ -175,7 +175,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 990;
@@ -192,13 +192,14 @@
   .portal-mobile-menu-btn {
     display: flex;
   }
+
   .portal-sidebar {
     transform: translateX(-100%);
     z-index: 1000 !important;
   }
+
   .portal-sidebar.mobile-open {
     transform: translateX(0);
-    box-shadow: 6px 0 30px rgba(0,0,0,0.4);
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.4);
   }
 }
-

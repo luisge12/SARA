@@ -163,28 +163,30 @@ function Modulo_CitasMedicas() {
 
         {/* Barra de Filtros y Búsqueda */}
         <Card className="glass-panel" style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, minWidth: '280px' }}>
-              <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-                <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Buscar por Paciente, Médico o Motivo..." 
-                  value={searchTerm} 
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ paddingLeft: '2.5rem', height: '40px' }}
-                />
-              </div>
+            {/* Buscador de Citas */}
+            <div style={{ position: 'relative', width: '100%' }}>
+              <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Buscar por Paciente, Médico o Motivo..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ paddingLeft: '2.5rem', height: '42px', width: '100%' }}
+              />
+            </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Filter size={16} style={{ color: 'var(--color-text-muted)' }} />
+            {/* Filtros */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                <Filter size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
                 <select 
                   className="input-field" 
                   value={selectedSede} 
                   onChange={(e) => setSelectedSede(e.target.value)}
-                  style={{ height: '40px', padding: '0.4rem 0.8rem' }}
+                  style={{ height: '42px', padding: '0.4rem 0.8rem', width: '100%' }}
                 >
                   <option value="Todas">Todas las Sedes</option>
                   <option value="CENTRAL">CENTRAL</option>
@@ -194,12 +196,13 @@ function Modulo_CitasMedicas() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                <Activity size={16} style={{ color: 'transparent', flexShrink: 0 }} />
                 <select 
                   className="input-field" 
                   value={selectedStatus} 
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  style={{ height: '40px', padding: '0.4rem 0.8rem' }}
+                  style={{ height: '42px', padding: '0.4rem 0.8rem', width: '100%' }}
                 >
                   <option value="Todas">Todos los Estados</option>
                   <option value="Confirmada">Confirmadas</option>

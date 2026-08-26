@@ -24,14 +24,14 @@ export function PortalPacienteSidebar() {
 
   return (
     <>
-      <button 
-        className="portal-mobile-menu-btn" 
+      <button
+        className="portal-mobile-menu-btn"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label={isMobileMenuOpen ? "Cerrar Menú" : "Abrir Menú"}
       >
         {isMobileMenuOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
       </button>
-      <div 
+      <div
         className={`portal-sidebar-overlay ${isMobileMenuOpen ? 'show' : ''}`}
         onClick={() => setIsMobileMenuOpen(false)}
       ></div>
@@ -57,8 +57,8 @@ export function PortalPacienteSidebar() {
         <nav className="portal-sidebar-nav">
           <ul>
             <li>
-              <NavLink 
-                to="/users/dashboard" 
+              <NavLink
+                to="/users/dashboard"
                 className={({ isActive }) => (isActive ? 'active' : '')}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -67,8 +67,8 @@ export function PortalPacienteSidebar() {
               </NavLink>
             </li>
             <li>
-              <NavLink 
-                to="/users/historia-medica" 
+              <NavLink
+                to="/users/historia-medica"
                 className={({ isActive }) => (isActive ? 'active' : '')}
                 onClick={() => setIsMobileMenuOpen(false)}
               >

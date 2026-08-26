@@ -144,16 +144,16 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const content = (
     <div className="module-container">
       {/* Cabecera */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.5rem' }}>
+      <header className="dashboard-header">
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
             Módulo 6: Estudios y Procedimientos Médicos
           </h1>
           <p style={{ color: 'var(--color-text-muted)' }}>
             Registro y consulta de notas operatorias, endoscopias, biopsias, ecografías y anexos diagnósticos.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="dashboard-actions">
           <Button 
             onClick={() => setShowNewModal(true)} 
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -170,8 +170,8 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
       {/* Barra de Filtros */}
       <Card className="glass-panel" style={{ marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', width: '100%' }}>
+          <div style={{ position: 'relative', flex: '1 1 200px' }}>
             <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
             <input 
               type="text" 
@@ -179,17 +179,17 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
               placeholder="Buscar por paciente, cédula, estudio o diagnóstico..." 
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ paddingLeft: '2.5rem', height: '40px' }}
+              style={{ paddingLeft: '2.5rem', height: '40px', width: '100%' }}
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={16} style={{ color: 'var(--color-text-muted)' }} />
+          <div style={{ display: 'flex', flex: '1 1 200px', alignItems: 'center', gap: '0.5rem' }}>
+            <Filter size={16} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
             <select 
               className="input-field" 
               value={filterType} 
               onChange={(e) => setFilterType(e.target.value)}
-              style={{ height: '40px', padding: '0.4rem 0.8rem' }}
+              style={{ height: '40px', padding: '0.4rem 0.8rem', width: '100%' }}
             >
               <option value="Todos">Todos los Procedimientos</option>
               <option value="Endoscopia">Endoscopia</option>

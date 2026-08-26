@@ -103,7 +103,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
 
     try {
       setSaving(true);
-      
+
       // Auto-determinar el estado de pago si no es personalizado
       let autoPayStatus = paymentStatus;
       if (paid >= tot && tot > 0) autoPayStatus = 'Pagado';
@@ -132,7 +132,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
         res = await api.post('/api/appointments', payload);
         setSuccessMsg(res.data.message || 'Cita agendada exitosamente.');
       }
-      
+
       setTimeout(() => {
         if (onSuccess) onSuccess(res.data.appointment);
         onClose();
@@ -149,7 +149,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
   const handleDeleteModal = async () => {
     if (!appointmentToEdit) return;
     if (!window.confirm('¿Está seguro de que desea eliminar permanentemente esta cita médica?')) return;
-    
+
     try {
       setSaving(true);
       await api.delete(`/api/appointments/${appointmentToEdit.id}`);
@@ -166,7 +166,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
   };
 
   return (
-    <div 
+    <div
       style={{
         position: 'fixed',
         top: 0,
@@ -186,11 +186,11 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div 
-        style={{ 
-          width: '100%', 
-          maxWidth: '650px', 
-          maxHeight: '90vh', 
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '650px',
+          maxHeight: '90vh',
           overflowY: 'auto',
           backgroundColor: 'rgba(255, 255, 255, 0.82)',
           backdropFilter: 'blur(24px) saturate(180%)',
@@ -211,18 +211,18 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
           <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: 'var(--color-primary)' }}>
             {appointmentToEdit ? `Editar Cita Médica #${appointmentToEdit.id}` : 'Agendar Nueva Cita Médica'}
           </h3>
-          <button 
-            onClick={onClose} 
-            style={{ 
-              background: 'rgba(0, 0, 0, 0.05)', 
-              border: 'none', 
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(0, 0, 0, 0.05)',
+              border: 'none',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer', 
+              cursor: 'pointer',
               color: 'var(--color-text-main)',
               transition: 'all 0.2s'
             }}
@@ -238,7 +238,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
+
               {successMsg && (
                 <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--color-success)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle size={18} /> {successMsg}
@@ -254,7 +254,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               {/* Selección de Paciente */}
               <div className="input-group">
                 <label className="input-label">Paciente *</label>
-                <select 
+                <select
                   className="input-field"
                   value={patientId}
                   onChange={(e) => setPatientId(e.target.value)}
@@ -274,7 +274,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               <div className="responsive-grid-1-1">
                 <div className="input-group">
                   <label className="input-label">Médico Asignado</label>
-                  <select 
+                  <select
                     className="input-field"
                     value={doctorId}
                     onChange={(e) => setDoctorId(e.target.value)}
@@ -291,7 +291,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
 
                 <div className="input-group">
                   <label className="input-label">Sede de Atención *</label>
-                  <select 
+                  <select
                     className="input-field"
                     value={sedeAtencion}
                     onChange={(e) => setSedeAtencion(e.target.value)}
@@ -307,7 +307,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
 
               {/* Fecha/Hora y Estado */}
               <div className="responsive-grid-1-1">
-                <Input 
+                <Input
                   label="Fecha y Hora de la Cita *"
                   type="datetime-local"
                   value={appointmentDate}
@@ -317,7 +317,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
 
                 <div className="input-group">
                   <label className="input-label">Estado de la Cita</label>
-                  <select 
+                  <select
                     className="input-field"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
@@ -334,7 +334,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               {/* Motivo de la Cita con Autocompletado */}
               <div className="input-group">
                 <label className="input-label">Motivo de Consulta / Observaciones de Agendamiento</label>
-                <input 
+                <input
                   className="input-field"
                   list="appointment-reasons-list"
                   type="text"
@@ -369,7 +369,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                 </h4>
 
                 <div className="responsive-grid-1-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-                  <Input 
+                  <Input
                     label="Monto Total Cita ($)"
                     type="number"
                     step="0.01"
@@ -379,7 +379,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                     onChange={(e) => setTotalAmount(e.target.value)}
                   />
 
-                  <Input 
+                  <Input
                     label="Monto Cancelado / Abonado ($)"
                     type="number"
                     step="0.01"
@@ -409,7 +409,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                 <div className="responsive-grid-1-1">
                   <div className="input-group">
                     <label className="input-label">Método de Pago</label>
-                    <select 
+                    <select
                       className="input-field"
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
@@ -427,7 +427,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
 
                   <div className="input-group">
                     <label className="input-label">Estado Financiero</label>
-                    <select 
+                    <select
                       className="input-field"
                       value={paymentStatus}
                       onChange={(e) => setPaymentStatus(e.target.value)}
@@ -444,7 +444,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               {/* Notas Adicionales */}
               <div className="input-group">
                 <label className="input-label">Notas Adicionales (Internas)</label>
-                <textarea 
+                <textarea
                   className="input-field"
                   rows="2"
                   placeholder="Detalles sobre seguro, confirmación telefónica..."
@@ -457,13 +457,13 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
                   {appointmentToEdit && (
-                    <Button 
-                      type="button" 
-                      onClick={handleDeleteModal} 
+                    <Button
+                      type="button"
+                      onClick={handleDeleteModal}
                       disabled={saving}
-                      style={{ 
-                        backgroundColor: 'rgba(239, 68, 68, 0.15)', 
-                        color: 'var(--color-alert)', 
+                      style={{
+                        backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                        color: 'var(--color-alert)',
                         border: '1px solid rgba(239, 68, 68, 0.4)',
                         fontWeight: '700',
                         display: 'flex',

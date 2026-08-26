@@ -111,14 +111,14 @@ export function Dashboard() {
       <div className="module-container" style={{ padding: 0 }}>
         
         {/* Encabezado del Dashboard */}
-        <header className="dashboard-header" style={{ flexWrap: 'wrap' }}>
+        <header className="dashboard-header">
           <div>
             <h1 className="dashboard-title">Resumen General SARA</h1>
             <p className="dashboard-subtitle">
               Bienvenido de nuevo, <strong>{user.name || 'Usuario'}</strong>. Rol: <strong>{user.role || 'Sin rol'}</strong>. Sede: <strong>{user.sedeAtencion || 'No especificada'}</strong>.
             </p>
           </div>
-          <div className="dashboard-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+          <div className="dashboard-actions">
             <span className="current-date">
               {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
@@ -143,10 +143,10 @@ export function Dashboard() {
             style={{ cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
             title="Haz clic para ver la lista y datos completos de los pacientes"
           >
-            <Card className="kpi-card" style={{ border: '2px solid rgba(34, 80, 93, 0.2)', position: 'relative' }}>
+            <Card className="kpi-card" style={{ position: 'relative' }}>
               <div className="kpi-content">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <p className="kpi-label" style={{ margin: 0 }}>Pacientes Registrados</p>
                     <span style={{ 
                       fontSize: '0.65rem', 
@@ -180,7 +180,7 @@ export function Dashboard() {
             <Card className="kpi-card" style={{ position: 'relative' }}>
               <div className="kpi-content">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <p className="kpi-label" style={{ margin: 0 }}>Citas para Hoy</p>
                     <span style={{ 
                       fontSize: '0.65rem', 
@@ -214,7 +214,7 @@ export function Dashboard() {
             <Card className="kpi-card" style={{ position: 'relative' }}>
               <div className="kpi-content">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <p className="kpi-label" style={{ margin: 0 }}>Historias / Consultas</p>
                     <span style={{ 
                       fontSize: '0.65rem', 

@@ -175,14 +175,16 @@ function Modulo3_GestionAdministrativa() {
   return (
     <DashboardLayout>
       <div className="module-container">
-        <header style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <header className="dashboard-header">
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Gestión Administrativa (Caja)</h1>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>Gestión Administrativa (Caja)</h1>
             <p style={{ color: 'var(--color-text-muted)' }}>Panel de control financiero, registro de pagos y auditoría.</p>
           </div>
-          <Button variant="outline" onClick={handleExportCSV} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Download size={16} /> Exportar CSV
-          </Button>
+          <div className="dashboard-actions">
+            <Button variant="outline" onClick={handleExportCSV} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <Download size={16} /> Exportar CSV
+            </Button>
+          </div>
         </header>
 
         {successMsg && (
@@ -237,7 +239,7 @@ function Modulo3_GestionAdministrativa() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>
                 <Input label="Monto Total (USD) *" type="number" step="0.01" value={totalAmountUSD} onChange={(e) => setTotalAmountUSD(e.target.value)} required />
                 
                 <div className="input-group">
@@ -277,12 +279,12 @@ function Modulo3_GestionAdministrativa() {
               <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.5rem 0' }}></div>
               <p style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--color-primary)' }}>Distribución y Costos</p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>
                 <Input label="% Retención UNIMECO" type="number" value={unimecoPercentage} onChange={(e) => setUnimecoPercentage(e.target.value)} disabled={!isMaster} />
                 <Input label="% Honorarios Médico" type="number" value={doctorPercentage} onChange={(e) => setDoctorPercentage(e.target.value)} disabled={!isMaster} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>
                 <Input label="Costos Operativos (USD)" type="number" step="0.01" value={operativeCosts} onChange={(e) => setOperativeCosts(e.target.value)} />
                 <Input label="Incentivos/Bonos (USD)" type="number" step="0.01" value={incentives} onChange={(e) => setIncentives(e.target.value)} />
               </div>

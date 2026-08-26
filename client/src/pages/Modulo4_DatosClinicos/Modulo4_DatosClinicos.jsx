@@ -48,9 +48,11 @@ function Modulo4_DatosClinicos() {
       
       {!selectedPatient ? (
         <div className="module-container">
-          <header style={{ marginBottom: '0.5rem' }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Módulo de Datos Clínicos</h1>
-            <p style={{ color: 'var(--color-text-muted)' }}>Seleccione un paciente para abrir su expediente clínico completo.</p>
+          <header className="dashboard-header">
+            <div>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>Módulo de Datos Clínicos</h1>
+              <p style={{ color: 'var(--color-text-muted)' }}>Seleccione un paciente para abrir su expediente clínico completo.</p>
+            </div>
           </header>
 
           <Card title="Pacientes Registrados" action={<Users size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
@@ -65,6 +67,8 @@ function Modulo4_DatosClinicos() {
                     key={p.id} 
                     style={{ 
                       display: 'flex', 
+                      flexWrap: 'wrap',
+                      gap: '1rem',
                       justifyContent: 'space-between', 
                       alignItems: 'center', 
                       padding: '1.25rem', 

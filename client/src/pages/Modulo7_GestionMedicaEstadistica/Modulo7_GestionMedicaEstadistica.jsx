@@ -35,13 +35,15 @@ function Modulo7_GestionMedicaEstadistica() {
     <DashboardLayout activeModule={7}>
       <div className="module-container">
         
-        <header style={{ marginBottom: '1rem' }}>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>
-            Módulo 7: Gestión Médica y Estadística Histórica
-          </h1>
-          <p style={{ color: 'var(--color-text-muted)' }}>
-            Consola del Director Médico para el análisis estadístico real de pacientes, distribución por sedes y rendimiento clínico.
-          </p>
+        <header className="dashboard-header">
+          <div>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
+              Módulo 7: Gestión Médica y Estadística Histórica
+            </h1>
+            <p style={{ color: 'var(--color-text-muted)' }}>
+              Consola del Director Médico para el análisis estadístico real de pacientes, distribución por sedes y rendimiento clínico.
+            </p>
+          </div>
         </header>
 
         {/* Tarjetas KPI Principales (BD Real) */}
