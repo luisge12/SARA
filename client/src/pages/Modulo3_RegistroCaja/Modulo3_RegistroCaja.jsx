@@ -4,7 +4,8 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw } from 'lucide-react';
+import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer } from 'lucide-react';
+import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 
 function Modulo3_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -40,6 +41,7 @@ function Modulo3_GestionAdministrativa() {
   const [loading, setLoading] = useState(true);
   const [loadingRate, setLoadingRate] = useState(false);
   const [bcvDateInfo, setBcvDateInfo] = useState('');
+  const [selectedTransactionForPrint, setSelectedTransactionForPrint] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -328,6 +330,7 @@ function Modulo3_GestionAdministrativa() {
                       <th style={{ padding: '0.5rem' }}>Total USD</th>
                       <th style={{ padding: '0.5rem' }}>UNIMECO</th>
                       <th style={{ padding: '0.5rem' }}>Neto</th>
+                      <th style={{ padding: '0.5rem', textAlign: 'center' }}>Recibo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -340,6 +343,17 @@ function Modulo3_GestionAdministrativa() {
                         <td style={{ padding: '0.75rem 0.5rem', fontWeight: 'bold' }}>${t.totalAmountUSD}</td>
                         <td style={{ padding: '0.75rem 0.5rem' }}>${t.unimecoAmount}</td>
                         <td style={{ padding: '0.75rem 0.5rem', color: t.netAmount > 0 ? 'var(--color-success)' : 'inherit' }}>${t.netAmount}</td>
+                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setSelectedTransactionForPrint(t)}
+                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                            title="Imprimir Comprobante Oficial"
+                          >
+                            <Printer size={13} /> Recibo
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -370,6 +384,28 @@ function Modulo3_GestionAdministrativa() {
             </Card>
           </div>
         )}
+
+        {/* MODAL DE COMPROBANTE OFICIAL DE PAGO */}
+        <MedicalDocumentModal
+          isOpen={Boolean(selectedTransactionForPrint)}
+          onClose={() => setSelectedTransactionForPrint(null)}
+          type="billing_receipt"
+          data={{
+            serviceType: selectedTransactionForPrint?.serviceType,
+            patient: selectedTransactionForPrint?.patient,
+            doctor: selectedTransactionForPrint?.doctor,
+            creatorName: selectedTransactionForPrint?.creator?.name || currentUser.name,
+            totalAmountUSD: selectedTransactionForPrint?.totalAmountUSD,
+            exchangeRate: selectedTransactionForPrint?.exchangeRate,
+            totalAmountLocal: selectedTransactionForPrint?.totalAmountLocal,
+            date: selectedTransactionForPrint ? new Date(selectedTransactionForPrint.createdAt).toLocaleDateString('es-VE', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            }) : '',
+            sede: selectedTransactionForPrint?.sedeAtencion || 'CENTRAL'
+          }}
+        />
 
       </div>
     </DashboardLayout>

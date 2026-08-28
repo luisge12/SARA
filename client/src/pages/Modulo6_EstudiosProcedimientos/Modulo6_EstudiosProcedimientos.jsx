@@ -9,6 +9,7 @@ import {
   FileCheck, Shield, Sparkles, Image as ImageIcon
 } from 'lucide-react';
 import { hasAccess } from '../../components/ProtectedRoute';
+import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 
 export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: propPatientId }) {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -488,81 +489,28 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         </div>
       )}
 
-      {/* MODAL: VER INFORME COMPLETO */}
-      {selectedReport && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1200,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            maxWidth: '680px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            padding: '2.5rem',
-            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)'
-          }}>
-            <div style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ color: 'var(--color-primary)', fontSize: '1.4rem', fontWeight: '800' }}>SARA - INFORME DE PROCEDIMIENTO</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Sede: {selectedReport.sede} | Fecha: {selectedReport.date}</p>
-              </div>
-              <button onClick={() => setSelectedReport(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.95rem' }}>
-              <div style={{ backgroundColor: 'rgba(34, 80, 93, 0.05)', padding: '0.85rem', borderRadius: '8px' }}>
-                <p><strong>Paciente:</strong> {selectedReport.patient?.name || selectedReport.patientName || 'Paciente'}</p>
-                <p><strong>Cédula:</strong> {selectedReport.patient?.identificationNumber || selectedReport.patientCedula || 'S/N'}</p>
-                <p><strong>Médico Responsable:</strong> {selectedReport.doctor?.name || selectedReport.doctorName || 'Médico Tratante'}</p>
-                <p><strong>Procedimiento:</strong> {selectedReport.studyType}</p>
-              </div>
-
-              <div>
-                <h4 style={{ fontWeight: '700', color: 'var(--color-primary)' }}>Hallazgos:</h4>
-                <p style={{ marginTop: '0.25rem', lineHeight: '1.6' }}>{selectedReport.findings}</p>
-              </div>
-
-              <div>
-                <h4 style={{ fontWeight: '700', color: 'var(--color-primary)' }}>Impresión Diagnóstica:</h4>
-                <p style={{ marginTop: '0.25rem', lineHeight: '1.6', fontWeight: '600' }}>{selectedReport.diagnosticImpression}</p>
-              </div>
-
-              {selectedReport.biopsySample && (
-                <div>
-                  <h4 style={{ fontWeight: '700', color: '#b45309' }}>Biopsia / Muestras:</h4>
-                  <p style={{ marginTop: '0.25rem' }}>{selectedReport.biopsySample}</p>
-                </div>
-              )}
-
-              {selectedReport.recommendations && (
-                <div>
-                  <h4 style={{ fontWeight: '700', color: 'var(--color-primary)' }}>Recomendaciones y Plan:</h4>
-                  <p style={{ marginTop: '0.25rem', lineHeight: '1.6' }}>{selectedReport.recommendations}</p>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-              <Button variant="outline" onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Printer size={16} /> Imprimir Informe
-              </Button>
-              <Button onClick={() => setSelectedReport(null)}>
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL: INFORME MÉDICO OFICIAL UNIMECO */}
+      <MedicalDocumentModal
+        isOpen={Boolean(selectedReport)}
+        onClose={() => setSelectedReport(null)}
+        type="study_report"
+        data={{
+          studyType: selectedReport?.studyType,
+          patient: selectedReport?.patient || {
+            name: selectedReport?.patientName,
+            identificationNumber: selectedReport?.patientCedula
+          },
+          doctor: selectedReport?.doctor || {
+            name: selectedReport?.doctorName
+          },
+          date: selectedReport?.date,
+          sede: selectedReport?.sede,
+          findings: selectedReport?.findings,
+          biopsySample: selectedReport?.biopsySample,
+          diagnosticImpression: selectedReport?.diagnosticImpression,
+          recommendations: selectedReport?.recommendations
+        }}
+      />
 
     </div>
   );

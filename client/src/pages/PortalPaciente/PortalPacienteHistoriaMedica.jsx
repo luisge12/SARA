@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './PortalPacienteHistoriaMedica.css';
-import { User, Activity, Heart, Weight } from 'lucide-react';
+import { User, Activity, Heart, Weight, Printer } from 'lucide-react';
 import { portalApi } from '../../services/api';
+import { Button } from '../../components/Button';
+import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 
 export function PortalPacienteHistoriaMedica() {
   const userStr = localStorage.getItem('portal_user');
   const user = userStr ? JSON.parse(userStr) : {};
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -71,9 +74,18 @@ export function PortalPacienteHistoriaMedica() {
 
   return (
     <div className="historia-medica-container">
-      <div className="historia-header">
-        <h1>Historia Médica</h1>
-        <p>Resumen de tu información clínica y datos personales.</p>
+      <div className="historia-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1>Historia Médica</h1>
+          <p>Resumen de tu información clínica y datos personales.</p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => setShowPrintModal(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <Printer size={16} /> Imprimir / Descargar Resumen
+        </Button>
       </div>
 
       {loading ? (
@@ -218,6 +230,28 @@ export function PortalPacienteHistoriaMedica() {
           </section>
         </div>
       )}
+
+      {/* MODAL DE IMPRESIÓN OFICIAL DEL PACIENTE */}
+      <MedicalDocumentModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        type="clinical_report"
+        data={{
+          patient: {
+            name: nombre,
+            identificationNumber: identificacion,
+            sedeAtencion: sedeAtencion
+          },
+          doctor: {
+            name: medicoTratante !== '-' ? medicoTratante : 'Especialista UNIMECO'
+          },
+          reasonForVisit: `Paciente con control clínico registrado en sede ${sedeAtencion}.`,
+          physicalExam: `Signos Vitales: FC: ${fc} ppm, FR: ${fr} rpm, TA: ${ta} mmHg, SatO2: ${sato2}%, Talla: ${talla} cm, Peso: ${peso} Kg, IMC: ${calcularIMC(pProfile.weightKg, pProfile.heightCm)} kg/m².`,
+          diagnoses: 'Control Clínico y Seguimiento Preventivo de Salud.',
+          evolutionaryReport: `Próximo control programado: ${proximaCita}. Dirección del paciente: ${direccion}.`,
+          sede: sedeAtencion
+        }}
+      />
     </div>
   );
 }
