@@ -61,10 +61,38 @@ const initDatabase = async () => {
     const AuditLog = require('../models/AuditLog');
     const Transaction = require('../models/Transaction');
     const Appointment = require('../models/Appointment');
+    const Study = require('../models/Study');
+
+    // Asegurar columnas requeridas en users de forma no destructiva
+    try {
+      const [cols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'users';
+      `);
+      const existingCols = (cols || []).map(c => c.column_name.toLowerCase());
+      const neededCols = [
+        { name: 'shift', type: 'VARCHAR(50)' },
+        { name: 'academic_degree', type: 'VARCHAR(150)' },
+        { name: 'specialty', type: 'VARCHAR(150)' },
+        { name: 'expires_at', type: 'TIMESTAMP WITH TIME ZONE' },
+        { name: 'identification_number', type: 'VARCHAR(50)' },
+        { name: 'mpps_number', type: 'VARCHAR(50)' },
+        { name: 'medical_college_number', type: 'VARCHAR(50)' },
+        { name: 'sede_atencion', type: 'VARCHAR(100)' }
+      ];
+
+      for (const col of neededCols) {
+        if (!existingCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
+    } catch (err) {
+      console.warn('Aviso comprobación de columnas users:', err.message);
+    }
 
     // Sincronizar modelos automáticamente
     await User.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo User:', err));
     await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
+    await Study.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Study:', err));
 
     // Sincronizar modelos solo si se solicita explícitamente en el entorno
     if (process.env.DB_SYNC === 'true') {
