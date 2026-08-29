@@ -9,6 +9,7 @@ const authorizedRoles = ['Master', 'Administrador', 'Médico', 'Recepcionista', 
 router.get('/', verifyToken, checkRole(authorizedRoles), studyController.getStudies);
 router.post('/', verifyToken, checkRole(authorizedRoles), studyController.createStudy);
 router.get('/patient/:patientId', verifyToken, checkRole(authorizedRoles), studyController.getPatientStudies);
-router.delete('/:id', verifyToken, checkRole(['Master', 'Administrador', 'MASTER', 'ADMINISTRADOR']), studyController.deleteStudy);
+router.put('/:id', verifyToken, checkRole(authorizedRoles), studyController.updateStudy);
+router.delete('/:id', verifyToken, checkRole(authorizedRoles), studyController.deleteStudy);
 
 module.exports = router;

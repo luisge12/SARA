@@ -5,7 +5,7 @@ import { Button } from '../../components/Button';
 import api from '../../services/api';
 import { 
   FileText, Plus, Search, Filter, Calendar, User, 
-  Upload, CheckCircle, AlertCircle, Eye, Printer, Trash2,
+  Upload, CheckCircle, AlertCircle, Eye, Printer, Trash2, Edit,
   FileCheck, Shield, Sparkles, Image as ImageIcon
 } from 'lucide-react';
 import { hasAccess } from '../../components/ProtectedRoute';
@@ -23,6 +23,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const [filterType, setFilterType] = useState('Todos');
   const [filterStatus, setFilterStatus] = useState('Todos');
   const [showNewModal, setShowNewModal] = useState(false);
+  const [editingStudyId, setEditingStudyId] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [loadingStudies, setLoadingStudies] = useState(true);
   const [savingStudy, setSavingStudy] = useState(false);
@@ -30,7 +31,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   // Lista de estudios y procedimientos
   const [studies, setStudies] = useState([]);
 
-  // Formulario nuevo estudio
+  // Formulario nuevo / editar estudio
   const [formData, setFormData] = useState({
     patientId: propPatientId || '',
     studyType: '',
@@ -74,6 +75,54 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     }
   };
 
+  const handleOpenCreateModal = () => {
+    setEditingStudyId(null);
+    setFormData({
+      patientId: propPatientId || '',
+      studyType: '',
+      doctorName: user.name || '',
+      sede: user.sedeAtencion || 'CENTRAL',
+      date: new Date().toISOString().split('T')[0],
+      findings: '',
+      biopsySample: '',
+      diagnosticImpression: '',
+      recommendations: '',
+      status: 'Completado'
+    });
+    setShowNewModal(true);
+  };
+
+  const handleOpenEditModal = (study) => {
+    setEditingStudyId(study.id);
+    setFormData({
+      patientId: study.patientId || study.patient?.id || '',
+      studyType: study.studyType || '',
+      doctorName: study.doctor?.name || user.name || '',
+      sede: study.sede || user.sedeAtencion || 'CENTRAL',
+      date: study.date ? String(study.date).split('T')[0] : new Date().toISOString().split('T')[0],
+      findings: study.findings || '',
+      biopsySample: study.biopsySample || '',
+      diagnosticImpression: study.diagnosticImpression || '',
+      recommendations: study.recommendations || '',
+      status: study.status || 'Completado'
+    });
+    setShowNewModal(true);
+  };
+
+  const handleDeleteStudy = async (studyId) => {
+    if (!window.confirm('¿Está seguro de que desea eliminar este estudio médico? Esta acción no se puede deshacer.')) {
+      return;
+    }
+    try {
+      await api.delete(`/api/studies/${studyId}`);
+      setStudies(prev => prev.filter(s => s.id !== studyId));
+      alert('Estudio eliminado exitosamente.');
+    } catch (err) {
+      console.error('Error al eliminar estudio:', err);
+      alert('Error al eliminar el estudio: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   const handleSaveStudy = async (e) => {
     e.preventDefault();
     if (!formData.patientId) {
@@ -96,23 +145,33 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         attachments: []
       };
 
-      const res = await api.post('/api/studies', payload);
-      if (res.data && res.data.study) {
-        setStudies(prev => [res.data.study, ...prev]);
-        setShowNewModal(false);
-        setFormData({
-          patientId: '',
-          studyType: '',
-          doctorName: user.name || '',
-          sede: user.sedeAtencion || 'CENTRAL',
-          date: new Date().toISOString().split('T')[0],
-          findings: '',
-          biopsySample: '',
-          diagnosticImpression: '',
-          recommendations: '',
-          status: 'Completado'
-        });
-        alert('¡Estudio / Procedimiento registrado exitosamente en la base de datos!');
+      if (editingStudyId) {
+        const res = await api.put(`/api/studies/${editingStudyId}`, payload);
+        if (res.data && res.data.study) {
+          setStudies(prev => prev.map(s => s.id === editingStudyId ? res.data.study : s));
+          setShowNewModal(false);
+          setEditingStudyId(null);
+          alert('¡Estudio médico actualizado exitosamente!');
+        }
+      } else {
+        const res = await api.post('/api/studies', payload);
+        if (res.data && res.data.study) {
+          setStudies(prev => [res.data.study, ...prev]);
+          setShowNewModal(false);
+          setFormData({
+            patientId: '',
+            studyType: '',
+            doctorName: user.name || '',
+            sede: user.sedeAtencion || 'CENTRAL',
+            date: new Date().toISOString().split('T')[0],
+            findings: '',
+            biopsySample: '',
+            diagnosticImpression: '',
+            recommendations: '',
+            status: 'Completado'
+          });
+          alert('¡Estudio / Procedimiento registrado exitosamente en la base de datos!');
+        }
       }
     } catch (err) {
       console.error('Error al guardar estudio:', err);
@@ -156,7 +215,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         </div>
         <div className="dashboard-actions">
           <Button 
-            onClick={() => setShowNewModal(true)} 
+            onClick={handleOpenCreateModal} 
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             <Plus size={18} /> Registrar Nuevo Estudio
@@ -209,7 +268,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
             <FileText size={42} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
             <p style={{ fontSize: '1rem', fontWeight: '500' }}>No se encontraron estudios o procedimientos registrados.</p>
-            <Button onClick={() => setShowNewModal(true)} style={{ marginTop: '1rem' }}>
+            <Button onClick={handleOpenCreateModal} style={{ marginTop: '1rem' }}>
               <Plus size={16} /> Crear el Primer Registro
             </Button>
           </div>
@@ -273,13 +332,27 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Button 
                     variant="outline" 
                     onClick={() => setSelectedReport(study)}
                     style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}
                   >
                     <Eye size={15} /> Ver Informe
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleOpenEditModal(study)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', color: '#0284c7', borderColor: '#bae6fd' }}
+                  >
+                    <Edit size={15} /> Editar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleDeleteStudy(study.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', color: '#ef4444', borderColor: '#fca5a5' }}
+                  >
+                    <Trash2 size={15} /> Borrar
                   </Button>
                 </div>
               </div>
@@ -288,7 +361,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         )}
       </Card>
 
-      {/* MODAL: NUEVO ESTUDIO O PROCEDIMIENTO */}
+      {/* MODAL: NUEVO O EDITAR ESTUDIO / PROCEDIMIENTO */}
       {showNewModal && (
         <div style={{
           position: 'fixed',
@@ -313,7 +386,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.4rem', fontWeight: '700', color: 'var(--color-primary)' }}>
-                Registrar Estudio / Procedimiento Médico
+                {editingStudyId ? 'Editar Estudio / Procedimiento Médico' : 'Registrar Estudio / Procedimiento Médico'}
               </h2>
               <button 
                 onClick={() => setShowNewModal(false)}
@@ -479,8 +552,8 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                 <Button variant="outline" type="button" onClick={() => setShowNewModal(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit">
-                  Guardar Procedimiento
+                <Button type="submit" disabled={savingStudy}>
+                  {savingStudy ? 'Guardando...' : (editingStudyId ? 'Actualizar Estudio' : 'Guardar Procedimiento')}
                 </Button>
               </div>
 
