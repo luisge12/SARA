@@ -115,6 +115,66 @@ module.exports = {
     }
   },
 
+  // Actualizar un estudio médico
+  updateStudy: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        patientId,
+        doctorId,
+        studyType,
+        sede,
+        date,
+        findings,
+        biopsySample,
+        diagnosticImpression,
+        recommendations,
+        status,
+        attachments
+      } = req.body;
+
+      const study = await Study.findByPk(id);
+      if (!study) {
+        return res.status(404).json({ error: 'Estudio no encontrado' });
+      }
+
+      if (patientId) study.patientId = patientId;
+      if (doctorId) study.doctorId = doctorId;
+      if (studyType) study.studyType = studyType;
+      if (sede) study.sede = sede;
+      if (date) study.date = date;
+      if (findings !== undefined) study.findings = findings;
+      if (biopsySample !== undefined) study.biopsySample = biopsySample;
+      if (diagnosticImpression !== undefined) study.diagnosticImpression = diagnosticImpression;
+      if (recommendations !== undefined) study.recommendations = recommendations;
+      if (status) study.status = status;
+      if (attachments !== undefined) study.attachments = attachments;
+
+      await study.save();
+
+      const updatedStudy = await Study.findByPk(study.id, {
+        include: [
+          {
+            model: User,
+            as: 'patient',
+            attributes: ['id', 'name', 'username', 'identificationNumber'],
+            include: [{ model: PatientProfile, as: 'patientProfile' }]
+          },
+          {
+            model: User,
+            as: 'doctor',
+            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber']
+          }
+        ]
+      });
+
+      return res.json({ message: 'Estudio actualizado exitosamente', study: updatedStudy });
+    } catch (error) {
+      console.error('Error al actualizar estudio:', error);
+      return res.status(500).json({ error: 'Error al actualizar el estudio', details: error.message });
+    }
+  },
+
   // Eliminar estudio
   deleteStudy: async (req, res) => {
     try {

@@ -3,8 +3,9 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText } from 'lucide-react';
+import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer } from 'lucide-react';
 import { AuditLogModal } from './AuditLogModal';
+import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 import { 
   CLINICAL_TEMPLATES, 
   COMMON_DIAGNOSES, 
@@ -33,6 +34,8 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [saving, setSaving] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
+  const [printDocType, setPrintDocType] = useState('prescription');
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   // Auto-fill template loader
   const handleApplyTemplate = (tmplId) => {
@@ -368,12 +371,64 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </div>
       </Card>
 
-      {/* SAVE BUTTON */}
-      <div style={{ position: 'sticky', bottom: '2rem', display: 'flex', justifyContent: 'flex-end', zIndex: 10 }}>
-        <Button onClick={handleSave} disabled={saving} style={{ padding: '1rem 3rem', fontSize: '1.2rem', boxShadow: '0 8px 16px rgba(42,183,202,0.3)' }}>
+      {/* ACCIONES Y BOTONES DE IMPRESIÓN Y GUARDADO */}
+      <div style={{ position: 'sticky', bottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)', padding: '1rem 1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)', zIndex: 10 }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              setPrintDocType('prescription');
+              setShowPrintModal(true);
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Printer size={16} /> Imprimir Récipe Médico
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              setPrintDocType('clinical_report');
+              setShowPrintModal(true);
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <FileText size={16} /> Imprimir Informe Médico
+          </Button>
+        </div>
+
+        <Button onClick={handleSave} disabled={saving} style={{ padding: '0.75rem 2.5rem', fontSize: '1.05rem', boxShadow: '0 8px 16px rgba(42,183,202,0.3)' }}>
           <Save style={{ marginRight: '0.5rem' }} /> {saving ? 'Guardando...' : 'Guardar Historia Clínica'}
         </Button>
       </div>
+
+      {/* MODAL DE IMPRESIÓN OFICIAL UNIMECO */}
+      <MedicalDocumentModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        type={printDocType}
+        data={{
+          patient: {
+            ...patient,
+            identificationNumber: patient.identificationNumber,
+            name: patient.name
+          },
+          doctor: JSON.parse(localStorage.getItem('user') || '{}'),
+          treatmentPlan: treatmentPlan,
+          diagnoses: diagnoses.map(d => d.diagnosis).filter(Boolean).join(', '),
+          reasonForVisit: reasonForVisit.map(r => `${r.symptom || ''} ${r.onset ? `(${r.onset})` : ''} ${r.additionalInfo || ''}`).filter(s => s.trim().length > 0).join('; '),
+          physicalExam: [
+            physicalInspection && `Inspección: ${physicalInspection}`,
+            physicalPalpation && `Palpación: ${physicalPalpation}`,
+            rectalExamination && `Tacto Rectal: ${rectalExamination}`,
+            anoscopy && `Anoscopia: ${anoscopy}`
+          ].filter(Boolean).join('. '),
+          evolutionaryReport: evolutionaryReport,
+          sede: patient.sedeAtencion || profile.sedeAtencion || 'CENTRAL'
+        }}
+      />
 
     </div>
   );
