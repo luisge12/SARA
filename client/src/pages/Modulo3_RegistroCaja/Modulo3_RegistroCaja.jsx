@@ -161,12 +161,11 @@ function Modulo3_GestionAdministrativa() {
     link.click();
     document.body.removeChild(link);
   };
-
   if (!hasAccess) {
     return (
       <DashboardLayout>
-        <div style={{ textAlign: 'center', padding: '3rem' }}>
-          <h2>Acceso Restringido</h2>
+        <div className="p-8 flex items-center justify-center">
+          <p className="text-red-500 font-medium">No tienes permisos para acceder a Finanzas y Caja.</p>
         </div>
       </DashboardLayout>
     );
@@ -174,7 +173,7 @@ function Modulo3_GestionAdministrativa() {
 
   return (
     <DashboardLayout>
-      <div className="module-container">
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
         <header className="dashboard-header">
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>Gestión Administrativa (Caja)</h1>

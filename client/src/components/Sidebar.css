@@ -23,13 +23,13 @@
 }
 
 /* Ajuste dinámico del área principal para acompañar al sidebar fijo */
-.sidebar ~ .main-content {
+.sidebar ~ .main-content, .sidebar ~ .main-wrapper {
   margin-left: 260px;
   transition: margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   min-width: 0;
 }
 
-.sidebar.collapsed ~ .main-content {
+.sidebar.collapsed ~ .main-content, .sidebar.collapsed ~ .main-wrapper {
   margin-left: 80px;
 }
 
@@ -265,7 +265,9 @@
 /* Mobile Off-canvas Drawer */
 @media (max-width: 1300px) {
   .sidebar ~ .main-content,
-  .sidebar.collapsed ~ .main-content {
+  .sidebar.collapsed ~ .main-content,
+  .sidebar ~ .main-wrapper,
+  .sidebar.collapsed ~ .main-wrapper {
     margin-left: 0 !important;
   }
 
