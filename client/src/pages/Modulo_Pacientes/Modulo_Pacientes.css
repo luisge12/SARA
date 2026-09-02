@@ -156,3 +156,43 @@
 .patient-card:hover .nav-icon {
   color: #3b82f6;
 }
+
+/* Responsive Fixes para Gestión de Pacientes */
+@media (max-width: 768px) {
+  .pacientes-container {
+    padding: 1rem;
+  }
+  
+  .pacientes-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-bar input {
+    padding: 0.75rem;
+  }
+
+  .btn-search {
+    padding: 0.75rem;
+    width: 100%;
+  }
+
+  .search-icon {
+    display: none; /* Ocultar icono de lupa para ahorrar espacio si se agrupa verticalmente */
+  }
+}
+

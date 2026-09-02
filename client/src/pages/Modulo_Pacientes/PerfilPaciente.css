@@ -1,5 +1,7 @@
 .perfil-container {
   padding: 2rem;
+  width: 100%;
+  min-width: 0;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -414,4 +416,109 @@
   .report-modal-footer, .btn-close {
     display: none !important;
   }
+}
+
+/* Responsive Fixes para Perfil del Paciente */
+@media (max-width: 768px) {
+  .perfil-container {
+    padding: 1rem;
+  }
+  
+  .perfil-header {
+    flex-direction: column;
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+  
+  .perfil-info-main h1 {
+    font-size: 1.75rem;
+  }
+  
+  .doc {
+    font-size: 1rem;
+  }
+  
+  .btn-edit {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tabs-header {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px; /* Espacio para scrollbar si aparece */
+  }
+
+  .tab-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    flex-shrink: 0; /* Evita que el texto se apelmace */
+  }
+
+  .tab-content {
+    padding: 1.25rem;
+  }
+  
+  .upload-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-upload {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .report-modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .report-modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .report-modal-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .report-modal-body {
+    padding: 1.25rem;
+  }
+  
+  .report-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .report-modal-footer {
+    padding: 1rem 1.25rem;
+    flex-direction: column-reverse;
+  }
+  
+  .report-modal-footer button {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+}
+
+/* Prevenir que los textos largos rompan el diseño en móviles */
+.perfil-container {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.raw-json {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  background: #f1f5f9;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.clinical-data-item, .nota-card, .study-card {
+  overflow: hidden; /* Evita que el contenido desborde sus tarjetas */
 }

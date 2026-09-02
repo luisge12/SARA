@@ -241,7 +241,7 @@
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  top: 1rem;
+  top: 10px;
   left: 1rem;
   z-index: 1001;
   background-color: var(--color-primary);
@@ -301,6 +301,7 @@
   .sidebar .sidebar-header,
   .sidebar.collapsed .sidebar-header {
     padding: 1.5rem !important;
+    padding-left: 70px !important; /* Evita que la X cubra el logo SARA */
     justify-content: flex-start !important;
   }
   

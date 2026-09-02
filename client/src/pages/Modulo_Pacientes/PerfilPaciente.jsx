@@ -7,6 +7,7 @@ import { AppointmentModal } from '../../components/AppointmentModal';
 import { PatientRegistrationModal } from '../../components/PatientRegistrationModal';
 import { ClinicalWorkspace } from '../Modulo4_DatosClinicos/ClinicalWorkspace';
 import api from '../../services/api';
+import html2pdf from 'html2pdf.js';
 import './PerfilPaciente.css';
 
 export default function PerfilPaciente() {
@@ -22,19 +23,36 @@ export default function PerfilPaciente() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState(null); // Para ver el informe
+  const [invoices, setInvoices] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null); // Para ver la factura
   const [isCreatingConsultation, setIsCreatingConsultation] = useState(false);
+
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('invoice-pdf-content');
+    if (!element) return;
+    const opt = {
+      margin:       0.5,
+      filename:     `Factura_${String(selectedInvoice.id).padStart(6, '0')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  };
 
   const fetchPatientData = async () => {
     try {
       setLoading(true);
-      const [profileRes, consultationsRes, studiesRes] = await Promise.all([
+      const [profileRes, consultationsRes, studiesRes, invoicesRes] = await Promise.all([
         api.get(`/api/patients/${id}/profile`),
         api.get(`/api/patients/${id}/consultations`),
-        api.get(`/api/studies/patient/${id}`)
+        api.get(`/api/studies/patient/${id}`),
+        api.get(`/api/billing/transactions?patientId=${id}`)
       ]);
       setPatient(profileRes.data);
       setConsultations(consultationsRes.data);
       setStudies(studiesRes.data);
+      setInvoices(invoicesRes.data);
     } catch (err) {
       console.error('Error fetching patient profile:', err);
     } finally {
@@ -177,8 +195,8 @@ export default function PerfilPaciente() {
                   />
                 ) : (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                      <h2>Historial de Consultas</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <h2 style={{ margin: 0 }}>Historial de Consultas</h2>
                       <button className="btn-primary" onClick={() => setIsCreatingConsultation(true)}>
                         <Activity size={18} style={{ display: 'inline', marginRight: '6px' }} />
                         Nueva Consulta
@@ -333,7 +351,39 @@ export default function PerfilPaciente() {
 
             {activeTab === 'facturacion' && (
               <div className="facturacion-section">
-                <p>Facturas pendientes e historial de pagos.</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ margin: 0 }}>Historial de Pagos y Facturas</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <button className="btn-primary" disabled style={{ opacity: 0.6, cursor: 'not-allowed', backgroundColor: '#003087', borderColor: '#003087' }} title="Esta función estará disponible próximamente">
+                      Pagar con PayPal
+                    </button>
+                    <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.25rem', fontWeight: '500' }}>Inhabilitado por ahora</span>
+                  </div>
+                </div>
+                {!(invoices && invoices.length > 0) ? (
+                  <p>No hay facturas registradas para este paciente.</p>
+                ) : (
+                  <div className="studies-grid">
+                    {invoices.map(inv => (
+                      <div key={inv.id} className="study-card">
+                        <div className="study-header">
+                          <span className="study-type">{inv.serviceType}</span>
+                          <span className="study-status completado">Pagado</span>
+                        </div>
+                        <p><strong>Total:</strong> ${parseFloat(inv.totalAmountUSD).toFixed(2)}</p>
+                        <p><strong>Fecha:</strong> {new Date(inv.created_at).toLocaleDateString()}</p>
+                        <p><strong>Médico:</strong> {inv.doctor?.name || 'No especificado'}</p>
+                        <button 
+                          className="btn-secondary btn-small mt-2" 
+                          style={{ width: '100%', marginTop: '1rem' }}
+                          onClick={() => setSelectedInvoice(inv)}
+                        >
+                          <FileText size={16} /> Ver Factura (PDF)
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -401,6 +451,80 @@ export default function PerfilPaciente() {
             <div className="report-modal-footer">
               <button className="btn-primary" onClick={() => window.print()}>Imprimir Informe</button>
               <button className="btn-secondary" onClick={() => setSelectedStudy(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedInvoice && (
+        <div className="report-modal-overlay">
+          <div className="report-modal invoice-modal">
+            <div className="report-modal-header">
+              <h2>Factura: #{String(selectedInvoice.id).padStart(6, '0')}</h2>
+              <button className="btn-close" onClick={() => setSelectedInvoice(null)}>&times;</button>
+            </div>
+            <div id="invoice-pdf-content" className="report-modal-body" style={{ padding: '2rem 3rem', backgroundColor: 'white' }}>
+              <div style={{ textAlign: 'center', marginBottom: '2rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem' }}>
+                <h1 style={{ margin: '0 0 0.5rem 0', color: '#22505d' }}>SARA Clínicas</h1>
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>Sistema Administrativo y de Registro Automatizado</p>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#4b5563', fontWeight: '500' }}>Sede: {selectedInvoice.sedeAtencion}</p>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6', textTransform: 'uppercase', fontSize: '0.85rem' }}>Datos del Paciente</h4>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>Nombre:</strong> {patient.name || patient.username}</p>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>C.I / Pasaporte:</strong> {patient.identificationNumber || 'No registrado'}</p>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>Seguro:</strong> {profile.referringEntity || 'Particular'}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: '#3b82f6', textTransform: 'uppercase', fontSize: '0.85rem' }}>Detalles de Factura</h4>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>Fecha Emisión:</strong> {new Date(selectedInvoice.created_at).toLocaleDateString()}</p>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>Médico Tratante:</strong> {selectedInvoice.doctor?.name || 'N/A'}</p>
+                  <p style={{ margin: '0.2rem 0', color: '#1f2937' }}><strong>Tasa BCV:</strong> Bs {parseFloat(selectedInvoice.exchangeRate).toFixed(2)}</p>
+                </div>
+              </div>
+
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2.5rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left', color: '#475569' }}>Descripción del Servicio</th>
+                    <th style={{ padding: '1rem', textAlign: 'right', color: '#475569' }}>Monto (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '1.5rem 1rem', color: '#1e293b', fontWeight: '500' }}>{selectedInvoice.serviceType}</td>
+                    <td style={{ padding: '1.5rem 1rem', textAlign: 'right', color: '#1e293b', fontWeight: '600' }}>${parseFloat(selectedInvoice.totalAmountUSD).toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ width: '300px', backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                    <span>Subtotal:</span>
+                    <span>${parseFloat(selectedInvoice.totalAmountUSD).toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', fontWeight: 'bold', fontSize: '1.1rem', color: '#0f172a' }}>
+                    <span>Total Pagado:</span>
+                    <span>${parseFloat(selectedInvoice.totalAmountUSD).toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', color: '#64748b', fontSize: '0.9rem' }}>
+                    <span>Equivalente en Bs:</span>
+                    <span>Bs {(parseFloat(selectedInvoice.totalAmountUSD) * parseFloat(selectedInvoice.exchangeRate)).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '4rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.8rem', borderTop: '1px dashed #e2e8f0', paddingTop: '1.5rem' }}>
+                Este es un comprobante de pago generado electrónicamente por SARA.
+                <br />No requiere firma física.
+              </div>
+            </div>
+            <div className="report-modal-footer">
+              <button className="btn-primary" onClick={handleDownloadPDF}>Descargar PDF</button>
+              <button className="btn-secondary" onClick={() => setSelectedInvoice(null)}>Cerrar</button>
             </div>
           </div>
         </div>

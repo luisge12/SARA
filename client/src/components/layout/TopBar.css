@@ -11,6 +11,19 @@
   z-index: 40;
 }
 
+@media (max-width: 1300px) {
+  .topbar {
+    padding-left: 80px; /* Evita que el botón de hamburguesa tape los iconos */
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding-right: 1rem;
+    padding-left: 64px;
+  }
+}
+
 .topbar-left {
   display: flex;
   align-items: center;
@@ -39,6 +52,26 @@
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .topbar-right {
+    gap: 0.75rem;
+  }
+  
+  .user-role {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-info {
+    display: none;
+  }
+  
+  .home-btn {
+    margin-right: 0;
+  }
 }
 
 .avatar-circle {
@@ -92,7 +125,7 @@
 }
 
 /* Solo mostrar el botón de home en pantallas pequeñas donde el sidebar se oculta o se colapsa */
-@media (min-width: 769px) {
+@media (min-width: 1301px) {
   .home-btn {
     display: none;
   }

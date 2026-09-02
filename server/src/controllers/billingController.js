@@ -45,9 +45,17 @@ module.exports = {
 
   getTransactions: async (req, res) => {
     try {
+      const { patientId } = req.query;
+      const whereClause = {};
+      
+      if (patientId) {
+        whereClause.patientId = patientId;
+      }
+      
       const transactions = await Transaction.findAll({
+        where: whereClause,
         include: [
-          { model: User, as: 'patient', attributes: ['id', 'name', 'username'] },
+          { model: User, as: 'patient', attributes: ['id', 'name', 'username', 'identificationNumber'] },
           { model: User, as: 'doctor', attributes: ['id', 'name', 'username'] },
           { model: User, as: 'creator', attributes: ['id', 'name', 'username'] }
         ],
