@@ -70,3 +70,31 @@
   color: #111827;
   transform: rotate(15deg);
 }
+
+.home-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-right: 1rem;
+}
+
+.home-btn:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+  transform: scale(1.1);
+}
+
+/* Solo mostrar el botón de home en pantallas pequeñas donde el sidebar se oculta o se colapsa */
+@media (min-width: 769px) {
+  .home-btn {
+    display: none;
+  }
+}
+
