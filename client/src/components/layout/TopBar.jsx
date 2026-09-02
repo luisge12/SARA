@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, User } from 'lucide-react';
+import { Settings, User, Home } from 'lucide-react';
 import './TopBar.css';
 
 export function TopBar() {
@@ -10,7 +10,13 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="topbar-left">
-        {/* Placeholder for future clinic name/logo if needed */}
+        <button 
+          className="home-btn" 
+          onClick={() => navigate('/dashboard')}
+          title="Inicio"
+        >
+          <Home size={22} />
+        </button>
       </div>
       <div className="topbar-right">
         <div className="user-info">
