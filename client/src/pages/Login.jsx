@@ -182,9 +182,9 @@ export function Login() {
       )}
 
       <footer className="login-footer-text">
-        <p>
-          Producto Desarrollado por FrailejonDEV
-        </p>
+        <div className="login-footer">
+          Producto Desarrollado para SARA Clínicas
+        </div>
       </footer>
     </div>
   );
