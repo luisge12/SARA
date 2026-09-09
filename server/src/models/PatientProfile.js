@@ -47,6 +47,58 @@ const PatientProfile = sequelize.define('PatientProfile', {
     type: DataTypes.TEXT
   },
 
+  // Antecedentes Personales y Quirúrgicos
+  personalHistory: {
+    type: DataTypes.TEXT,
+    field: 'personal_history'
+  },
+  surgicalHistory: {
+    type: DataTypes.TEXT,
+    field: 'surgical_history'
+  },
+
+  // Antecedentes Familiares
+  familyHistory: {
+    type: DataTypes.TEXT,
+    field: 'family_history'
+  },
+
+  // Antecedentes Gineco-Obstétricos
+  menarcheAge: {
+    type: DataTypes.STRING(20),
+    field: 'menarche_age'
+  },
+  menopauseAge: {
+    type: DataTypes.STRING(20),
+    field: 'menopause_age'
+  },
+  obstetricFormula: {
+    type: DataTypes.STRING(50),
+    field: 'obstetric_formula'
+  },
+
+  // Hábito Evacuatorio y Coloproctología
+  bristolType: {
+    type: DataTypes.STRING(50),
+    field: 'bristol_type'
+  },
+  bowelFrequency: {
+    type: DataTypes.STRING(100),
+    field: 'bowel_frequency'
+  },
+  strainToEvacuate: {
+    type: DataTypes.STRING(20),
+    field: 'strain_to_evacuate'
+  },
+  incompleteEvacuation: {
+    type: DataTypes.STRING(20),
+    field: 'incomplete_evacuation'
+  },
+  bowelNotes: {
+    type: DataTypes.TEXT,
+    field: 'bowel_notes'
+  },
+
   // Parámetros Generales (Sección 2)
   heartRate: {
     type: DataTypes.INTEGER,

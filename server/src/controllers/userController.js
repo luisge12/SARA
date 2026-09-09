@@ -61,7 +61,9 @@ module.exports = {
       const { 
         username, password, role, name, identificationNumber, mppsNumber, medicalCollegeNumber, sedeAtencion,
         shift, academicDegree, specialty,
-        gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
+        gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address,
+        personalHistory, surgicalHistory, familyHistory, menarcheAge, menopauseAge, obstetricFormula,
+        bristolType, bowelFrequency, strainToEvacuate, incompleteEvacuation, bowelNotes
       } = req.body;
       if (!username || !password || !role) {
         return res.status(400).json({ error: 'Campos requeridos faltantes' });
@@ -80,6 +82,17 @@ module.exports = {
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(password, salt);
 
+      const safeIso = (val) => {
+        if (!val) return null;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d.toISOString();
+      };
+      const safeDateOnly = (val) => {
+        if (!val) return null;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d.toISOString().split('T')[0];
+      };
+
       const newUser = await User.create({
         username,
         passwordHash,
@@ -91,27 +104,65 @@ module.exports = {
         sedeAtencion,
         shift,
         academicDegree,
-        specialty
+        specialty,
+        gender: gender || null,
+        dateOfBirth: safeDateOnly(dateOfBirth),
+        email: email || null,
+        phone: phone || null
       });
 
       if (role === 'Paciente') {
+
         const newProfile = await PatientProfile.create({
           userId: newUser.id,
           gender,
-          dateOfBirth,
+          dateOfBirth: safeDateOnly(dateOfBirth),
           phone,
           email,
           treatingDoctor,
           referringEntity,
-          nextAppointment,
-          address
+          nextAppointment: safeIso(nextAppointment),
+          address,
+          personalHistory: personalHistory || null,
+          surgicalHistory: surgicalHistory || null,
+          familyHistory: familyHistory || null
         });
         
-        await AuditLog.create({
+        const { logPatientAudit, FIELD_LABELS, formatDisplayValue } = require('../services/auditService');
+
+        const initialFields = {
+          name: newUser.name || newUser.username,
+          identificationNumber: newUser.identificationNumber,
+          sedeAtencion: newUser.sedeAtencion || 'CENTRAL',
+          gender: newUser.gender,
+          dateOfBirth: newUser.dateOfBirth,
+          phone: newUser.phone,
+          email: newUser.email,
+          treatingDoctor,
+          referringEntity,
+          nextAppointment: safeIso(nextAppointment),
+          address,
+          personalHistory,
+          surgicalHistory,
+          familyHistory
+        };
+
+        const initialDiffs = Object.entries(initialFields)
+          .filter(([_, val]) => val !== null && val !== undefined && val !== '')
+          .map(([key, val]) => ({
+            field: key,
+            label: FIELD_LABELS[key] || key,
+            oldValue: '(registro nuevo)',
+            newValue: formatDisplayValue(val)
+          }));
+
+        await logPatientAudit({
           patientId: newProfile.id,
-          modifiedByUserId: req.user ? req.user.id : null,
+          userId: req.user ? req.user.id : null,
           actionType: 'CREATE_PATIENT',
-          changesDescription: {
+          summary: `Paciente registrado en el sistema: ${newUser.name || newUser.username}`,
+          diffs: initialDiffs,
+          metadata: {
             message: 'Paciente creado',
             user: { username: newUser.username, name: newUser.name }
           }
@@ -124,7 +175,9 @@ module.exports = {
           id: newUser.id,
           username: newUser.username,
           role: newUser.role,
-          name: newUser.name
+          name: newUser.name,
+          identificationNumber: newUser.identificationNumber,
+          sedeAtencion: newUser.sedeAtencion
         }
       });
     } catch (error) {

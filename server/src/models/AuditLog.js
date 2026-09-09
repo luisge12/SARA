@@ -20,7 +20,7 @@ const AuditLog = sequelize.define('AuditLog', {
   },
   modifiedByUserId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: User,
       key: 'id'

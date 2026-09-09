@@ -77,7 +77,11 @@ const initDatabase = async () => {
         { name: 'identification_number', type: 'VARCHAR(50)' },
         { name: 'mpps_number', type: 'VARCHAR(50)' },
         { name: 'medical_college_number', type: 'VARCHAR(50)' },
-        { name: 'sede_atencion', type: 'VARCHAR(100)' }
+        { name: 'sede_atencion', type: 'VARCHAR(100)' },
+        { name: 'gender', type: 'VARCHAR(50)' },
+        { name: 'date_of_birth', type: 'DATE' },
+        { name: 'email', type: 'VARCHAR(150)' },
+        { name: 'phone', type: 'VARCHAR(50)' }
       ];
 
       for (const col of neededCols) {
@@ -85,12 +89,70 @@ const initDatabase = async () => {
           await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
         }
       }
+
+      // Asegurar columnas en patient_profiles
+      const [pCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'patient_profiles';
+      `);
+      const existingPCols = (pCols || []).map(c => c.column_name.toLowerCase());
+      const neededPCols = [
+        { name: 'personal_history', type: 'TEXT' },
+        { name: 'surgical_history', type: 'TEXT' },
+        { name: 'family_history', type: 'TEXT' },
+        { name: 'menarche_age', type: 'VARCHAR(20)' },
+        { name: 'menopause_age', type: 'VARCHAR(20)' },
+        { name: 'obstetric_formula', type: 'VARCHAR(50)' },
+        { name: 'bristol_type', type: 'VARCHAR(50)' },
+        { name: 'bowel_frequency', type: 'VARCHAR(100)' },
+        { name: 'strain_to_evacuate', type: 'VARCHAR(20)' },
+        { name: 'incomplete_evacuation', type: 'VARCHAR(20)' },
+        { name: 'bowel_notes', type: 'TEXT' }
+      ];
+
+      for (const col of neededPCols) {
+        if (!existingPCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
+
+      // Asegurar tabla y columnas de auditoría (audit_logs)
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id SERIAL PRIMARY KEY,
+          patient_id INTEGER,
+          modified_by_user_id INTEGER,
+          action_type VARCHAR(100),
+          changes_description JSONB,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      const [auditCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'audit_logs';
+      `);
+      const existingAuditCols = (auditCols || []).map(c => c.column_name.toLowerCase());
+      const neededAuditCols = [
+        { name: 'patient_id', type: 'INTEGER' },
+        { name: 'modified_by_user_id', type: 'INTEGER' },
+        { name: 'action_type', type: 'VARCHAR(100)' },
+        { name: 'changes_description', type: 'JSONB' },
+        { name: 'created_at', type: 'TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP' }
+      ];
+
+      for (const col of neededAuditCols) {
+        if (!existingAuditCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
     } catch (err) {
-      console.warn('Aviso comprobación de columnas users:', err.message);
+      console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }
 
     // Sincronizar modelos automáticamente
     await User.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo User:', err));
+    await PatientProfile.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo PatientProfile:', err));
+    await Consultation.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Consultation:', err));
+    await AuditLog.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo AuditLog:', err));
     await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
     await Study.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Study:', err));
 

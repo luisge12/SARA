@@ -51,6 +51,19 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(150),
     field: 'specialty' // Especialidad médica (ej. Coloproctología, Ginecología, etc.)
   },
+  gender: {
+    type: DataTypes.STRING(50)
+  },
+  dateOfBirth: {
+    type: DataTypes.DATEONLY,
+    field: 'date_of_birth'
+  },
+  email: {
+    type: DataTypes.STRING(150)
+  },
+  phone: {
+    type: DataTypes.STRING(50)
+  },
   expiresAt: {
     type: DataTypes.DATE,
     field: 'expires_at'

@@ -4,10 +4,11 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Trash2, UserPlus, ShieldAlert, Users, Calendar, CalendarPlus, Clock, CheckCircle } from 'lucide-react';
+import { Trash2, UserPlus, ShieldAlert, Users, User, Calendar, CalendarPlus, Clock, CheckCircle } from 'lucide-react';
 
 import { PatientProfileEditor } from './PatientProfileEditor';
 import { AppointmentModal } from '../../components/AppointmentModal';
+import { AuditLogModal } from '../Modulo4_DatosClinicos/AuditLogModal';
 import { COMMON_SPECIALTIES } from '../../data/clinicalTemplates';
 
 function Modulo2_GestionAdministrativa() {
@@ -15,6 +16,7 @@ function Modulo2_GestionAdministrativa() {
   const isMaster = currentUser.role === 'Master';
   const hasAccess = ['Master', 'Administrador', 'Recepcionista', 'Médico'].includes(currentUser.role);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [auditPatient, setAuditPatient] = useState(null);
 
   // Citas states
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
@@ -50,6 +52,11 @@ function Modulo2_GestionAdministrativa() {
   const [referringEntity, setReferringEntity] = useState('');
   const [nextAppointment, setNextAppointment] = useState('');
   const [address, setAddress] = useState('');
+
+  // Antecedentes (Paciente)
+  const [personalHistory, setPersonalHistory] = useState('');
+  const [surgicalHistory, setSurgicalHistory] = useState('');
+  const [familyHistory, setFamilyHistory] = useState('');
 
   // Recepcionista specific states
   const [shift, setShift] = useState('Mañana');
@@ -113,7 +120,17 @@ function Modulo2_GestionAdministrativa() {
         sedeAtencion,
         specialty,
         ...(role === 'Paciente' ? {
-          gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address
+          gender, 
+          dateOfBirth: dateOfBirth || null, 
+          phone, 
+          email, 
+          treatingDoctor, 
+          referringEntity, 
+          nextAppointment: nextAppointment || null, 
+          address,
+          personalHistory: personalHistory || null,
+          surgicalHistory: surgicalHistory || null,
+          familyHistory: familyHistory || null
         } : {}),
         ...(role === 'Recepcionista' ? {
           shift, academicDegree
@@ -121,7 +138,7 @@ function Modulo2_GestionAdministrativa() {
       };
       
       const response = await api.post('/api/users/create', payload);
-      setSuccessMsg(response.data.message || 'Usuario creado exitosamente.');
+      const createdUser = response.data.user;
       
       // Reset form
       setUsername('');
@@ -141,12 +158,24 @@ function Modulo2_GestionAdministrativa() {
       setReferringEntity('');
       setNextAppointment('');
       setAddress('');
+
+      setPersonalHistory('');
+      setSurgicalHistory('');
+      setFamilyHistory('');
       
       setShift('Mañana');
       setAcademicDegree('');
       
       // Reload user list
-      fetchUsers();
+      await fetchUsers();
+
+      // Si es un paciente, desplegar automáticamente el modal con su expediente clínico completo
+      if (role === 'Paciente' && createdUser) {
+        setSuccessMsg('Paciente registrado con éxito. Desplegando expediente clínico...');
+        setSelectedPatient(createdUser);
+      } else {
+        setSuccessMsg(response.data.message || 'Usuario creado exitosamente.');
+      }
     } catch (err) {
       console.error('Error al crear usuario:', err);
       setErrorMsg(err.response?.data?.error || 'Error al procesar la solicitud.');
@@ -316,6 +345,26 @@ function Modulo2_GestionAdministrativa() {
                           </button>
 
                           <button 
+                            onClick={() => setAuditPatient(usr)} 
+                            style={{ 
+                              background: 'rgba(42, 183, 202, 0.12)', 
+                              border: '1px solid rgba(42, 183, 202, 0.4)', 
+                              color: 'var(--color-primary)', 
+                              cursor: 'pointer',
+                              padding: '0.4rem 0.75rem',
+                              borderRadius: '8px',
+                              fontWeight: '600',
+                              fontSize: '0.8rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                            title="Ver Historial de Modificaciones del Paciente"
+                          >
+                            <Clock size={14} /> Historial
+                          </button>
+
+                          <button 
                             onClick={() => setSelectedPatient(usr)} 
                             style={{ 
                               background: 'var(--color-primary)', 
@@ -436,6 +485,37 @@ function Modulo2_GestionAdministrativa() {
                 onChange={(e) => setIdentificationNumber(e.target.value)}
               />
 
+              {/* CAMPOS COMUNES PARA TODOS LOS USUARIOS: GÉNERO, FECHA DE NACIMIENTO Y EMAIL */}
+              <div className="responsive-grid-1-1">
+                <div className="input-group">
+                  <label className="input-label">Género</label>
+                  <select 
+                    className="input-field" 
+                    value={gender} 
+                    onChange={(e) => setGender(e.target.value)}
+                    style={{ height: '39px', padding: '0.5rem 1rem' }}
+                  >
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <Input 
+                  label="Fecha de Nacimiento"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </div>
+
+              <Input 
+                label="Correo Electrónico"
+                type="email"
+                placeholder="correo@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
               {role === 'Médico' && (
                 <div className="responsive-grid-1-1">
                   <Input 
@@ -498,74 +578,24 @@ function Modulo2_GestionAdministrativa() {
               )}
 
               {role === 'Paciente' && (
-                <>
-                  <div className="responsive-grid-1-1">
-                    <div className="input-group">
-                      <label className="input-label">Género</label>
-                      <select 
-                        className="input-field" 
-                        value={gender} 
-                        onChange={(e) => setGender(e.target.value)}
-                        style={{ height: '39px', padding: '0.5rem 1rem' }}
-                      >
-                        <option value="Masculino">Masculino</option>
-                        <option value="Femenino">Femenino</option>
-                        <option value="Otro">Otro</option>
-                      </select>
-                    </div>
-                    <Input 
-                      label="Fecha de Nacimiento"
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                    />
-                  </div>
-                  <div className="responsive-grid-1-1">
-                    <Input 
-                      label="Teléfono"
-                      type="text"
-                      placeholder="+58 412 1234567"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                    <Input 
-                      label="Email"
-                      type="email"
-                      placeholder="correo@ejemplo.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="responsive-grid-1-1">
-                    <Input 
-                      label="Médico Tratante"
-                      type="text"
-                      placeholder="Dr. Nombre Apellido"
-                      value={treatingDoctor}
-                      onChange={(e) => setTreatingDoctor(e.target.value)}
-                    />
-                    <Input 
-                      label="Referente"
-                      type="text"
-                      placeholder="Seguros Mercantil, etc."
-                      value={referringEntity}
-                      onChange={(e) => setReferringEntity(e.target.value)}
-                    />
-                  </div>
-                  <Input 
-                    label="Próxima Cita / Control"
-                    type="datetime-local"
-                    value={nextAppointment}
-                    onChange={(e) => setNextAppointment(e.target.value)}
-                  />
-                  <Input 
-                    label="Dirección"
-                    type="text"
-                    placeholder="Dirección completa"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                </>
+                <div style={{ 
+                  marginTop: '0.25rem', 
+                  padding: '0.85rem 1rem', 
+                  backgroundColor: 'rgba(42, 183, 202, 0.08)', 
+                  border: '1px solid rgba(42, 183, 202, 0.25)', 
+                  borderRadius: '8px', 
+                  fontSize: '0.83rem', 
+                  color: 'var(--color-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  lineHeight: '1.4'
+                }}>
+                  <span style={{ fontSize: '1.25rem' }}>📋</span>
+                  <span>
+                    Al presionar <strong>Crear Usuario</strong>, se registrará el paciente y se <strong>desplegará automáticamente el modal</strong> con su expediente clínico completo (Teléfono, Médico Tratante, Referente, Próxima Cita, Dirección y Antecedentes Médicos y Quirúrgicos).
+                  </span>
+                </div>
               )}
 
               <Button type="submit" fullWidth style={{ marginTop: '0.5rem' }}>
@@ -584,6 +614,13 @@ function Modulo2_GestionAdministrativa() {
             setSelectedPatient(null);
             fetchUsers();
           }} 
+        />
+      )}
+
+      {auditPatient && (
+        <AuditLogModal 
+          patient={auditPatient} 
+          onClose={() => setAuditPatient(null)} 
         />
       )}
 

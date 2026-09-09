@@ -132,7 +132,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </Button>
       </div>
 
-      {showAudit && <AuditLogModal patientId={patient.id} onClose={() => setShowAudit(false)} />}
+      {showAudit && <AuditLogModal patient={patient} patientId={patient.id} onClose={() => setShowAudit(false)} />}
 
       {/* Read-Only Secciones 1 y 2 */}
       <div className="responsive-grid-1-1">
@@ -160,6 +160,19 @@ export function ClinicalWorkspace({ patient, onBack }) {
           )}
         </Card>
       </div>
+
+      {/* Tarjeta de Antecedentes y Coloproctología */}
+      <Card title="Antecedentes Médicos y Quirúrgicos del Paciente" className="glass-panel" style={{ marginTop: '1rem' }}>
+        {loadingProfile ? <p>Cargando antecedentes...</p> : (
+          <div style={{ fontSize: '0.88rem' }}>
+            <div style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
+              <div><strong>Personales / Patologías / Alergias:</strong> {profile.personalHistory || 'No especificados'}</div>
+              <div style={{ marginTop: '0.35rem' }}><strong>Quirúrgicos (Qx):</strong> {profile.surgicalHistory || 'No especificados'}</div>
+              <div style={{ marginTop: '0.35rem' }}><strong>Familiares:</strong> {profile.familyHistory || 'No especificados'}</div>
+            </div>
+          </div>
+        )}
+      </Card>
 
       {/* PANEL DE RELLENADO AUTOMÁTICO Y PLANTILLAS RÁPIDAS POR ESPECIALIDAD */}
       <div style={{ 
