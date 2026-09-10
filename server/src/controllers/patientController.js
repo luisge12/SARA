@@ -108,6 +108,9 @@ module.exports = {
       if (data.dateOfBirth !== undefined) profile.dateOfBirth = safeDateOnly(data.dateOfBirth);
       if (data.phone !== undefined) profile.phone = data.phone;
       if (data.email !== undefined) profile.email = data.email;
+      if (data.photoUrl !== undefined) profile.photoUrl = data.photoUrl;
+      if (data.flowType !== undefined) profile.flowType = data.flowType;
+      if (data.customFields !== undefined) profile.customFields = data.customFields;
       if (data.treatingDoctor !== undefined) profile.treatingDoctor = data.treatingDoctor;
       if (data.referringEntity !== undefined) profile.referringEntity = data.referringEntity;
       if (data.nextAppointment !== undefined) profile.nextAppointment = safeIsoDate(data.nextAppointment);
@@ -215,7 +218,8 @@ module.exports = {
       }
 
       const consultFields = [
-        'reasonForVisit', 'physicalInspection', 'physicalPalpation', 'rectalExamination', 
+        'reasonForVisit', 'clinicalSummary', 'consultationFlow', 'reasonGeneral', 'reasonSpecific',
+        'physicalInspection', 'physicalPalpation', 'rectalExamination', 
         'anoscopy', 'diagnoses', 'treatmentPlan', 'evolutionaryReport'
       ];
 

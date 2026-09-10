@@ -93,13 +93,51 @@ module.exports = {
         group: ['role']
       });
 
+      // Métricas de Frecuentología (Recurrencia y Distribución de Consultas)
+      let firstTimeConsults = 0;
+      let reconsults = 0;
+      let reasonsBreakdown = [];
+      let recurrenceRate = '0';
+
+      try {
+        firstTimeConsults = await Consultation.count({
+          where: { consultationFlow: 'PRIMERA_VEZ' }
+        });
+        reconsults = await Consultation.count({
+          where: { consultationFlow: 'RECONSULTA' }
+        });
+
+        reasonsBreakdown = await Consultation.findAll({
+          attributes: [
+            ['reason_general', 'reason'],
+            [fn('COUNT', col('id')), 'count']
+          ],
+          where: {
+            reason_general: { [Op.ne]: null }
+          },
+          group: ['reason_general'],
+          order: [[fn('COUNT', col('id')), 'DESC']]
+        });
+
+        const totalTracked = firstTimeConsults + reconsults;
+        recurrenceRate = totalTracked > 0 ? ((reconsults / totalTracked) * 100).toFixed(1) : '0';
+      } catch (frecErr) {
+        console.warn('Aviso cálculo frecuentología:', frecErr.message);
+      }
+
       return res.json({
         totalPatients,
         totalConsultations,
         totalAppointments,
         patientsBySede,
         appointmentsByStatus,
-        usersByRole
+        usersByRole,
+        frecuentologia: {
+          firstTimeConsults,
+          reconsults,
+          recurrenceRate,
+          reasonsBreakdown
+        }
       });
     } catch (error) {
       console.error('Error al obtener estadísticas históricas:', error);

@@ -208,21 +208,106 @@ const handleAiChat = async (req, res) => {
   }
 };
 
-// Endpoint de transcripción de voz universal
-const handleAudioTranscribe = async (req, res) => {
+// Generar el 'Gran Motivo de Consulta y Enfermedad Actual' asistido por IA (Google Gemini con Fallback Clínico)
+const handleGenerateClinicalReason = async (req, res) => {
   try {
+    const { reasonForVisit = [], patient = {}, additionalNotes = '' } = req.body;
+
+    if (!Array.isArray(reasonForVisit) || reasonForVisit.length === 0) {
+      return res.status(400).json({ error: 'Se requiere al menos un síntoma o motivo registrado para procesar.' });
+    }
+
+    // Preparar resumen estructurado de los datos ingresados
+    const symptomsDetails = reasonForVisit
+      .filter(r => (r.symptom && r.symptom.trim()) || (r.complement && r.complement.trim()))
+      .map(r => {
+        let parts = [];
+        if (r.symptom) parts.push(`Síntoma: ${r.symptom}`);
+        if (r.onset) parts.push(`Tiempo de inicio: ${r.onset}`);
+        if (r.complement) parts.push(`Características: ${r.complement}`);
+        if (r.regionGeneral || r.regionSpecific) parts.push(`Localización: ${[r.regionGeneral, r.regionSpecific].filter(Boolean).join(' - ')}`);
+        if (r.relatedTo) parts.push(`Relacionado con: ${r.relatedTo}`);
+        if (r.additionalInfo) parts.push(`Información adicional: ${r.additionalInfo}`);
+        return parts.join(', ');
+      })
+      .join('; ');
+
+    const patientDesc = [
+      patient.name ? `Paciente: ${patient.name}` : '',
+      patient.gender ? `Género: ${patient.gender}` : '',
+      patient.age ? `Edad: ${patient.age}` : ''
+    ].filter(Boolean).join(' | ');
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    let synthesizedText = null;
+
+    if (apiKey && apiKey.trim()) {
+      try {
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(apiKey.trim());
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-flash-latest',
+          systemInstruction: `Eres un médico especialista de alto nivel y redactor clínico para historias médicas estandarizadas en español (estándar internacional SOAP).
+Tu tarea es redactar el "Gran Motivo de Consulta y Enfermedad Actual" en un párrafo clínico formal, coherente, pulcro y profesional a partir de los síntomas y datos recolectados.
+Reglas estrictas:
+- Redacta en tercera persona formal (ej: "Paciente refiere cuadro clínico caracterizado por...").
+- Organiza cronológicamente la evolución de los síntomas.
+- Emplea terminología semiológica precisa en español médico.
+- No inventes síntomas que no estén en la entrada, pero enlázalos con fluidez y coherencia gramatical.
+- Devuelve únicamente el párrafo redactado, sin encabezados redundantes como "Motivo de consulta:" ni despedidas.`
+        });
+
+        const prompt = `Datos del paciente: ${patientDesc || 'Adulto'}
+Síntomas y signos recolectados:
+${symptomsDetails || 'No especificados en detalle'}
+${additionalNotes ? `Notas adicionales: ${additionalNotes}` : ''}
+
+Por favor genera el resumen del Motivo de Consulta y Enfermedad Actual:`;
+
+        const result = await model.generateContent(prompt);
+        if (result && result.response) {
+          synthesizedText = result.response.text().trim();
+        }
+      } catch (geminiErr) {
+        console.warn('Fallo llamada a Gemini API, aplicando fallback clínico:', geminiErr.message);
+      }
+    }
+
+    // Fallback clínico algorítmico determinista si no hay API Key o falla la red
+    if (!synthesizedText) {
+      const primarySymptom = reasonForVisit[0] || {};
+      const onset = primarySymptom.onset ? `con ${primarySymptom.onset} de evolución` : 'de evolución reciente';
+      const mainSymptomText = primarySymptom.symptom || 'malestar no especificado';
+      const location = [primarySymptom.regionGeneral, primarySymptom.regionSpecific].filter(Boolean).join(', ');
+      const locationPhrase = location ? `localizado en ${location}` : '';
+      const complementPhrase = primarySymptom.complement ? `de tipo ${primarySymptom.complement}` : '';
+      const relatedPhrase = primarySymptom.relatedTo ? `asociado a ${primarySymptom.relatedTo}` : '';
+      const addInfo = primarySymptom.additionalInfo ? `. Refiere además: ${primarySymptom.additionalInfo}` : '';
+
+      synthesizedText = `Paciente acude a valoración clínica presentando cuadro sintomático ${onset}, caracterizado principalmente por ${mainSymptomText} ${complementPhrase} ${locationPhrase} ${relatedPhrase}${addInfo}.`;
+      
+      if (reasonForVisit.length > 1) {
+        const otherSymptoms = reasonForVisit.slice(1).map(s => s.symptom).filter(Boolean).join(', ');
+        if (otherSymptoms) {
+          synthesizedText += ` Se asocian concomitantemente los siguientes síntomas de soporte: ${otherSymptoms}.`;
+        }
+      }
+    }
+
     return res.json({
       success: true,
-      text: "Mensaje por voz procesado con éxito por SARA-AI.",
-      info: "Audio recibido universalmente."
+      granMotivoConsulta: synthesizedText,
+      source: apiKey ? 'gemini-ai' : 'deterministic-clinical-engine'
     });
   } catch (error) {
-    console.error('Error en transcripción de audio:', error);
-    return res.status(500).json({ error: 'Error al procesar el audio de voz.' });
+    console.error('Error al generar Gran Motivo de Consulta:', error);
+    return res.status(500).json({ error: 'Error al sintetizar el motivo de consulta con IA.' });
   }
 };
 
 module.exports = {
   handleAiChat,
-  handleAudioTranscribe
+  handleAudioTranscribe,
+  handleGenerateClinicalReason
 };
+

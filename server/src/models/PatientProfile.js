@@ -18,6 +18,20 @@ const PatientProfile = sequelize.define('PatientProfile', {
     field: 'user_id'
   },
   // Demográficos (Sección 1) adicionales al User
+  photoUrl: {
+    type: DataTypes.TEXT,
+    field: 'photo_url'
+  },
+  flowType: {
+    type: DataTypes.STRING(50),
+    field: 'flow_type',
+    defaultValue: 'PRIMERA_VEZ'
+  },
+  customFields: {
+    type: DataTypes.JSONB,
+    field: 'custom_fields',
+    defaultValue: {}
+  },
   gender: {
     type: DataTypes.STRING(50)
   },

@@ -311,16 +311,43 @@ function Modulo2_GestionAdministrativa() {
                       gap: '0.5rem'
                     }}
                   >
-                    <div>
-                      <h4 style={{ fontWeight: '600', color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
-                        {usr.name || 'Sin Nombre Registrado'}
-                      </h4>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.15rem' }}>
-                        Usuario: <strong>{usr.username}</strong> | Rol: <span style={{ color: usr.role === 'Master' ? 'var(--color-alert)' : 'var(--color-primary)', fontWeight: 'bold' }}>{usr.role}</span>
-                      </p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                        Sede: {usr.sedeAtencion || 'No especificada'} {usr.mppsNumber && `| MPPS: ${usr.mppsNumber}`}
-                      </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                      {usr.patientProfile?.photoUrl || usr.photoUrl ? (
+                        <img 
+                          src={usr.patientProfile?.photoUrl || usr.photoUrl} 
+                          alt="Foto" 
+                          style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #0d9488' }} 
+                        />
+                      ) : (
+                        <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                          <User size={22} />
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <h4 style={{ fontWeight: '600', color: 'var(--color-text-main)', fontSize: '0.95rem', margin: 0 }}>
+                            {usr.name || 'Sin Nombre Registrado'}
+                          </h4>
+                          {usr.role === 'Paciente' && (
+                            <span style={{ 
+                              fontSize: '0.7rem', 
+                              padding: '1px 6px', 
+                              borderRadius: '10px', 
+                              backgroundColor: (usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '#dcfce7' : '#e0f2fe',
+                              color: (usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '#166534' : '#075985',
+                              fontWeight: 700 
+                            }}>
+                              {(usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '1ª Vez' : 'Reconsulta'}
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '0.15rem 0 0 0' }}>
+                          Usuario: <strong>{usr.username}</strong> | Rol: <span style={{ color: usr.role === 'Master' ? 'var(--color-alert)' : 'var(--color-primary)', fontWeight: 'bold' }}>{usr.role}</span>
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0.15rem 0 0 0' }}>
+                          Sede: {usr.sedeAtencion || 'No especificada'} {usr.mppsNumber && `| MPPS: ${usr.mppsNumber}`}
+                        </p>
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {usr.role === 'Paciente' && (

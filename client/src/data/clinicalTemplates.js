@@ -127,6 +127,93 @@ export const COMMON_MEDICATIONS = [
   'Metformina'
 ];
 
+export const PHARMACOLOGICAL_GUIDE = [
+  {
+    brandName: 'Daflon / Flebodia',
+    activeIngredient: 'Diosmina + Hesperidina (Fracción flavonoica purificada 500 mg)',
+    presentation: 'Comprimidos 500 mg',
+    defaultIndication: '1 comprimido cada 12 horas con las comidas principales.',
+    defaultDuration: 'Por 3 a 4 semanas'
+  },
+  {
+    brandName: 'Proctoglyvenol / Scheriproct',
+    activeIngredient: 'Tribenósido + Lidocaína / Prednisolona',
+    presentation: 'Pomada rectal 30 g',
+    defaultIndication: 'Aplicar en región anorrectal cada 12 horas tras baño de asiento templado.',
+    defaultDuration: 'Por 7 a 10 días'
+  },
+  {
+    brandName: 'Metamucil / Agiolax',
+    activeIngredient: 'Plantago Ovata / Psyllium (Fibra soluble natural)',
+    presentation: 'Polvo para suspensión oral 300 g',
+    defaultIndication: '1 cucharada disuelta en 1 vaso grande de agua con abundante líquido adicional.',
+    defaultDuration: 'Uso continuo diario'
+  },
+  {
+    brandName: 'Diltiazem Fórmula Magistral',
+    activeIngredient: 'Clorhidrato de Diltiazem al 2%',
+    presentation: 'Gel tópico anorrectal 30 g',
+    defaultIndication: 'Aplicar pequeña porción perianal e intra-esfinteriana cada 12 horas.',
+    defaultDuration: 'Por 6 a 8 semanas'
+  },
+  {
+    brandName: 'Tachipirón / Atamel / Tempra',
+    activeIngredient: 'Paracetamol / Acetaminofén',
+    presentation: 'Tabletas 500 mg / 650 mg',
+    defaultIndication: '1 tableta cada 8 horas en caso de dolor moderado o fiebre.',
+    defaultDuration: 'Por 3 a 5 días'
+  },
+  {
+    brandName: 'Brugesic / Advil / Motrin',
+    activeIngredient: 'Ibuprofeno',
+    presentation: 'Cápsulas blandas 400 mg',
+    defaultIndication: '1 cápsula cada 8 horas con alimentos.',
+    defaultDuration: 'Por 5 días'
+  },
+  {
+    brandName: 'Ciproxina / Ciprobac',
+    activeIngredient: 'Ciprofloxacina',
+    presentation: 'Comprimidos 500 mg',
+    defaultIndication: '1 comprimido cada 12 horas en ayunas o con agua abundante.',
+    defaultDuration: 'Por 7 días'
+  },
+  {
+    brandName: 'Flegyl / Metrovax',
+    activeIngredient: 'Metronidazol',
+    presentation: 'Comprimidos 500 mg',
+    defaultIndication: '1 comprimido cada 8 horas vía oral (evitar consumo de alcohol).',
+    defaultDuration: 'Por 7 a 10 días'
+  },
+  {
+    brandName: 'Augmentin / Fulgram',
+    activeIngredient: 'Amoxicilina + Ácido Clavulánico',
+    presentation: 'Comprimidos 875/125 mg',
+    defaultIndication: '1 comprimido cada 12 horas al inicio de una comida.',
+    defaultDuration: 'Por 7 a 10 días'
+  },
+  {
+    brandName: 'Losec / Gastrium',
+    activeIngredient: 'Omeprazol',
+    presentation: 'Cápsulas 20 mg',
+    defaultIndication: '1 cápsula en ayunas 30 minutos antes del desayuno.',
+    defaultDuration: 'Por 14 a 28 días'
+  },
+  {
+    brandName: 'Dicetel / Spasmomen',
+    activeIngredient: 'Bromuro de Pinaverio / Otilonio',
+    presentation: 'Comprimidos 100 mg',
+    defaultIndication: '1 comprimido cada 12 horas con las comidas.',
+    defaultDuration: 'Por 15 días'
+  },
+  {
+    brandName: 'Dulcolax / Ciruelax',
+    activeIngredient: 'Bisacodilo / Senósidos',
+    presentation: 'Grageas 5 mg',
+    defaultIndication: '1 gragea por la noche antes de acostarse.',
+    defaultDuration: 'Por 2 a 3 días puntuales'
+  }
+];
+
 export const COMMON_PRESENTATIONS = [
   'Comprimidos 500 mg',
   'Cápsulas 20 mg',

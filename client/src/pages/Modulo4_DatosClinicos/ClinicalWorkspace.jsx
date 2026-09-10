@@ -3,9 +3,10 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer } from 'lucide-react';
+import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer, UserCheck, RefreshCw, Mic } from 'lucide-react';
 import { AuditLogModal } from './AuditLogModal';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
+import { SpeechMicButton } from '../../components/SpeechMicButton';
 import { 
   CLINICAL_TEMPLATES, 
   COMMON_DIAGNOSES, 
@@ -19,9 +20,17 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [profile, setProfile] = useState({});
   const [loadingProfile, setLoadingProfile] = useState(true);
   
+  // Tramitación (Flujo de Llegada y Razón de Consulta)
+  const [consultationFlow, setConsultationFlow] = useState('PRIMERA_VEZ'); // 'PRIMERA_VEZ' | 'RECONSULTA'
+  const [reasonGeneral, setReasonGeneral] = useState('Dolor / Molestia');
+  const [reasonSpecific, setReasonSpecific] = useState('');
+
   // States for Consultation Form
   const [consultationId, setConsultationId] = useState(null);
   const [reasonForVisit, setReasonForVisit] = useState([]);
+  const [clinicalSummary, setClinicalSummary] = useState(''); // Gran Motivo de Consulta estructurado con IA
+  const [generatingAiReason, setGeneratingAiReason] = useState(false);
+
   const [physicalInspection, setPhysicalInspection] = useState('');
   const [physicalPalpation, setPhysicalPalpation] = useState('');
   const [rectalExamination, setRectalExamination] = useState('');
@@ -59,18 +68,56 @@ export function ClinicalWorkspace({ patient, onBack }) {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfileAndHistory();
   }, [patient.id]);
 
-  const fetchProfile = async () => {
+  const fetchProfileAndHistory = async () => {
     try {
       setLoadingProfile(true);
       const res = await api.get(`/api/patients/${patient.id}/profile`);
       setProfile(res.data.patientProfile || {});
+
+      // Consultar historial para auto-determinar si es Reconsulta
+      const consultRes = await api.get(`/api/patients/${patient.id}/consultations`);
+      if (Array.isArray(consultRes.data) && consultRes.data.length > 0) {
+        setConsultationFlow('RECONSULTA');
+      } else {
+        setConsultationFlow('PRIMERA_VEZ');
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoadingProfile(false);
+    }
+  };
+
+  // Generación Asistida del Gran Motivo de Consulta con IA (Google Gemini + Fallback)
+  const handleGenerateAiReason = async () => {
+    if (reasonForVisit.length === 0 && !reasonGeneral && !clinicalSummary) {
+      alert('Por favor agregue al menos un síntoma o detalle en la tabla superior para procesar.');
+      return;
+    }
+
+    try {
+      setGeneratingAiReason(true);
+      const res = await api.post('/api/ai/clinical-reason', {
+        reasonForVisit: reasonForVisit.length > 0 ? reasonForVisit : [{ symptom: reasonGeneral, complement: reasonSpecific }],
+        patient: {
+          name: patient.name,
+          gender: profile.gender || patient.gender,
+          age: profile.dateOfBirth ? `${new Date().getFullYear() - new Date(profile.dateOfBirth).getFullYear()} años` : ''
+        },
+        additionalNotes: clinicalSummary
+      });
+
+      if (res.data && res.data.granMotivoConsulta) {
+        setClinicalSummary(res.data.granMotivoConsulta);
+      }
+    } catch (err) {
+      console.error('Error al generar resumen IA:', err);
+      alert('No se pudo generar el resumen asistido con IA. Puede continuar manualmente.');
+    } finally {
+      setGeneratingAiReason(false);
     }
   };
 
@@ -79,7 +126,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
       setSaving(true);
       const payload = {
         id: consultationId,
+        consultationFlow,
+        reasonGeneral,
+        reasonSpecific,
         reasonForVisit,
+        clinicalSummary,
         physicalInspection,
         physicalPalpation,
         rectalExamination,
@@ -119,13 +170,39 @@ export function ClinicalWorkspace({ patient, onBack }) {
     <div className="module-container" style={{ paddingBottom: '3rem' }}>
       
       {/* Header and Trazabilidad */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>
             <ArrowLeft size={18} /> Volver a Lista
           </button>
-          <h2 style={{ fontSize: '1.8rem', color: 'var(--color-text-main)' }}>Historia Clínica: {patient.name}</h2>
-          <p style={{ color: 'var(--color-text-muted)' }}>ID: {patient.identificationNumber}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {profile.photoUrl && (
+              <img 
+                src={profile.photoUrl} 
+                alt="Foto Paciente" 
+                style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #0d9488', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }} 
+              />
+            )}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.8rem', color: 'var(--color-text-main)', margin: 0 }}>
+                  Historia Clínica: {patient.name}
+                </h2>
+                <span style={{ 
+                  padding: '0.25rem 0.75rem', 
+                  borderRadius: '20px', 
+                  fontSize: '0.8rem', 
+                  fontWeight: 700,
+                  backgroundColor: consultationFlow === 'PRIMERA_VEZ' ? '#dcfce7' : '#e0f2fe',
+                  color: consultationFlow === 'PRIMERA_VEZ' ? '#166534' : '#075985',
+                  border: consultationFlow === 'PRIMERA_VEZ' ? '1px solid #86efac' : '1px solid #7dd3fc'
+                }}>
+                  {consultationFlow === 'PRIMERA_VEZ' ? '🟢 Primera Consulta' : '🔁 Reconsulta / Seguimiento'}
+                </span>
+              </div>
+              <p style={{ color: 'var(--color-text-muted)', margin: '0.25rem 0 0 0' }}>ID: {patient.identificationNumber}</p>
+            </div>
+          </div>
         </div>
         <Button onClick={() => setShowAudit(true)} style={{ backgroundColor: 'var(--color-accent)' }}>
           <Clock size={18} /> Historial de Modificaciones
@@ -134,8 +211,97 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
       {showAudit && <AuditLogModal patient={patient} patientId={patient.id} onClose={() => setShowAudit(false)} />}
 
+      {/* BANNER DE TRAMITACIÓN CLÍNICA: 1RA VEZ VS RECONSULTA & RAZÓN DUAL */}
+      <div style={{
+        marginTop: '1.25rem',
+        padding: '1rem 1.25rem',
+        backgroundColor: '#ffffff',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid #cbd5e1',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>Flujo de Tramitación:</span>
+          <div style={{ display: 'flex', gap: '0.35rem', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+            <button
+              type="button"
+              onClick={() => setConsultationFlow('PRIMERA_VEZ')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: consultationFlow === 'PRIMERA_VEZ' ? '#10b981' : 'transparent',
+                color: consultationFlow === 'PRIMERA_VEZ' ? '#ffffff' : '#64748b',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Primera Consulta
+            </button>
+            <button
+              type="button"
+              onClick={() => setConsultationFlow('RECONSULTA')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: consultationFlow === 'RECONSULTA' ? '#0284c7' : 'transparent',
+                color: consultationFlow === 'RECONSULTA' ? '#ffffff' : '#64748b',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Reconsulta / Llegada Directa
+            </button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Razón General:</label>
+            <select
+              className="input-field"
+              value={reasonGeneral}
+              onChange={e => setReasonGeneral(e.target.value)}
+              style={{ height: '36px', padding: '0.2rem 0.6rem', fontSize: '0.85rem' }}
+            >
+              <option value="Dolor / Molestia">Dolor / Molestia Aguda</option>
+              <option value="Sangrado / Rectorragia">Sangrado / Rectorragia</option>
+              <option value="Masa / Prolapso">Masa / Prolapso Anal</option>
+              <option value="Trastorno Evacuatorio">Trastorno Evacuatorio</option>
+              <option value="Control Postoperatorio">Control Postoperatorio</option>
+              <option value="Chequeo Preventivo">Chequeo Preventivo</option>
+              <option value="Control Evolutivo">Control Evolutivo</option>
+              <option value="Urgencia Médica">Urgencia Médica</option>
+              <option value="Otro">Otro Motivo</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: '220px' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Razón Específica:</label>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="Detalle puntual de la consulta..."
+              value={reasonSpecific}
+              onChange={e => setReasonSpecific(e.target.value)}
+              style={{ height: '36px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', flex: 1 }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Read-Only Secciones 1 y 2 */}
-      <div className="responsive-grid-1-1">
+      <div className="responsive-grid-1-1" style={{ marginTop: '1.25rem' }}>
         <Card title="Sección 1: Demográficos (Recepción)" className="glass-panel">
           {loadingProfile ? <p>Cargando...</p> : (
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -161,7 +327,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </Card>
       </div>
 
-      {/* Tarjeta de Antecedentes y Coloproctología */}
+      {/* Tarjeta de Antecedentes */}
       <Card title="Antecedentes Médicos y Quirúrgicos del Paciente" className="glass-panel" style={{ marginTop: '1rem' }}>
         {loadingProfile ? <p>Cargando antecedentes...</p> : (
           <div style={{ fontSize: '0.88rem' }}>
@@ -255,57 +421,156 @@ export function ClinicalWorkspace({ patient, onBack }) {
         {COMMON_PRESENTATIONS.map((pres, i) => <option key={i} value={pres} />)}
       </datalist>
 
-      {/* SECCIÓN 3 */}
-      <Card title="3. Motivo de Consulta y Enfermedad Actual" className="glass-panel">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {reasonForVisit.map((row, idx) => (
-            <div key={idx} className="dynamic-row-7">
-              <Input placeholder="Inicio Síntomas" value={row.onset} onChange={e=>updateReason(idx, 'onset', e.target.value)} />
-              <input 
-                className="input-field" 
-                list="symptoms-list"
-                placeholder="Síntoma..." 
-                value={row.symptom} 
-                onChange={e=>updateReason(idx, 'symptom', e.target.value)} 
-                style={{ padding: '0.5rem', height: '42px' }} 
-              />
-              <Input placeholder="Complemento" value={row.complement} onChange={e=>updateReason(idx, 'complement', e.target.value)} />
-              <Input placeholder="Región General" value={row.regionGeneral} onChange={e=>updateReason(idx, 'regionGeneral', e.target.value)} />
-              <Input placeholder="Reg. Específica" value={row.regionSpecific} onChange={e=>updateReason(idx, 'regionSpecific', e.target.value)} />
-              <Input placeholder="Relacionado con" value={row.relatedTo} onChange={e=>updateReason(idx, 'relatedTo', e.target.value)} />
-              <Input placeholder="Info. Adicional" value={row.additionalInfo} onChange={e=>updateReason(idx, 'additionalInfo', e.target.value)} />
-              <button type="button" onClick={() => removeReason(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer' }}><Trash size={18} /></button>
+      {/* SECCIÓN 3: SÍNTOMAS, SIGNOS Y BOTÓN GRAN MOTIVO DE CONSULTA IA */}
+      <Card 
+        title="3. Síntomas, Signos y Motivo de Consulta" 
+        className="glass-panel"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Tabla dinámica de síntomas */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#475569' }}>
+                Registro de Sintomatología y Signos (Tabulados o Texto Libre):
+              </span>
             </div>
-          ))}
-          <Button type="button" onClick={addReasonRow} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
-            <Plus size={16} /> Añadir Fila
-          </Button>
+
+            {reasonForVisit.map((row, idx) => (
+              <div key={idx} className="dynamic-row-7">
+                <Input placeholder="Inicio Síntomas" value={row.onset} onChange={e=>updateReason(idx, 'onset', e.target.value)} />
+                <input 
+                  className="input-field" 
+                  list="symptoms-list"
+                  placeholder="Síntoma o Signo (o escribir nuevo)..." 
+                  value={row.symptom} 
+                  onChange={e=>updateReason(idx, 'symptom', e.target.value)} 
+                  style={{ padding: '0.5rem', height: '42px' }} 
+                />
+                <Input placeholder="Características" value={row.complement} onChange={e=>updateReason(idx, 'complement', e.target.value)} />
+                <Input placeholder="Región General" value={row.regionGeneral} onChange={e=>updateReason(idx, 'regionGeneral', e.target.value)} />
+                <Input placeholder="Reg. Específica" value={row.regionSpecific} onChange={e=>updateReason(idx, 'regionSpecific', e.target.value)} />
+                <Input placeholder="Relacionado con" value={row.relatedTo} onChange={e=>updateReason(idx, 'relatedTo', e.target.value)} />
+                <Input placeholder="Info. Adicional" value={row.additionalInfo} onChange={e=>updateReason(idx, 'additionalInfo', e.target.value)} />
+                <button type="button" onClick={() => removeReason(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer' }}><Trash size={18} /></button>
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+              <Button type="button" onClick={addReasonRow} style={{ backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+                <Plus size={16} /> Añadir Fila de Síntoma
+              </Button>
+
+              {/* BOTÓN PROCESAMIENTO ASISTIDO: GRAN MOTIVO DE CONSULTA CON IA */}
+              <button
+                type="button"
+                onClick={handleGenerateAiReason}
+                disabled={generatingAiReason}
+                style={{
+                  background: 'linear-gradient(135deg, #0d9488 0%, #0284c7 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.6rem 1.25rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 4px 12px rgba(13, 148, 136, 0.25)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Sparkles size={18} />
+                {generatingAiReason ? 'Sintetizando con IA...' : '✨ Gran Motivo de Consulta con IA'}
+              </button>
+            </div>
+          </div>
+
+          {/* ÁREA DEL GRAN MOTIVO DE CONSULTA Y ENFERMEDAD ACTUAL (CON DICTADO POR VOZ) */}
+          <div style={{
+            backgroundColor: '#f8fafc',
+            border: '1px solid #cbd5e1',
+            borderRadius: '10px',
+            padding: '1.25rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label className="input-label" style={{ fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+                <span>Gran Motivo de Consulta y Enfermedad Actual (Redacción Médica Formal)</span>
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Dictar por voz:</span>
+                <SpeechMicButton
+                  onAppendText={(text) => setClinicalSummary(prev => prev ? `${prev} ${text}` : text)}
+                  title="Dictar motivo de consulta por voz"
+                />
+              </div>
+            </div>
+
+            <textarea
+              className="input-field"
+              placeholder="Haga clic en '✨ Gran Motivo de Consulta con IA' para redactar automáticamente a partir de los síntomas, o dicte / escriba libremente la descripción clínica formal..."
+              style={{ minHeight: '110px', resize: 'vertical', width: '100%', lineHeight: '1.6', fontSize: '0.92rem' }}
+              value={clinicalSummary}
+              onChange={e => setClinicalSummary(e.target.value)}
+            />
+            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+              * Esta síntesis clínica se incluirá en el informe médico oficial y en el expediente SOAP estandarizado.
+            </p>
+          </div>
         </div>
       </Card>
 
-      {/* SECCIÓN 4 */}
+      {/* SECCIÓN 4: HALLAZGOS CLÍNICOS CON DICTADO POR VOZ DIRECTO */}
       <Card title="4. Hallazgos Clínicos (Examen Físico)" className="glass-panel">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }}>
           <div>
-            <label className="input-label">Inspección</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Inspección</label>
+              <SpeechMicButton
+                onAppendText={(text) => setPhysicalInspection(prev => prev ? `${prev} ${text}` : text)}
+                title="Dictar inspección por voz"
+              />
+            </div>
             <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={physicalInspection} onChange={e=>setPhysicalInspection(e.target.value)} />
           </div>
+
           <div>
-            <label className="input-label">Palpación</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Palpación</label>
+              <SpeechMicButton
+                onAppendText={(text) => setPhysicalPalpation(prev => prev ? `${prev} ${text}` : text)}
+                title="Dictar palpación por voz"
+              />
+            </div>
             <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={physicalPalpation} onChange={e=>setPhysicalPalpation(e.target.value)} />
           </div>
+
           <div>
-            <label className="input-label">Tacto Rectal</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Tacto Rectal</label>
+              <SpeechMicButton
+                onAppendText={(text) => setRectalExamination(prev => prev ? `${prev} ${text}` : text)}
+                title="Dictar tacto rectal por voz"
+              />
+            </div>
             <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={rectalExamination} onChange={e=>setRectalExamination(e.target.value)} />
           </div>
+
           <div>
-            <label className="input-label">Anoscopia</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Anoscopia</label>
+              <SpeechMicButton
+                onAppendText={(text) => setAnoscopy(prev => prev ? `${prev} ${text}` : text)}
+                title="Dictar anoscopia por voz"
+              />
+            </div>
             <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={anoscopy} onChange={e=>setAnoscopy(e.target.value)} />
           </div>
         </div>
       </Card>
 
-      {/* SECCIÓN 5 */}
+      {/* SECCIÓN 5: DIAGNÓSTICOS */}
       <Card title="5. Diagnósticos" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {diagnoses.map((row, idx) => (
@@ -341,7 +606,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </div>
       </Card>
 
-      {/* SECCIÓN 6 */}
+      {/* SECCIÓN 6: PLAN DE TRABAJO (TRATAMIENTO) */}
       <Card title="6. Plan de Trabajo (Tratamiento)" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {treatmentPlan.map((row, idx) => (
@@ -349,7 +614,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
               <input 
                 className="input-field" 
                 list="medications-list"
-                placeholder="Medicamento / Estudio" 
+                placeholder="Medicamento / Principio Activo" 
                 value={row.medication} 
                 onChange={e=>updateTreatment(idx, 'medication', e.target.value)} 
                 style={{ padding: '0.5rem', height: '42px' }}
@@ -362,7 +627,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 onChange={e=>updateTreatment(idx, 'presentation', e.target.value)} 
                 style={{ padding: '0.5rem', height: '42px' }}
               />
-              <Input placeholder="Indicación" value={row.indication} onChange={e=>updateTreatment(idx, 'indication', e.target.value)} />
+              <Input placeholder="Indicación / Posología" value={row.indication} onChange={e=>updateTreatment(idx, 'indication', e.target.value)} />
               <Input placeholder="Duración" value={row.duration} onChange={e=>updateTreatment(idx, 'duration', e.target.value)} />
               <button type="button" onClick={() => removeTreatment(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer' }}><Trash size={18} /></button>
             </div>
@@ -373,11 +638,17 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </div>
       </Card>
 
-      {/* SECCIÓN 7 */}
+      {/* SECCIÓN 7: INFORME EVOLUTIVO */}
       <Card title="7. Informe Evolutivo" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label className="input-label">Descripción General</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Descripción General</label>
+              <SpeechMicButton
+                onAppendText={(text) => setEvolutionaryReport(prev => prev ? `${prev} ${text}` : text)}
+                title="Dictar informe evolutivo por voz"
+              />
+            </div>
             <textarea className="input-field" style={{ minHeight: '120px', resize: 'vertical', width: '100%' }} value={evolutionaryReport} onChange={e=>setEvolutionaryReport(e.target.value)} />
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>* Recuerde que la inspección y examen físico evolutivo puede reflejarse en los campos de la Sección 4 superiores o documentarse en la descripción general.</p>
@@ -396,7 +667,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
             }}
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
-            <Printer size={16} /> Imprimir Récipe Médico
+            <Printer size={16} /> Imprimir Récipes (Farmacia / Indicaciones)
           </Button>
 
           <Button 
@@ -408,7 +679,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
             }}
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
           >
-            <FileText size={16} /> Imprimir Informe Médico
+            <FileText size={16} /> Imprimir Informe Médico de Consulta
           </Button>
         </div>
 
@@ -417,7 +688,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </Button>
       </div>
 
-      {/* MODAL DE IMPRESIÓN OFICIAL UNIMECO */}
+      {/* MODAL DE IMPRESIÓN OFICIAL UNIMECO CON SOPORTE DOBLE RÉCIPE */}
       <MedicalDocumentModal
         isOpen={showPrintModal}
         onClose={() => setShowPrintModal(false)}
@@ -431,7 +702,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
           doctor: JSON.parse(localStorage.getItem('user') || '{}'),
           treatmentPlan: treatmentPlan,
           diagnoses: diagnoses.map(d => d.diagnosis).filter(Boolean).join(', '),
-          reasonForVisit: reasonForVisit.map(r => `${r.symptom || ''} ${r.onset ? `(${r.onset})` : ''} ${r.additionalInfo || ''}`).filter(s => s.trim().length > 0).join('; '),
+          reasonForVisit: clinicalSummary || reasonForVisit.map(r => `${r.symptom || ''} ${r.onset ? `(${r.onset})` : ''} ${r.additionalInfo || ''}`).filter(s => s.trim().length > 0).join('; '),
           physicalExam: [
             physicalInspection && `Inspección: ${physicalInspection}`,
             physicalPalpation && `Palpación: ${physicalPalpation}`,
@@ -439,6 +710,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
             anoscopy && `Anoscopia: ${anoscopy}`
           ].filter(Boolean).join('. '),
           evolutionaryReport: evolutionaryReport,
+          recommendations: evolutionaryReport,
           sede: patient.sedeAtencion || profile.sedeAtencion || 'CENTRAL'
         }}
       />
@@ -446,3 +718,5 @@ export function ClinicalWorkspace({ patient, onBack }) {
     </div>
   );
 }
+
+export default ClinicalWorkspace;

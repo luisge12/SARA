@@ -35,6 +35,29 @@ const Consultation = sequelize.define('Consultation', {
     field: 'reason_for_visit'
   },
 
+  // Gran Motivo de Consulta y Enfermedad Actual estructurado por IA
+  clinicalSummary: {
+    type: DataTypes.TEXT,
+    field: 'clinical_summary'
+  },
+
+  // Tramitación: Primera Consulta vs Reconsulta
+  consultationFlow: {
+    type: DataTypes.STRING(50),
+    field: 'consultation_flow',
+    defaultValue: 'PRIMERA_VEZ'
+  },
+
+  // Clasificación de Razón de Consulta
+  reasonGeneral: {
+    type: DataTypes.STRING(150),
+    field: 'reason_general'
+  },
+  reasonSpecific: {
+    type: DataTypes.STRING(255),
+    field: 'reason_specific'
+  },
+
   // Sección 4: Hallazgos
   physicalInspection: {
     type: DataTypes.TEXT,
