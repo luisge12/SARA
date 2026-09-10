@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Camera, User } from 'lucide-react';
 import { Input } from './Input';
 import { Button } from './Button';
+import { PatientCameraCaptureModal } from './PatientCameraCaptureModal';
 import api from '../services/api';
 
 export function PatientRegistrationModal({ onClose, onSuccess, initialData = null }) {
@@ -21,6 +22,9 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
   const [treatingDoctor, setTreatingDoctor] = useState(profile.treatingDoctor || '');
   const [referringEntity, setReferringEntity] = useState(profile.referringEntity || '');
   const [address, setAddress] = useState(profile.address || '');
+  const [photoUrl, setPhotoUrl] = useState(profile.photoUrl || profile.photo_url || '');
+  const [flowType, setFlowType] = useState(profile.flowType || profile.flow_type || 'PRIMERA_VEZ');
+  const [showCamera, setShowCamera] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -40,7 +44,9 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
         email,
         treatingDoctor,
         referringEntity,
-        address
+        address,
+        photoUrl,
+        flowType
       };
 
       if (initialData) {
@@ -74,6 +80,80 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
             {errorMsg}
           </div>
         )}
+
+        {/* Módulo Visual - Foto del Paciente y Tipo de Trámite */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.25rem',
+          padding: '1rem',
+          backgroundColor: '#f8fafc',
+          borderRadius: '10px',
+          border: '1px dashed #cbd5e1',
+          marginBottom: '0.5rem'
+        }}>
+          <div style={{
+            width: '70px',
+            height: '70px',
+            borderRadius: '50%',
+            backgroundColor: '#e2e8f0',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            border: '2px solid var(--color-primary)'
+          }}>
+            {photoUrl ? (
+              <img src={photoUrl} alt="Paciente" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <User size={36} color="#94a3b8" />
+            )}
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowCamera(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: '6px',
+                  backgroundColor: 'var(--color-primary)',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Camera size={15} /> {photoUrl ? 'Cambiar Foto / Selfie' : 'Tomar Foto / Selfie (Webcam)'}
+              </button>
+              {photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setPhotoUrl('')}
+                  style={{ background: 'none', border: 'none', color: 'var(--color-alert)', fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  Quitar
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>Tipo de Trámite:</label>
+              <select
+                value={flowType}
+                onChange={(e) => setFlowType(e.target.value)}
+                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: 600 }}
+              >
+                <option value="PRIMERA_VEZ">Primera Vez (Apertura de Expediente)</option>
+                <option value="RECONSULTA">Reconsulta (Control / Seguimiento)</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {!initialData && (
@@ -127,6 +207,13 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
             <Button type="submit" disabled={loading}>{loading ? (initialData ? 'Actualizando...' : 'Guardando...') : (initialData ? 'Actualizar Paciente' : 'Registrar Paciente')}</Button>
           </div>
         </form>
+
+        {showCamera && (
+          <PatientCameraCaptureModal
+            onClose={() => setShowCamera(false)}
+            onCapture={(imageData) => setPhotoUrl(imageData)}
+          />
+        )}
       </div>
     </div>
   );

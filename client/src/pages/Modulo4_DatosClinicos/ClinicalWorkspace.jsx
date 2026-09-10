@@ -3,7 +3,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer, UserCheck, RefreshCw, Mic } from 'lucide-react';
+import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer, UserCheck, RefreshCw, Mic, Bookmark, Pill } from 'lucide-react';
 import { AuditLogModal } from './AuditLogModal';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 import { SpeechMicButton } from '../../components/SpeechMicButton';
@@ -13,7 +13,8 @@ import {
   COMMON_MEDICATIONS, 
   COMMON_PRESENTATIONS, 
   COMMON_SYMPTOMS,
-  COMMON_SPECIALTIES
+  COMMON_SPECIALTIES,
+  PHARMACOLOGICAL_GUIDE
 } from '../../data/clinicalTemplates';
 
 export function ClinicalWorkspace({ patient, onBack }) {
@@ -38,6 +39,59 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [diagnoses, setDiagnoses] = useState([]);
   const [treatmentPlan, setTreatmentPlan] = useState([]);
   const [evolutionaryReport, setEvolutionaryReport] = useState('');
+
+  // Pautas farmacológicas y esquemas personalizados
+  const [savedSchemes, setSavedSchemes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sara_saved_treatment_schemes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const handleSelectPharmGuide = (e) => {
+    const val = e.target.value;
+    if (val === '') return;
+    const item = PHARMACOLOGICAL_GUIDE[Number(val)];
+    if (!item) return;
+
+    const newRow = {
+      medication: `${item.brandName} (${item.activeIngredient})`,
+      presentation: item.presentation,
+      indication: item.defaultIndication,
+      duration: item.defaultDuration
+    };
+
+    setTreatmentPlan(prev => {
+      if (prev.length === 1 && !prev[0].medication) {
+        return [newRow];
+      }
+      return [...prev, newRow];
+    });
+    e.target.value = '';
+  };
+
+  const handleSaveCustomScheme = () => {
+    if (treatmentPlan.length === 0 || !treatmentPlan.some(t => t.medication)) {
+      alert('Agregue al menos un medicamento antes de guardar como pauta personalizada.');
+      return;
+    }
+    const schemeName = prompt('Nombre para esta pauta de tratamiento (ej. Pauta Fisura Aguda / Pauta Hemorroides):');
+    if (!schemeName || !schemeName.trim()) return;
+    const updated = [...savedSchemes, { id: Date.now().toString(), name: schemeName.trim(), items: treatmentPlan }];
+    setSavedSchemes(updated);
+    localStorage.setItem('sara_saved_treatment_schemes', JSON.stringify(updated));
+    alert(`Plantilla "${schemeName}" guardada correctamente.`);
+  };
+
+  const handleLoadCustomScheme = (e) => {
+    const id = e.target.value;
+    if (!id) return;
+    const found = savedSchemes.find(s => s.id === id);
+    if (!found) return;
+    setTreatmentPlan(found.items || []);
+    e.target.value = '';
+  };
 
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -608,7 +662,90 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
       {/* SECCIÓN 6: PLAN DE TRABAJO (TRATAMIENTO) */}
       <Card title="6. Plan de Trabajo (Tratamiento)" className="glass-panel">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          
+          {/* BARRA DE HERRAMIENTAS: GUÍA FARMACOLÓGICA Y PAUTAS FAVORITAS */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+            padding: '0.75rem 1rem',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <Pill size={18} color="var(--color-primary)" />
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+                Guía Rápida:
+              </span>
+              <select
+                onChange={handleSelectPharmGuide}
+                defaultValue=""
+                style={{
+                  padding: '0.45rem 0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  maxWidth: '300px'
+                }}
+              >
+                <option value="">-- Insertar Fármaco Frecuente --</option>
+                {PHARMACOLOGICAL_GUIDE.map((med, i) => (
+                  <option key={i} value={i}>
+                    {med.brandName} ({med.activeIngredient.slice(0, 32)}...)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {savedSchemes.length > 0 && (
+                <select
+                  onChange={handleLoadCustomScheme}
+                  defaultValue=""
+                  style={{
+                    padding: '0.45rem 0.75rem',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    fontSize: '0.85rem',
+                    fontWeight: 500
+                  }}
+                >
+                  <option value="">-- Cargar Mi Pauta --</option>
+                  {savedSchemes.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSaveCustomScheme}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.45rem 0.75rem',
+                  borderRadius: '6px',
+                  backgroundColor: '#ffffff',
+                  color: 'var(--color-primary)',
+                  border: '1px solid var(--color-primary)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Bookmark size={15} /> Guardar como Mi Pauta
+              </button>
+            </div>
+          </div>
+
           {treatmentPlan.map((row, idx) => (
             <div key={idx} className="dynamic-row-5">
               <input 
@@ -632,6 +769,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
               <button type="button" onClick={() => removeTreatment(idx)} style={{ background: 'none', border: 'none', color: 'var(--color-alert)', cursor: 'pointer' }}><Trash size={18} /></button>
             </div>
           ))}
+
           <Button type="button" onClick={addTreatment} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
             <Plus size={16} /> Añadir Medicamento
           </Button>

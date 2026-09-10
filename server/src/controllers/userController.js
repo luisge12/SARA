@@ -63,7 +63,8 @@ module.exports = {
         shift, academicDegree, specialty,
         gender, dateOfBirth, phone, email, treatingDoctor, referringEntity, nextAppointment, address,
         personalHistory, surgicalHistory, familyHistory, menarcheAge, menopauseAge, obstetricFormula,
-        bristolType, bowelFrequency, strainToEvacuate, incompleteEvacuation, bowelNotes
+        bristolType, bowelFrequency, strainToEvacuate, incompleteEvacuation, bowelNotes,
+        photoUrl, flowType, customFields
       } = req.body;
       if (!username || !password || !role) {
         return res.status(400).json({ error: 'Campos requeridos faltantes' });
@@ -123,6 +124,9 @@ module.exports = {
           referringEntity,
           nextAppointment: safeIso(nextAppointment),
           address,
+          photoUrl: photoUrl || null,
+          flowType: flowType || 'PRIMERA_VEZ',
+          customFields: customFields || {},
           personalHistory: personalHistory || null,
           surgicalHistory: surgicalHistory || null,
           familyHistory: familyHistory || null
@@ -142,6 +146,7 @@ module.exports = {
           referringEntity,
           nextAppointment: safeIso(nextAppointment),
           address,
+          flowType: flowType || 'PRIMERA_VEZ',
           personalHistory,
           surgicalHistory,
           familyHistory
