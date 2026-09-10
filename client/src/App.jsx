@@ -28,7 +28,7 @@ function PortalPacienteIndex() {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         {/* Ruta del Módulo 1: Login */}
         <Route path="/login" element={<Login />} />
