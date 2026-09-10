@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
@@ -30,7 +29,7 @@ function Modulo2_GestionAdministrativa() {
   const [loading, setLoading] = useState(true);
 
   // Form states
-  const initialRole = isMaster ? 'Administrador' : 'Paciente';
+  const initialRole = isMaster ? 'Administrador' : 'Recepcionista';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState(initialRole);
@@ -136,10 +135,10 @@ function Modulo2_GestionAdministrativa() {
           shift, academicDegree
         } : {})
       };
-      
+
       const response = await api.post('/api/users/create', payload);
       const createdUser = response.data.user;
-      
+
       // Reset form
       setUsername('');
       setPassword('');
@@ -149,7 +148,7 @@ function Modulo2_GestionAdministrativa() {
       setMedicalCollegeNumber('');
       setRole(initialRole);
       setSedeAtencion('CENTRAL');
-      
+
       setGender('Masculino');
       setDateOfBirth('');
       setPhone('');
@@ -162,10 +161,10 @@ function Modulo2_GestionAdministrativa() {
       setPersonalHistory('');
       setSurgicalHistory('');
       setFamilyHistory('');
-      
+
       setShift('Mañana');
       setAcademicDegree('');
-      
+
       // Reload user list
       await fetchUsers();
 
@@ -205,28 +204,27 @@ function Modulo2_GestionAdministrativa() {
   // 1. Return Access Denied if user has no access
   if (!hasAccess) {
     return (
-      <DashboardLayout>
-        <div className="card glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
-          <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-alert)', marginBottom: '1.5rem' }}>
-            <ShieldAlert size={48} />
-          </div>
-          <h3 style={{ color: 'var(--color-text-main)', fontSize: '1.75rem', fontWeight: '700', marginBottom: '1rem' }}>Acceso Restringido</h3>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '1rem', lineHeight: '1.6' }}>
-            Tu rol actual no tiene privilegios para acceder al módulo de gestión de usuarios o pacientes.
-          </p>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '1rem' }}>
-            Tu rol actual registrado es: <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{currentUser.role || 'Invitado'}</span>
-          </p>
+      <div className="card glass-panel" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
+        <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-alert)', marginBottom: '1.5rem' }}>
+          <ShieldAlert size={48} />
         </div>
-      </DashboardLayout>
+        <h3 style={{ color: 'var(--color-text-main)', fontSize: '1.75rem', fontWeight: '700', marginBottom: '1rem' }}>Acceso Restringido</h3>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '1rem', lineHeight: '1.6' }}>
+          Tu rol actual no tiene privilegios para acceder al módulo de gestión de usuarios o pacientes.
+          Por favor, contacta al administrador del sistema si consideras que esto es un error.
+        </p>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '1rem' }}>
+          Tu rol actual registrado es: <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{currentUser.role || 'Invitado'}</span>
+        </p>
+      </div>
     );
   }
 
   // 2. Return Admin Dashboard if Master
   return (
-    <DashboardLayout>
+    <div className="modulo-registro-container p-6 max-w-7xl mx-auto space-y-6">
       <div className="module-container">
-        
+
         <header style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-primary)' }}>Gestión Recepción y Citas Médicas</h1>
@@ -287,7 +285,7 @@ function Modulo2_GestionAdministrativa() {
         </Card>
 
         <div className="responsive-admin-grid">
-          
+
           {/* USER LIST PANEL */}
           <Card title="Cuentas de Usuarios y Pacientes" action={<Users size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
             {loading ? (
@@ -297,15 +295,15 @@ function Modulo2_GestionAdministrativa() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '520px', overflowY: 'auto', paddingRight: '0.25rem' }}>
                 {usersList.map((usr) => (
-                  <div 
-                    key={usr.id} 
-                    style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      padding: '1rem', 
-                      borderRadius: 'var(--radius-md)', 
-                      border: '1px solid var(--border-color)', 
+                  <div
+                    key={usr.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '1rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
                       backgroundColor: 'var(--color-bg-main)',
                       flexWrap: 'wrap',
                       gap: '0.5rem'
@@ -352,12 +350,12 @@ function Modulo2_GestionAdministrativa() {
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {usr.role === 'Paciente' && (
                         <>
-                          <button 
+                          <button
                             onClick={() => handleOpenAppointmentModal(usr.id)}
-                            style={{ 
-                              background: 'var(--color-accent)', 
-                              border: 'none', 
-                              color: '#fff', 
+                            style={{
+                              background: 'var(--color-accent)',
+                              border: 'none',
+                              color: '#fff',
                               cursor: 'pointer',
                               padding: '0.4rem 0.75rem',
                               borderRadius: '8px',
@@ -409,12 +407,12 @@ function Modulo2_GestionAdministrativa() {
                         </>
                       )}
                       {isMaster && (
-                        <button 
-                          onClick={() => handleDeleteUser(usr.id, usr.username)} 
-                          style={{ 
-                            background: 'none', 
-                            border: 'none', 
-                            color: 'var(--color-alert)', 
+                        <button
+                          onClick={() => handleDeleteUser(usr.id, usr.username)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-alert)',
                             cursor: 'pointer',
                             padding: '0.5rem',
                             borderRadius: '50%',
@@ -440,9 +438,9 @@ function Modulo2_GestionAdministrativa() {
           <Card title="Registrar Nuevo Usuario" action={<UserPlus size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel">
 
             <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              
+
               <div className="responsive-grid-1-1">
-                <Input 
+                <Input
                   label="Nombre de Usuario *"
                   type="text"
                   placeholder="ej. luisg12"
@@ -450,7 +448,7 @@ function Modulo2_GestionAdministrativa() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
-                <Input 
+                <Input
                   label="Contraseña *"
                   type="password"
                   placeholder="Contraseña"
@@ -468,23 +466,17 @@ function Modulo2_GestionAdministrativa() {
                     value={role} 
                     onChange={(e) => setRole(e.target.value)}
                     style={{ height: '39px', padding: '0.5rem 1rem' }}
-                    disabled={!isMaster && role !== 'Paciente'}
                   >
-                    {isMaster && (
-                      <>
-                        <option value="Administrador">Administrador</option>
-                        <option value="Médico">Médico</option>
-                        <option value="Recepcionista">Recepcionista</option>
-                      </>
-                    )}
-                    <option value="Paciente">Paciente</option>
+                    <option value="Administrador" disabled={!isMaster}>Administrador</option>
+                    <option value="Médico">Médico</option>
+                    <option value="Recepcionista">Recepcionista</option>
                   </select>
                 </div>
                 <div className="input-group">
                   <label className="input-label">Sede de Atención *</label>
-                  <select 
-                    className="input-field" 
-                    value={sedeAtencion} 
+                  <select
+                    className="input-field"
+                    value={sedeAtencion}
                     onChange={(e) => setSedeAtencion(e.target.value)}
                     style={{ height: '39px', padding: '0.5rem 1rem' }}
                   >
@@ -496,7 +488,7 @@ function Modulo2_GestionAdministrativa() {
                 </div>
               </div>
 
-              <Input 
+              <Input
                 label="Nombre Completo"
                 type="text"
                 placeholder="Nombre y Apellido"
@@ -504,7 +496,7 @@ function Modulo2_GestionAdministrativa() {
                 onChange={(e) => setName(e.target.value)}
               />
 
-              <Input 
+              <Input
                 label="Documento de Identificación / Cédula"
                 type="text"
                 placeholder="C.I. o Pasaporte"
@@ -545,14 +537,14 @@ function Modulo2_GestionAdministrativa() {
 
               {role === 'Médico' && (
                 <div className="responsive-grid-1-1">
-                  <Input 
+                  <Input
                     label="Número MPPS"
                     type="text"
                     placeholder="Ministerio"
                     value={mppsNumber}
                     onChange={(e) => setMppsNumber(e.target.value)}
                   />
-                  <Input 
+                  <Input
                     label="Colegio de Médicos"
                     type="text"
                     placeholder="Número de Registro"
@@ -561,11 +553,11 @@ function Modulo2_GestionAdministrativa() {
                   />
                   <div className="input-group">
                     <label className="input-label">Especialidad Médica</label>
-                    <input 
-                      className="input-field" 
+                    <input
+                      className="input-field"
                       list="specialties-list"
-                      placeholder="Seleccione o escriba..." 
-                      value={specialty} 
+                      placeholder="Seleccione o escriba..."
+                      value={specialty}
                       onChange={(e) => setSpecialty(e.target.value)}
                       style={{ height: '39px', padding: '0.5rem 1rem' }}
                     />
@@ -582,9 +574,9 @@ function Modulo2_GestionAdministrativa() {
                 <div className="responsive-grid-1-1">
                   <div className="input-group">
                     <label className="input-label">Turno</label>
-                    <select 
-                      className="input-field" 
-                      value={shift} 
+                    <select
+                      className="input-field"
+                      value={shift}
                       onChange={(e) => setShift(e.target.value)}
                       style={{ height: '39px', padding: '0.5rem 1rem' }}
                     >
@@ -594,13 +586,14 @@ function Modulo2_GestionAdministrativa() {
                       <option value="Mixto">Mixto</option>
                     </select>
                   </div>
-                  <Input 
+                  <Input
                     label="Título o Grado Académico"
                     type="text"
                     placeholder="Ej. TSU, Licenciada, etc."
                     value={academicDegree}
                     onChange={(e) => setAcademicDegree(e.target.value)}
                   />
+                  {/* The Patient specific fields are now handled in the PatientRegistrationModal in the Pacientes module */}
                 </div>
               )}
 
@@ -624,23 +617,22 @@ function Modulo2_GestionAdministrativa() {
                   </span>
                 </div>
               )}
-
               <Button type="submit" fullWidth style={{ marginTop: '0.5rem' }}>
                 Crear Usuario
               </Button>
             </form>
           </Card>
-          
+
         </div>
       </div>
-      
+
       {selectedPatient && (
-        <PatientProfileEditor 
-          patient={selectedPatient} 
+        <PatientProfileEditor
+          patient={selectedPatient}
           onClose={() => {
             setSelectedPatient(null);
             fetchUsers();
-          }} 
+          }}
         />
       )}
 
@@ -652,7 +644,7 @@ function Modulo2_GestionAdministrativa() {
       )}
 
       {showAppointmentModal && (
-        <AppointmentModal 
+        <AppointmentModal
           initialPatientId={appointmentPatientId}
           appointmentToEdit={appointmentToEdit}
           onClose={() => {
@@ -665,7 +657,7 @@ function Modulo2_GestionAdministrativa() {
           }}
         />
       )}
-    </DashboardLayout>
+    </div>
   );
 }
 
