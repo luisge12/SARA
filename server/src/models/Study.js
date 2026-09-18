@@ -31,6 +31,14 @@ const Study = sequelize.define('Study', {
     allowNull: false,
     field: 'study_type'
   },
+  category: {
+    type: DataTypes.STRING(100),
+    defaultValue: 'General'
+  },
+  techniqueOrRegion: {
+    type: DataTypes.STRING(255),
+    field: 'technique_or_region'
+  },
   sede: {
     type: DataTypes.STRING(100),
     defaultValue: 'CENTRAL'
@@ -56,6 +64,10 @@ const Study = sequelize.define('Study', {
   status: {
     type: DataTypes.STRING(50),
     defaultValue: 'Completado'
+  },
+  metadata: {
+    type: DataTypes.JSONB,
+    defaultValue: {}
   },
   attachments: {
     type: DataTypes.JSONB,

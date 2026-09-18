@@ -29,7 +29,6 @@ app.use((req, res, next) => {
 // Importar Rutas de SARA
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
-const clinicalRoutes = require('./routes/clinicalRoutes');
 const billingRoutes = require('./routes/billingRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const statsRoutes = require('./routes/statsRoutes');
@@ -39,7 +38,6 @@ const studyRoutes = require('./routes/studyRoutes');
 // Registrar Rutas de la API
 app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
-app.use('/api/clinical', clinicalRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/stats', statsRoutes);

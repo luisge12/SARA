@@ -147,6 +147,23 @@ const initDatabase = async () => {
           await sequelize.query(`ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
         }
       }
+
+      // Asegurar columnas en medical_studies
+      const [studyCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'medical_studies';
+      `);
+      const existingStudyCols = (studyCols || []).map(c => c.column_name.toLowerCase());
+      const neededStudyCols = [
+        { name: 'category', type: "VARCHAR(100) DEFAULT 'General'" },
+        { name: 'technique_or_region', type: 'VARCHAR(255)' },
+        { name: 'metadata', type: "JSONB DEFAULT '{}'" }
+      ];
+
+      for (const col of neededStudyCols) {
+        if (!existingStudyCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
     } catch (err) {
       console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }
@@ -199,7 +216,7 @@ const initDatabase = async () => {
       console.log('Usuario de prueba Master (luisge) creado exitosamente.');
     }
 
-    // Semillar usuario master con clave 1234
+    // Semillar usuario master con clave 1234 solo si no existe
     const masterExists = await User.findOne({ where: { username: 'master' } });
     if (!masterExists) {
       const salt = await bcrypt.genSalt(10);
@@ -212,12 +229,6 @@ const initDatabase = async () => {
         sedeAtencion: 'CENTRAL'
       });
       console.log('Usuario Master (master) creado exitosamente.');
-    } else {
-      const salt = await bcrypt.genSalt(10);
-      masterExists.passwordHash = await bcrypt.hash('1234', salt);
-      masterExists.role = 'Master';
-      await masterExists.save();
-      console.log('Usuario Master (master) actualizado exitosamente.');
     }
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);

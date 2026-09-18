@@ -10,6 +10,8 @@ module.exports = {
         patientId,
         doctorId,
         studyType,
+        category,
+        techniqueOrRegion,
         sede,
         date,
         findings,
@@ -17,6 +19,7 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status,
+        metadata,
         attachments
       } = req.body;
 
@@ -31,6 +34,8 @@ module.exports = {
         patientId,
         doctorId: assignedDoctorId,
         studyType,
+        category: category || 'General',
+        techniqueOrRegion: techniqueOrRegion || null,
         sede: sede || 'CENTRAL',
         date,
         findings,
@@ -38,6 +43,7 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status: status || 'Completado',
+        metadata: metadata || {},
         attachments: attachments || []
       });
 
@@ -68,7 +74,14 @@ module.exports = {
   // Obtener todos los estudios
   getStudies: async (req, res) => {
     try {
+      const { category } = req.query;
+      const whereClause = {};
+      if (category && category !== 'Todos') {
+        whereClause.category = category;
+      }
+
       const studies = await Study.findAll({
+        where: whereClause,
         include: [
           {
             model: User,
@@ -96,8 +109,14 @@ module.exports = {
   getPatientStudies: async (req, res) => {
     try {
       const { patientId } = req.params;
+      const { category } = req.query;
+      const whereClause = { patientId };
+      if (category && category !== 'Todos') {
+        whereClause.category = category;
+      }
+
       const studies = await Study.findAll({
-        where: { patientId },
+        where: whereClause,
         include: [
           {
             model: User,
@@ -123,6 +142,8 @@ module.exports = {
         patientId,
         doctorId,
         studyType,
+        category,
+        techniqueOrRegion,
         sede,
         date,
         findings,
@@ -130,6 +151,7 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status,
+        metadata,
         attachments
       } = req.body;
 
@@ -141,6 +163,8 @@ module.exports = {
       if (patientId) study.patientId = patientId;
       if (doctorId) study.doctorId = doctorId;
       if (studyType) study.studyType = studyType;
+      if (category !== undefined) study.category = category;
+      if (techniqueOrRegion !== undefined) study.techniqueOrRegion = techniqueOrRegion;
       if (sede) study.sede = sede;
       if (date) study.date = date;
       if (findings !== undefined) study.findings = findings;
@@ -148,6 +172,7 @@ module.exports = {
       if (diagnosticImpression !== undefined) study.diagnosticImpression = diagnosticImpression;
       if (recommendations !== undefined) study.recommendations = recommendations;
       if (status) study.status = status;
+      if (metadata !== undefined) study.metadata = metadata;
       if (attachments !== undefined) study.attachments = attachments;
 
       await study.save();

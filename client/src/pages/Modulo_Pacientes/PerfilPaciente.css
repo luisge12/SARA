@@ -522,3 +522,175 @@
 .clinical-data-item, .nota-card, .study-card {
   overflow: hidden; /* Evita que el contenido desborde sus tarjetas */
 }
+
+/* =========================================================
+   Estilos para la Ficha y Antecedentes del Paciente
+   ========================================================= */
+.ficha-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.ficha-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ficha-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ficha-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ficha-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ficha-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.ficha-item-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ficha-item-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.ficha-item-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ficha-item-value {
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.ficha-photo-box {
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.ficha-photo-placeholder {
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+/* =========================================================
+   Estilos para el Listado de Citas en Perfil
+   ========================================================= */
+.citas-container-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.citas-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.cita-card-perfil {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cita-card-perfil:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.cita-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cita-date-badge {
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.cita-status-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.cita-status-tag.confirmada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.cita-status-tag.pendiente {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.cita-status-tag.atendida {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.cita-status-tag.cancelada {
+  background: #fee2e2;
+  color: #b91c1c;
+}

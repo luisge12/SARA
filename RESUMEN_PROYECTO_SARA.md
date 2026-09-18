@@ -45,9 +45,9 @@ SARA/
 │       │   ├── aiController.js
 │       │   ├── appointmentController.js
 │       │   ├── billingController.js
-│       │   ├── clinicalController.js
 │       │   ├── patientController.js
 │       │   ├── statsController.js
+│       │   ├── studyController.js
 │       │   └── userController.js
 │       ├── middlewares/authMiddleware.js
 │       ├── models/
@@ -55,18 +55,20 @@ SARA/
 │       │   ├── AuditLog.js
 │       │   ├── Consultation.js
 │       │   ├── PatientProfile.js
+│       │   ├── Study.js
 │       │   ├── Transaction.js
 │       │   └── User.js
 │       ├── routes/
 │       │   ├── aiRoutes.js
 │       │   ├── appointmentRoutes.js
 │       │   ├── billingRoutes.js
-│       │   ├── clinicalRoutes.js
 │       │   ├── patientRoutes.js
 │       │   ├── statsRoutes.js
+│       │   ├── studyRoutes.js
 │       │   └── userRoutes.js
 │       └── services/
-│           ├── aiService.js
+│           ├── auditService.js
+│           ├── bcvService.js
 │           └── cronService.js
 └── client/
     ├── index.html
@@ -152,19 +154,19 @@ SARA/
 
 #### 🎮 Controladores (`src/controllers/`)
 * **`userController.js`**: Autenticación de usuarios del sistema, generación de tokens JWT, registro de nuevos colaboradores, hash de contraseñas con bcrypt y listado de personal médico.
-* **`patientController.js`**: Operaciones CRUD sobre la tabla de pacientes, búsqueda avanzada por cédula o nombre, gestión de fichas demográficas y autenticación del Portal del Paciente.
-* **`clinicalController.js`**: Gestión completa de la historia clínica: registro de signos vitales, antecedentes, diagnósticos, recetas, planes de trabajo y publicación de informes para el portal.
-* **`billingController.js`**: Gestión de ingresos de caja, cobro de servicios prestados, métodos de pago (efectivo, transferencias, divisas) y consolidado de reportes diarios.
+* **`patientController.js`**: Operaciones CRUD sobre la tabla de pacientes, búsqueda avanzada por cédula o nombre, gestión de historias clínicas y consultas (`/consultations`), antecedentes, trazabilidad y autenticación del Portal del Paciente.
+* **`billingController.js`**: Gestión de ingresos de caja, cobro de servicios prestados, métodos de pago (efectivo, transferencias, divisas), tasa oficial BCV y consolidado de reportes financieros.
 * **`appointmentController.js`**: Creación, actualización, reprogramación y consulta de citas médicas por paciente, médico tratante y fecha.
+* **`studyController.js`**: Registro, consulta, edición y seguimiento de estudios y procedimientos médicos (Módulo 6).
 * **`statsController.js`**: Generación de reportes analíticos e indicadores clave de rendimiento (KPIs) para directivos y administradores.
-* **`aiController.js`**: Endpoint de enlace entre el frontend y el servicio de IA para procesar consultas y emitir respuestas en lenguaje natural.
+* **`aiController.js`**: Asistente SARA-AI con Google Gemini y motor clínico algorítmico determinista para generación de historias y respuestas asistenciales.
 
 #### 🛣️ Rutas API (`src/routes/`)
 * **`userRoutes.js`**: Enrutamiento para login, perfil y administración de usuarios (`/api/users`).
-* **`patientRoutes.js`**: Enrutamiento para gestión de pacientes y acceso de pacientes (`/api/patients`).
-* **`clinicalRoutes.js`**: Enrutamiento para historias clínicas, recetas y diagnósticos (`/api/clinical`).
-* **`billingRoutes.js`**: Enrutamiento para caja y cobros de servicios (`/api/billing`).
+* **`patientRoutes.js`**: Enrutamiento para gestión de pacientes, historias clínicas, consultas y auditoría (`/api/patients`).
+* **`billingRoutes.js`**: Enrutamiento para caja, tasa BCV y cobros de servicios (`/api/billing`).
 * **`appointmentRoutes.js`**: Enrutamiento para agendamiento y calendario de citas (`/api/appointments`).
+* **`studyRoutes.js`**: Enrutamiento para estudios y procedimientos médicos (`/api/studies`).
 * **`statsRoutes.js`**: Enrutamiento para estadísticas y reportes gerenciales (`/api/stats`).
 * **`aiRoutes.js`**: Enrutamiento para el asistente virtual con IA (`/api/ai`).
 

@@ -17,7 +17,7 @@ const getGeminiModel = () => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey.trim());
     const model = genAI.getGenerativeModel({
-      model: 'gemini-flash-latest',
+      model: 'gemini-3.6-flash',
       systemInstruction: `Eres SARA-AI, la asistente médica e inteligente integrada en el sistema SARA (Sistema de Administración y Registros Asistenciales para clínicas y centros de salud UNIMECO).
 Tu misión es asistir a personal médico, recepcionistas, administradores y pacientes.
 
@@ -246,7 +246,7 @@ const handleGenerateClinicalReason = async (req, res) => {
         const { GoogleGenerativeAI } = require('@google/generative-ai');
         const genAI = new GoogleGenerativeAI(apiKey.trim());
         const model = genAI.getGenerativeModel({
-          model: 'gemini-flash-latest',
+          model: 'gemini-3.6-flash',
           systemInstruction: `Eres un médico especialista de alto nivel y redactor clínico para historias médicas estandarizadas en español (estándar internacional SOAP).
 Tu tarea es redactar el "Gran Motivo de Consulta y Enfermedad Actual" en un párrafo clínico formal, coherente, pulcro y profesional a partir de los síntomas y datos recolectados.
 Reglas estrictas:

@@ -3,6 +3,7 @@ import './MedicalDocumentModal.css';
 import { Esculapio } from './Esculapio';
 import { Button } from './Button';
 import { Printer, X, FileText, CheckCircle2, Pill, ClipboardList, Layers } from 'lucide-react';
+import { getClinicSettings } from '../services/clinicSettings';
 
 /**
  * Modal universal para visualización, impresión y descarga de documentos médicos y administrativos
@@ -36,17 +37,27 @@ export function MedicalDocumentModal({
   const doctorCollege = data.doctor?.medicalCollegeNumber || data.doctorCollege || 'CMDMC: Registrado';
   const patientAge = data.patient?.age || data.patientAge || (data.patient?.birth_date ? `${new Date().getFullYear() - new Date(data.patient.birth_date).getFullYear()} años` : '');
 
+  const clinic = getClinicSettings();
+  const clinicName = clinic.name || 'UNIMECO';
+  const clinicSubtitle = clinic.subtitle || 'Unidad Médica Quirúrgica Especializada';
+  const clinicRif = clinic.rif || '';
+  const clinicLogo = clinic.logoUrl || null;
+
   // Renderizador individual de Récipe Farmacéutico (Medicamentos)
   const renderMedsPrescription = (isDualHalf = false) => (
     <div className={`recipe-sheet-content ${isDualHalf ? 'dual-half' : ''}`}>
       <header className="doc-header">
         <div className="doc-brand">
           <div className="doc-logo-box">
-            <Esculapio size={24} />
+            {clinicLogo ? (
+              <img src={clinicLogo} alt={clinicName} style={{ maxHeight: '28px', maxWidth: '36px', objectFit: 'contain' }} />
+            ) : (
+              <Esculapio size={24} />
+            )}
           </div>
           <div>
-            <h1 className="doc-clinic-name">UNIMECO</h1>
-            <p className="doc-clinic-subtitle">Unidad Médica Quirúrgica Especializada</p>
+            <h1 className="doc-clinic-name">{clinicName}</h1>
+            <p className="doc-clinic-subtitle">{clinicSubtitle} {clinicRif ? `| RIF: ${clinicRif}` : ''}</p>
           </div>
         </div>
         <div className="doc-meta">
@@ -143,10 +154,14 @@ export function MedicalDocumentModal({
       <header className="doc-header">
         <div className="doc-brand">
           <div className="doc-logo-box" style={{ background: 'linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)' }}>
-            <Esculapio size={24} />
+            {clinicLogo ? (
+              <img src={clinicLogo} alt={clinicName} style={{ maxHeight: '28px', maxWidth: '36px', objectFit: 'contain' }} />
+            ) : (
+              <Esculapio size={24} />
+            )}
           </div>
           <div>
-            <h1 className="doc-clinic-name">UNIMECO</h1>
+            <h1 className="doc-clinic-name">{clinicName}</h1>
             <p className="doc-clinic-subtitle">Guía de Atención y Cuidados al Paciente</p>
           </div>
         </div>
@@ -326,11 +341,15 @@ export function MedicalDocumentModal({
               <header className="doc-header">
                 <div className="doc-brand">
                   <div className="doc-logo-box">
-                    <Esculapio size={30} />
+                    {clinicLogo ? (
+                      <img src={clinicLogo} alt={clinicName} style={{ maxHeight: '34px', maxWidth: '44px', objectFit: 'contain' }} />
+                    ) : (
+                      <Esculapio size={30} />
+                    )}
                   </div>
                   <div>
-                    <h1 className="doc-clinic-name">UNIMECO</h1>
-                    <p className="doc-clinic-subtitle">Unidad Médica Quirúrgica Especializada | SARA Medical</p>
+                    <h1 className="doc-clinic-name">{clinicName}</h1>
+                    <p className="doc-clinic-subtitle">{clinicSubtitle} {clinicRif ? `| RIF: ${clinicRif}` : ''}</p>
                   </div>
                 </div>
 

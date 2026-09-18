@@ -12,8 +12,8 @@ router.get('/:id/profile', verifyToken, patientController.getPatientProfile);
 router.put('/:id/profile', verifyToken, patientController.updatePatientProfile);
 
 // === Rutas Médicas ===
-// Solo Médicos y Master (el backend se encargará de roles si es necesario o el frontend bloquea la UI)
-router.post('/:patientId/consultations', verifyToken, patientController.saveConsultation);
+// Solo Médicos y Master
+router.post('/:patientId/consultations', verifyToken, checkRole(['Director Médico', 'Médico Tratante', 'Médico', 'Master']), patientController.saveConsultation);
 router.get('/:patientId/consultations', verifyToken, patientController.getPatientConsultations);
 
 // === Rutas de Auditoría / Trazabilidad ===

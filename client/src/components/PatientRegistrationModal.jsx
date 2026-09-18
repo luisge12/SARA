@@ -54,10 +54,10 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
         await api.put(`/api/patients/${initialData.id}/profile`, payload);
       } else {
         // Create mode
-        payload.username = username;
-        payload.password = password;
+        payload.username = (username || identificationNumber || '').trim();
+        payload.password = (password || identificationNumber || '123456').trim();
         payload.role = 'Paciente';
-        await api.post('/api/users/register', payload);
+        await api.post('/api/users/create', payload);
       }
 
       onSuccess();

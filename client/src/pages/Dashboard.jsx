@@ -376,16 +376,6 @@ export function Dashboard() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setShowPatientsModal(false);
-                    navigate('/modulo2');
-                  }}
-                  style={{ fontSize: '0.85rem' }}
-                >
-                  Ir a Módulo 2 (Gestión)
-                </Button>
                 <button 
                   onClick={() => {
                     setShowPatientsModal(false);

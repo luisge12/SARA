@@ -41,11 +41,22 @@ export default function Modulo_Pacientes() {
       return;
     }
     const lowerSearch = searchTerm.toLowerCase();
-    const filtered = patients.filter(p => 
-      (p.name && p.name.toLowerCase().includes(lowerSearch)) ||
-      (p.identificationNumber && p.identificationNumber.toLowerCase().includes(lowerSearch)) ||
-      (p.treatingDoctor && p.treatingDoctor.toLowerCase().includes(lowerSearch))
-    );
+    const filtered = patients.filter(p => {
+      const profile = p.patientProfile || {};
+      const treatingDoctor = profile.treatingDoctor || p.treatingDoctor || '';
+      const name = p.name || p.username || '';
+      const idNum = p.identificationNumber || p.document || '';
+      const phone = profile.phone || p.phone || '';
+      const email = profile.email || p.email || '';
+
+      return (
+        name.toLowerCase().includes(lowerSearch) ||
+        idNum.toLowerCase().includes(lowerSearch) ||
+        treatingDoctor.toLowerCase().includes(lowerSearch) ||
+        phone.toLowerCase().includes(lowerSearch) ||
+        email.toLowerCase().includes(lowerSearch)
+      );
+    });
     setFilteredPatients(filtered);
   }, [searchTerm, patients]);
 
@@ -75,7 +86,7 @@ export default function Modulo_Pacientes() {
             <Search size={20} className="search-icon" />
             <input 
               type="text" 
-              placeholder="Buscar por nombre, ID o médico..." 
+              placeholder="Buscar por nombre, ID, teléfono o médico..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -89,16 +100,20 @@ export default function Modulo_Pacientes() {
             <p>Cargando pacientes...</p>
           ) : (
             <div className="patients-grid">
-              {filteredPatients.map(patient => (
-                <div key={patient.id} className="patient-card" onClick={() => navigate(`/pacientes/${patient.id}`)}>
-                  <div className="patient-info">
-                    <h3>{patient.name}</h3>
-                    <p><strong>ID:</strong> {patient.identificationNumber || patient.document}</p>
-                    <p><strong>Médico:</strong> {patient.treatingDoctor || patient.doctor || 'No asignado'}</p>
+              {filteredPatients.map(patient => {
+                const profile = patient.patientProfile || {};
+                const doctorName = profile.treatingDoctor || patient.treatingDoctor || patient.doctor || 'No asignado';
+                return (
+                  <div key={patient.id} className="patient-card" onClick={() => navigate(`/pacientes/${patient.id}`)}>
+                    <div className="patient-info">
+                      <h3>{patient.name || patient.username}</h3>
+                      <p><strong>ID:</strong> {patient.identificationNumber || patient.document || 'S/N'}</p>
+                      <p><strong>Médico:</strong> {doctorName}</p>
+                    </div>
+                    <ChevronRight size={24} className="nav-icon" />
                   </div>
-                  <ChevronRight size={24} className="nav-icon" />
-                </div>
-              ))}
+                );
+              })}
               {filteredPatients.length === 0 && <p>No se encontraron pacientes.</p>}
             </div>
           )}

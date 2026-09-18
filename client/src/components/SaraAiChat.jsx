@@ -144,12 +144,12 @@ export const SaraAiChat = () => {
   const [micError, setMicError] = useState('');
   
   const messagesEndRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
   const recognitionRef = useRef(null);
+  const transcriptRef = useRef('');
+  const isListeningRef = useRef(false);
   const timerIntervalRef = useRef(null);
 
-  // Grabador de Voz Universal (MediaRecorder + WebSpeech fallback)
+  // Grabador y Dictado por Voz Directo con Web Speech API
   const toggleListening = async () => {
     if (isListening) {
       stopRecordingAndSend();
@@ -158,71 +158,99 @@ export const SaraAiChat = () => {
 
     setMicError('');
     setInputQuery('');
-    audioChunksRef.current = [];
+    transcriptRef.current = '';
+    isListeningRef.current = true;
+    setIsListening(true);
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setMicError('El reconocimiento de voz en vivo requiere Google Chrome o Microsoft Edge.');
+      isListeningRef.current = false;
+      setIsListening(false);
+      return;
+    }
 
     try {
-      // 1. Obtener acceso al micrófono mediante MediaRecorder (Compatibilidad 100% universal)
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsListening(true);
-
-      // Iniciar temporizador de grabación
-      setRecordTimer(0);
-      timerIntervalRef.current = setInterval(() => {
-        setRecordTimer(prev => prev + 1);
-      }, 1000);
-
-      // 2. Intentar reconocimiento de voz en vivo si el navegador lo soporta de forma nativa
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        try {
-          const recognition = new SpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.lang = 'es-ES';
-
-          recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              transcript += event.results[i][0].transcript;
-            }
-            if (transcript) {
-              setInputQuery(transcript);
-            }
-          };
-
-          recognition.onerror = (e) => {
-            console.log('Aviso de voz WebSpeech (se utiliza MediaRecorder universal):', e.error);
-          };
-
-          recognitionRef.current = recognition;
-          recognition.start();
-        } catch (err) {
-          console.log('WebSpeech no disponible, usando captura de audio universal.');
-        }
+      // Detener cualquier instancia previa activa
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (e) {}
       }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = navigator.language ? navigator.language : 'es-ES';
+
+      recognition.onstart = () => {
+        isListeningRef.current = true;
+        setIsListening(true);
+        setRecordTimer(0);
+        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = setInterval(() => {
+          setRecordTimer(prev => prev + 1);
+        }, 1000);
+      };
+
+      recognition.onresult = (event) => {
+        let fullTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          fullTranscript += event.results[i][0].transcript;
+        }
+        if (fullTranscript) {
+          transcriptRef.current = fullTranscript;
+          setInputQuery(fullTranscript);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error === 'aborted' || e.error === 'no-speech') {
+          return;
+        }
+        console.warn('Aviso de voz WebSpeech:', e.error);
+        if (e.error === 'not-allowed') {
+          setMicError('Permiso de micrófono no otorgado. Habilita el micrófono en la barra del navegador (icono 🔒).');
+          isListeningRef.current = false;
+          setIsListening(false);
+        } else if (e.error === 'network') {
+          setMicError('El servicio de voz tardó en responder. También puedes presionar Win + H para dictar directamente.');
+        }
+      };
+
+      recognition.onend = () => {
+        // Si el usuario aún no presionó el botón de detener, mantener viva la escucha
+        if (isListeningRef.current) {
+          try {
+            recognition.start();
+          } catch (err) {
+            setTimeout(() => {
+              if (isListeningRef.current) {
+                try { recognition.start(); } catch (e) {}
+              }
+            }, 100);
+          }
+        } else {
+          setIsListening(false);
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+          }
+        }
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
     } catch (err) {
       console.error('Error al acceder al micrófono:', err);
-      setMicError('Permiso de micrófono no otorgado. Habilita el micrófono en la barra del navegador (icono 🔒).');
+      setMicError('No se pudo acceder al micrófono. Verifica los permisos de tu navegador.');
+      isListeningRef.current = false;
       setIsListening(false);
     }
   };
 
-  // Detener grabación y enviar el mensaje
+  // Detener grabación y enviar el mensaje transcrito
   const stopRecordingAndSend = () => {
+    isListeningRef.current = false;
+    setIsListening(false);
+
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
@@ -231,21 +259,15 @@ export const SaraAiChat = () => {
       try { recognitionRef.current.stop(); } catch (e) {}
     }
 
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+    // Recuperar el texto dictado en tiempo real desde transcriptRef o inputQuery
+    const textToSend = transcriptRef.current.trim() || inputQuery.trim();
+    if (textToSend) {
+      handleSendMessage(textToSend);
+      transcriptRef.current = '';
+    } else {
+      setMicError('No se detectaron palabras habladas. Por favor habla cerca del micrófono.');
+      setTimeout(() => setMicError(''), 3500);
     }
-
-    setIsListening(false);
-
-    // Dar 300ms de margen para consolidar el texto o enviar el audio
-    setTimeout(() => {
-      if (inputQuery.trim()) {
-        handleSendMessage(inputQuery);
-      } else {
-        // Si no se capturó texto por WebSpeech, procesar mensaje de voz capturado
-        handleSendMessage(' Mensaje de voz enviado a SARA-AI');
-      }
-    }, 300);
   };
 
   // Reproducción por voz (Text-to-Speech)
