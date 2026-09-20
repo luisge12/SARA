@@ -95,6 +95,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [templateLoadedMessage, setTemplateLoadedMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
   const [printDocType, setPrintDocType] = useState('prescription');
@@ -102,23 +103,82 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
   // Auto-fill template loader
   const handleApplyTemplate = (tmplId) => {
-    const tmpl = CLINICAL_TEMPLATES.find(t => t.id === tmplId);
-    if (!tmpl) return;
+    if (!tmplId) {
+      alert('Por favor seleccione una plantilla clínica del listado desplegable.');
+      return;
+    }
 
-    if (reasonForVisit.length > 0 || diagnoses.length > 0 || physicalInspection) {
+    const tmpl = CLINICAL_TEMPLATES.find(t => t.id === tmplId);
+    if (!tmpl) {
+      alert('No se encontró la plantilla seleccionada.');
+      return;
+    }
+
+    const hasExistingData = reasonForVisit.length > 0 || diagnoses.length > 0 || physicalInspection || clinicalSummary;
+    if (hasExistingData) {
       if (!window.confirm(`¿Desea rellenar automáticamente la historia con la plantilla "${tmpl.name}"? Los datos actuales serán reemplazados.`)) {
         return;
       }
     }
 
-    setReasonForVisit(tmpl.reasonForVisit || []);
+    // Copias profundas para evitar mutaciones de memoria
+    const clonedReasons = (tmpl.reasonForVisit || []).map(r => ({
+      onset: r.onset || '',
+      symptom: r.symptom || '',
+      complement: r.complement || '',
+      regionGeneral: r.regionGeneral || '',
+      regionSpecific: r.regionSpecific || '',
+      relatedTo: r.relatedTo || '',
+      additionalInfo: r.additionalInfo || ''
+    }));
+
+    const clonedDiagnoses = (tmpl.diagnoses || []).map(d => ({
+      diagnosis: d.diagnosis || '',
+      classification: d.classification || '',
+      complication: d.complication || '',
+      histologicType: d.histologicType || '',
+      stage: d.stage || ''
+    }));
+
+    const clonedTreatments = (tmpl.treatmentPlan || [])
+      .filter(t => t.medication && t.medication.trim() !== '' && t.medication !== 'Indicaciones Generales')
+      .map(t => ({
+        medication: t.medication || '',
+        presentation: t.presentation || '',
+        indication: t.indication || '',
+        duration: t.duration || ''
+      }));
+
+    setReasonForVisit(clonedReasons);
     setPhysicalInspection(tmpl.physicalInspection || '');
     setPhysicalPalpation(tmpl.physicalPalpation || '');
     setRectalExamination(tmpl.rectalExamination || '');
     setAnoscopy(tmpl.anoscopy || '');
-    setDiagnoses(tmpl.diagnoses || []);
-    setTreatmentPlan(tmpl.treatmentPlan || []);
+    setDiagnoses(clonedDiagnoses);
+    setTreatmentPlan(clonedTreatments);
     setEvolutionaryReport(tmpl.evolutionaryReport || '');
+
+    // Gran Motivo de Consulta y Redacción Médica
+    if (tmpl.description) {
+      setClinicalSummary(tmpl.description);
+    } else if (clonedReasons.length > 0 && clonedReasons[0].symptom) {
+      setClinicalSummary(`${clonedReasons[0].symptom}: ${clonedReasons[0].complement || ''}`);
+    }
+
+    // Razón General y Razón Específica de Tramitación
+    if (clonedReasons.length > 0) {
+      if (clonedReasons[0].symptom) {
+        setReasonGeneral(clonedReasons[0].symptom);
+      }
+      if (clonedReasons[0].complement) {
+        setReasonSpecific(clonedReasons[0].complement);
+      }
+    }
+
+    setTemplateLoadedMessage(`Plantilla "${tmpl.name}" cargada correctamente con diagnósticos, motivo de consulta y tratamiento.`);
+    setTimeout(() => {
+      setTemplateLoadedMessage('');
+    }, 6000);
   };
 
   useEffect(() => {
@@ -239,22 +299,22 @@ export function ClinicalWorkspace({ patient, onBack }) {
             )}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.8rem', color: 'var(--color-text-main)', margin: 0 }}>
+                <h2 style={{ fontSize: '1.8rem', color: '#0f172a', fontWeight: 700, margin: 0 }}>
                   Historia Clínica: {patient.name}
                 </h2>
                 <span style={{ 
                   padding: '0.25rem 0.75rem', 
                   borderRadius: '20px', 
-                  fontSize: '0.8rem', 
+                  fontSize: '0.82rem', 
                   fontWeight: 700,
                   backgroundColor: consultationFlow === 'PRIMERA_VEZ' ? '#dcfce7' : '#e0f2fe',
-                  color: consultationFlow === 'PRIMERA_VEZ' ? '#166534' : '#075985',
+                  color: consultationFlow === 'PRIMERA_VEZ' ? '#14532d' : '#0369a1',
                   border: consultationFlow === 'PRIMERA_VEZ' ? '1px solid #86efac' : '1px solid #7dd3fc'
                 }}>
                   {consultationFlow === 'PRIMERA_VEZ' ? '🟢 Primera Consulta' : '🔁 Reconsulta / Seguimiento'}
                 </span>
               </div>
-              <p style={{ color: 'var(--color-text-muted)', margin: '0.25rem 0 0 0' }}>ID: {patient.identificationNumber}</p>
+              <p style={{ color: '#334155', fontWeight: 600, margin: '0.25rem 0 0 0' }}>ID: <strong style={{ color: '#0f172a' }}>{patient.identificationNumber}</strong></p>
             </div>
           </div>
         </div>
@@ -271,8 +331,8 @@ export function ClinicalWorkspace({ patient, onBack }) {
         padding: '1rem 1.25rem',
         backgroundColor: '#ffffff',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid #cbd5e1',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+        border: '1px solid #94a3b8',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
@@ -280,20 +340,20 @@ export function ClinicalWorkspace({ patient, onBack }) {
         gap: '1rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>Flujo de Tramitación:</span>
-          <div style={{ display: 'flex', gap: '0.35rem', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Flujo de Tramitación:</span>
+          <div style={{ display: 'flex', gap: '0.35rem', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '8px' }}>
             <button
               type="button"
               onClick={() => setConsultationFlow('PRIMERA_VEZ')}
               style={{
-                padding: '0.35rem 0.85rem',
+                padding: '0.4rem 0.85rem',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '0.82rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
-                backgroundColor: consultationFlow === 'PRIMERA_VEZ' ? '#10b981' : 'transparent',
-                color: consultationFlow === 'PRIMERA_VEZ' ? '#ffffff' : '#64748b',
+                backgroundColor: consultationFlow === 'PRIMERA_VEZ' ? '#059669' : 'transparent',
+                color: consultationFlow === 'PRIMERA_VEZ' ? '#ffffff' : '#1e293b',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -303,14 +363,14 @@ export function ClinicalWorkspace({ patient, onBack }) {
               type="button"
               onClick={() => setConsultationFlow('RECONSULTA')}
               style={{
-                padding: '0.35rem 0.85rem',
+                padding: '0.4rem 0.85rem',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '0.82rem',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
                 backgroundColor: consultationFlow === 'RECONSULTA' ? '#0284c7' : 'transparent',
-                color: consultationFlow === 'RECONSULTA' ? '#ffffff' : '#64748b',
+                color: consultationFlow === 'RECONSULTA' ? '#ffffff' : '#1e293b',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -321,12 +381,12 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Razón General:</label>
+            <label style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Razón General:</label>
             <select
               className="input-field"
               value={reasonGeneral}
               onChange={e => setReasonGeneral(e.target.value)}
-              style={{ height: '36px', padding: '0.2rem 0.6rem', fontSize: '0.85rem' }}
+              style={{ height: '38px', padding: '0.2rem 0.6rem', fontSize: '0.88rem', fontWeight: 600, color: '#0f172a', backgroundColor: '#ffffff', borderColor: '#94a3b8' }}
             >
               <option value="Dolor / Molestia">Dolor / Molestia Aguda</option>
               <option value="Sangrado / Rectorragia">Sangrado / Rectorragia</option>
@@ -341,14 +401,14 @@ export function ClinicalWorkspace({ patient, onBack }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: '220px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>Razón Específica:</label>
+            <label style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Razón Específica:</label>
             <input
               type="text"
               className="input-field"
               placeholder="Detalle puntual de la consulta..."
               value={reasonSpecific}
               onChange={e => setReasonSpecific(e.target.value)}
-              style={{ height: '36px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', flex: 1 }}
+              style={{ height: '38px', padding: '0.2rem 0.6rem', fontSize: '0.88rem', fontWeight: 500, color: '#0f172a', backgroundColor: '#ffffff', borderColor: '#94a3b8', flex: 1 }}
             />
           </div>
         </div>
@@ -357,25 +417,25 @@ export function ClinicalWorkspace({ patient, onBack }) {
       {/* Read-Only Secciones 1 y 2 */}
       <div className="responsive-grid-1-1" style={{ marginTop: '1.25rem' }}>
         <Card title="Sección 1: Demográficos (Recepción)" className="glass-panel">
-          {loadingProfile ? <p>Cargando...</p> : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem', color: 'var(--color-text-muted)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <li><strong>Género:</strong> {profile.gender || '-'}</li>
-              <li><strong>Teléfono:</strong> {profile.phone || '-'}</li>
-              <li><strong>Sede:</strong> {patient.sedeAtencion || '-'}</li>
-              <li><strong>Próxima Cita:</strong> {profile.nextAppointment ? new Date(profile.nextAppointment).toLocaleString() : '-'}</li>
+          {loadingProfile ? <p style={{ color: '#0f172a' }}>Cargando...</p> : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.92rem', color: '#1e293b', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+              <li><strong style={{ color: '#0f172a' }}>Género:</strong> <span>{profile.gender || '-'}</span></li>
+              <li><strong style={{ color: '#0f172a' }}>Teléfono:</strong> <span>{profile.phone || '-'}</span></li>
+              <li><strong style={{ color: '#0f172a' }}>Sede:</strong> <span>{patient.sedeAtencion || '-'}</span></li>
+              <li><strong style={{ color: '#0f172a' }}>Próxima Cita:</strong> <span>{profile.nextAppointment ? new Date(profile.nextAppointment).toLocaleString() : '-'}</span></li>
             </ul>
           )}
         </Card>
         
         <Card title="Sección 2: Parámetros (Signos Vitales)" className="glass-panel">
-          {loadingProfile ? <p>Cargando...</p> : (
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.9rem', color: 'var(--color-text-main)' }}>
-              <div><strong>FC:</strong> {profile.heartRate || '-'} ppm</div>
-              <div><strong>FR:</strong> {profile.respiratoryRate || '-'} rpm</div>
-              <div><strong>TA:</strong> {profile.bloodPressure || '-'} mmHg</div>
-              <div><strong>SatO2:</strong> {profile.oxygenSaturation || '-'} %</div>
-              <div><strong>Talla:</strong> {profile.heightCm || '-'} cm</div>
-              <div><strong>Peso:</strong> {profile.weightKg || '-'} Kg</div>
+          {loadingProfile ? <p style={{ color: '#0f172a' }}>Cargando...</p> : (
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.92rem', color: '#1e293b' }}>
+              <div><strong style={{ color: '#0f172a' }}>FC:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.heartRate || '-'}</span> ppm</div>
+              <div><strong style={{ color: '#0f172a' }}>FR:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.respiratoryRate || '-'}</span> rpm</div>
+              <div><strong style={{ color: '#0f172a' }}>TA:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.bloodPressure || '-'}</span> mmHg</div>
+              <div><strong style={{ color: '#0f172a' }}>SatO2:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.oxygenSaturation || '-'}</span> %</div>
+              <div><strong style={{ color: '#0f172a' }}>Talla:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.heightCm || '-'}</span> cm</div>
+              <div><strong style={{ color: '#0f172a' }}>Peso:</strong> <span style={{ color: '#0f172a', fontWeight: 600 }}>{profile.weightKg || '-'}</span> Kg</div>
             </div>
           )}
         </Card>
@@ -383,13 +443,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
       {/* Tarjeta de Antecedentes */}
       <Card title="Antecedentes Médicos y Quirúrgicos del Paciente" className="glass-panel" style={{ marginTop: '1rem' }}>
-        {loadingProfile ? <p>Cargando antecedentes...</p> : (
-          <div style={{ fontSize: '0.88rem' }}>
-            <div style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
-              <div><strong>Personales / Patologías / Alergias:</strong> {profile.personalHistory || 'No especificados'}</div>
-              <div style={{ marginTop: '0.35rem' }}><strong>Quirúrgicos (Qx):</strong> {profile.surgicalHistory || 'No especificados'}</div>
-              <div style={{ marginTop: '0.35rem' }}><strong>Familiares:</strong> {profile.familyHistory || 'No especificados'}</div>
-            </div>
+        {loadingProfile ? <p style={{ color: '#0f172a' }}>Cargando antecedentes...</p> : (
+          <div style={{ fontSize: '0.92rem', color: '#1e293b', lineHeight: '1.7' }}>
+            <div><strong style={{ color: '#0f172a' }}>Personales / Patologías / Alergias:</strong> <span>{profile.personalHistory || 'No especificados'}</span></div>
+            <div style={{ marginTop: '0.35rem' }}><strong style={{ color: '#0f172a' }}>Quirúrgicos (Qx):</strong> <span>{profile.surgicalHistory || 'No especificados'}</span></div>
+            <div style={{ marginTop: '0.35rem' }}><strong style={{ color: '#0f172a' }}>Familiares:</strong> <span>{profile.familyHistory || 'No especificados'}</span></div>
           </div>
         )}
       </Card>
@@ -399,66 +457,114 @@ export function ClinicalWorkspace({ patient, onBack }) {
         margin: '1.5rem 0',
         padding: '1.25rem',
         borderRadius: 'var(--radius-lg)',
-        backgroundColor: 'rgba(42, 183, 202, 0.08)',
-        border: '1px solid rgba(42, 183, 202, 0.3)',
+        backgroundColor: '#f0fdf4',
+        border: '1px solid #86efac',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem'
+        flexDirection: 'column',
+        gap: '0.85rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ padding: '0.6rem', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: '#fff', display: 'flex' }}>
-            <Sparkles size={20} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.6rem', borderRadius: '50%', backgroundColor: '#059669', color: '#fff', display: 'flex' }}>
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: '#065f46' }}>
+                Plantillas Clínicas Rápidas y Rellenado Automático
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#1e293b', fontWeight: '500' }}>
+                Cargue diagnósticos, motivos de consulta, examen físico y tratamientos frecuentes con 1-clic.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: 'var(--color-primary)' }}>
-              Rellenado Automático y Plantillas por Especialidad
-            </h4>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-              Cargue diagnósticos, hallazgos físicos y tratamientos frecuentes con 1-clic.
-            </p>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <select 
-            className="input-field" 
-            value={selectedSpecialty} 
-            onChange={(e) => { setSelectedSpecialty(e.target.value); setSelectedTemplateId(''); }}
-            style={{ minWidth: '220px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
-          >
-            <option value="">-- Especialidad Médica --</option>
-            {Array.from(new Set(CLINICAL_TEMPLATES.map(t => t.specialty))).sort().map((spec, i) => (
-              <option key={i} value={spec}>{spec}</option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {/* Filtro opcional por Especialidad */}
+            <select 
+              className="input-field" 
+              value={selectedSpecialty} 
+              onChange={(e) => { 
+                setSelectedSpecialty(e.target.value); 
+                setSelectedTemplateId(''); 
+              }}
+              style={{ minWidth: '200px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '600', color: '#0f172a', borderColor: '#94a3b8' }}
+              title="Filtrar plantillas por especialidad médica"
+            >
+              <option value="">-- Todas las Especialidades ({Array.from(new Set(CLINICAL_TEMPLATES.map(t => t.specialty))).length}) --</option>
+              {Array.from(new Set(CLINICAL_TEMPLATES.map(t => t.specialty))).sort().map((spec, i) => (
+                <option key={i} value={spec}>{spec}</option>
+              ))}
+            </select>
 
-          {selectedSpecialty && (
+            {/* Selector de Plantilla (Siempre disponible para selección inmediata) */}
             <select 
               className="input-field" 
               value={selectedTemplateId} 
               onChange={(e) => setSelectedTemplateId(e.target.value)}
-              style={{ minWidth: '260px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '500' }}
+              style={{ minWidth: '260px', maxWidth: '400px', height: '42px', padding: '0.5rem 1rem', backgroundColor: '#fff', fontWeight: '600', color: '#0f172a', borderColor: selectedTemplateId ? '#059669' : '#94a3b8' }}
             >
-              <option value="">-- Seleccionar Plantilla --</option>
-              {CLINICAL_TEMPLATES.filter(t => t.specialty === selectedSpecialty).map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
+              <option value="">-- Seleccionar Plantilla Clínica --</option>
+              {selectedSpecialty ? (
+                CLINICAL_TEMPLATES.filter(t => t.specialty === selectedSpecialty).map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))
+              ) : (
+                Array.from(new Set(CLINICAL_TEMPLATES.map(t => t.specialty))).sort().map((spec) => (
+                  <optgroup key={spec} label={`-- ${spec} --`}>
+                    {CLINICAL_TEMPLATES.filter(t => t.specialty === spec).map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              )}
             </select>
-          )}
 
-          <Button 
-            type="button"
-            disabled={!selectedTemplateId}
-            onClick={() => handleApplyTemplate(selectedTemplateId)}
-            style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-          >
-            <FileText size={16} /> Cargar Plantilla
-          </Button>
+            <button 
+              type="button"
+              onClick={() => handleApplyTemplate(selectedTemplateId)}
+              style={{ 
+                height: '42px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                fontWeight: '700',
+                padding: '0 1.25rem',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: selectedTemplateId ? '#059669' : '#0284c7',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+                transition: 'all 0.2s'
+              }}
+              title="Cargar la plantilla seleccionada en la historia clínica"
+            >
+              <FileText size={16} /> Cargar Plantilla
+            </button>
+          </div>
         </div>
+
+        {templateLoadedMessage && (
+          <div style={{
+            padding: '0.65rem 1rem',
+            backgroundColor: '#dcfce7',
+            border: '1px solid #86efac',
+            borderRadius: '8px',
+            color: '#14532d',
+            fontWeight: '600',
+            fontSize: '0.88rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <span>✅ {templateLoadedMessage}</span>
+          </div>
+        )}
       </div>
 
       {/* DATALISTS PARA AUTOCOMPLETADO */}
@@ -484,7 +590,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
           {/* Tabla dinámica de síntomas */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#475569' }}>
+              <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
                 Registro de Sintomatología y Signos (Tabulados o Texto Libre):
               </span>
             </div>
@@ -498,7 +604,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                   placeholder="Síntoma o Signo (o escribir nuevo)..." 
                   value={row.symptom} 
                   onChange={e=>updateReason(idx, 'symptom', e.target.value)} 
-                  style={{ padding: '0.5rem', height: '42px' }} 
+                  style={{ padding: '0.5rem', height: '42px', color: '#0f172a', fontWeight: '500', borderColor: '#94a3b8' }} 
                 />
                 <Input placeholder="Características" value={row.complement} onChange={e=>updateReason(idx, 'complement', e.target.value)} />
                 <Input placeholder="Región General" value={row.regionGeneral} onChange={e=>updateReason(idx, 'regionGeneral', e.target.value)} />
@@ -510,7 +616,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
             ))}
 
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-              <Button type="button" onClick={addReasonRow} style={{ backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+              <Button type="button" onClick={addReasonRow} style={{ backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', fontWeight: '600' }}>
                 <Plus size={16} /> Añadir Fila de Síntoma
               </Button>
 
@@ -543,17 +649,17 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
           {/* ÁREA DEL GRAN MOTIVO DE CONSULTA Y ENFERMEDAD ACTUAL (CON DICTADO POR VOZ) */}
           <div style={{
-            backgroundColor: '#f8fafc',
-            border: '1px solid #cbd5e1',
+            backgroundColor: '#ffffff',
+            border: '1px solid #94a3b8',
             borderRadius: '10px',
             padding: '1.25rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label className="input-label" style={{ fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
+              <label className="input-label" style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
                 <span>Gran Motivo de Consulta y Enfermedad Actual (Redacción Médica Formal)</span>
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Dictar por voz:</span>
+                <span style={{ fontSize: '0.82rem', color: '#1e293b', fontWeight: '600' }}>Dictar por voz:</span>
                 <SpeechMicButton
                   onAppendText={(text) => setClinicalSummary(prev => prev ? `${prev} ${text}` : text)}
                   title="Dictar motivo de consulta por voz"
@@ -564,81 +670,32 @@ export function ClinicalWorkspace({ patient, onBack }) {
             <textarea
               className="input-field"
               placeholder="Haga clic en '✨ Gran Motivo de Consulta con IA' para redactar automáticamente a partir de los síntomas, o dicte / escriba libremente la descripción clínica formal..."
-              style={{ minHeight: '110px', resize: 'vertical', width: '100%', lineHeight: '1.6', fontSize: '0.92rem' }}
+              style={{ minHeight: '110px', resize: 'vertical', width: '100%', lineHeight: '1.6', fontSize: '0.92rem', color: '#0f172a', fontWeight: '500', backgroundColor: '#ffffff', borderColor: '#94a3b8' }}
               value={clinicalSummary}
               onChange={e => setClinicalSummary(e.target.value)}
             />
-            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+            <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.82rem', color: '#334155', fontWeight: '500' }}>
               * Esta síntesis clínica se incluirá en el informe médico oficial y en el expediente SOAP estandarizado.
             </p>
           </div>
         </div>
       </Card>
 
-      {/* SECCIÓN 4: HALLAZGOS CLÍNICOS CON DICTADO POR VOZ DIRECTO */}
-      <Card title="4. Hallazgos Clínicos (Examen Físico)" className="glass-panel">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Inspección</label>
-              <SpeechMicButton
-                onAppendText={(text) => setPhysicalInspection(prev => prev ? `${prev} ${text}` : text)}
-                title="Dictar inspección por voz"
-              />
-            </div>
-            <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={physicalInspection} onChange={e=>setPhysicalInspection(e.target.value)} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Palpación</label>
-              <SpeechMicButton
-                onAppendText={(text) => setPhysicalPalpation(prev => prev ? `${prev} ${text}` : text)}
-                title="Dictar palpación por voz"
-              />
-            </div>
-            <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={physicalPalpation} onChange={e=>setPhysicalPalpation(e.target.value)} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Tacto Rectal</label>
-              <SpeechMicButton
-                onAppendText={(text) => setRectalExamination(prev => prev ? `${prev} ${text}` : text)}
-                title="Dictar tacto rectal por voz"
-              />
-            </div>
-            <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={rectalExamination} onChange={e=>setRectalExamination(e.target.value)} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Anoscopia</label>
-              <SpeechMicButton
-                onAppendText={(text) => setAnoscopy(prev => prev ? `${prev} ${text}` : text)}
-                title="Dictar anoscopia por voz"
-              />
-            </div>
-            <textarea className="input-field" style={{ minHeight: '80px', resize: 'vertical', width: '100%' }} value={anoscopy} onChange={e=>setAnoscopy(e.target.value)} />
-          </div>
-        </div>
-      </Card>
-
-      {/* SECCIÓN 5: DIAGNÓSTICOS */}
-      <Card title="5. Diagnósticos" className="glass-panel">
+      {/* SECCIÓN 4: DIAGNÓSTICOS */}
+      <Card title="4. Diagnósticos" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {diagnoses.map((row, idx) => (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '1rem', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#ffffff' }}>
               <div className="dynamic-row-4">
                 <div className="input-group">
-                  <label className="input-label">Diagnóstico</label>
+                  <label className="input-label" style={{ fontWeight: 700, color: '#0f172a' }}>Diagnóstico</label>
                   <input 
                     className="input-field"
                     list="diagnoses-list"
                     placeholder="Escriba o seleccione un diagnóstico..."
                     value={row.diagnosis}
                     onChange={e=>updateDiagnosis(idx, 'diagnosis', e.target.value)}
-                    style={{ height: '42px', padding: '0.5rem 1rem' }}
+                    style={{ height: '42px', padding: '0.5rem 1rem', color: '#0f172a', fontWeight: '500', borderColor: '#94a3b8' }}
                   />
                 </div>
                 <Input label="Clasificación/Tipo" value={row.classification} onChange={e=>updateDiagnosis(idx, 'classification', e.target.value)} />
@@ -647,21 +704,21 @@ export function ClinicalWorkspace({ patient, onBack }) {
               </div>
               
               {isCancer(row.diagnosis) && (
-                <div className="responsive-grid-1-1" style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px dashed var(--color-alert)' }}>
+                <div className="responsive-grid-1-1" style={{ backgroundColor: '#fff1f2', padding: '1rem', borderRadius: '8px', border: '1px dashed #e11d48' }}>
                   <Input label="Tipo Histológico (Cáncer)" value={row.histologicType} onChange={e=>updateDiagnosis(idx, 'histologicType', e.target.value)} />
                   <Input label="Estadio (Cáncer)" value={row.stage} onChange={e=>updateDiagnosis(idx, 'stage', e.target.value)} />
                 </div>
               )}
             </div>
           ))}
-          <Button type="button" onClick={addDiagnosis} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+          <Button type="button" onClick={addDiagnosis} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', fontWeight: '600' }}>
             <Plus size={16} /> Añadir Diagnóstico
           </Button>
         </div>
       </Card>
 
-      {/* SECCIÓN 6: PLAN DE TRABAJO (TRATAMIENTO) */}
-      <Card title="6. Plan de Trabajo (Tratamiento)" className="glass-panel">
+      {/* SECCIÓN 5: PLAN DE TRABAJO (TRATAMIENTO) */}
+      <Card title="5. Plan de Trabajo (Tratamiento)" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
           {/* BARRA DE HERRAMIENTAS: GUÍA FARMACOLÓGICA Y PAUTAS FAVORITAS */}
@@ -674,11 +731,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
             padding: '0.75rem 1rem',
             backgroundColor: '#f1f5f9',
             borderRadius: '8px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #cbd5e1'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <Pill size={18} color="var(--color-primary)" />
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
                 Guía Rápida:
               </span>
               <select
@@ -687,10 +744,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 style={{
                   padding: '0.45rem 0.75rem',
                   borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid #94a3b8',
                   backgroundColor: '#ffffff',
                   fontSize: '0.85rem',
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  color: '#0f172a',
                   maxWidth: '300px'
                 }}
               >
@@ -711,10 +769,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
                   style={{
                     padding: '0.45rem 0.75rem',
                     borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid #94a3b8',
                     backgroundColor: '#ffffff',
                     fontSize: '0.85rem',
-                    fontWeight: 500
+                    fontWeight: 600,
+                    color: '#0f172a'
                   }}
                 >
                   <option value="">-- Cargar Mi Pauta --</option>
@@ -737,7 +796,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                   color: 'var(--color-primary)',
                   border: '1px solid var(--color-primary)',
                   fontSize: '0.82rem',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: 'pointer'
                 }}
               >
@@ -754,7 +813,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 placeholder="Medicamento / Principio Activo" 
                 value={row.medication} 
                 onChange={e=>updateTreatment(idx, 'medication', e.target.value)} 
-                style={{ padding: '0.5rem', height: '42px' }}
+                style={{ padding: '0.5rem', height: '42px', color: '#0f172a', fontWeight: '500', borderColor: '#94a3b8' }} 
               />
               <input 
                 className="input-field" 
@@ -762,7 +821,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 placeholder="Presentación" 
                 value={row.presentation} 
                 onChange={e=>updateTreatment(idx, 'presentation', e.target.value)} 
-                style={{ padding: '0.5rem', height: '42px' }}
+                style={{ padding: '0.5rem', height: '42px', color: '#0f172a', fontWeight: '500', borderColor: '#94a3b8' }} 
               />
               <Input placeholder="Indicación / Posología" value={row.indication} onChange={e=>updateTreatment(idx, 'indication', e.target.value)} />
               <Input placeholder="Duración" value={row.duration} onChange={e=>updateTreatment(idx, 'duration', e.target.value)} />
@@ -770,26 +829,26 @@ export function ClinicalWorkspace({ patient, onBack }) {
             </div>
           ))}
 
-          <Button type="button" onClick={addTreatment} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+          <Button type="button" onClick={addTreatment} style={{ alignSelf: 'flex-start', backgroundColor: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', fontWeight: '600' }}>
             <Plus size={16} /> Añadir Medicamento
           </Button>
         </div>
       </Card>
 
-      {/* SECCIÓN 7: INFORME EVOLUTIVO */}
-      <Card title="7. Informe Evolutivo" className="glass-panel">
+      {/* SECCIÓN 6: INFORME EVOLUTIVO */}
+      <Card title="6. Informe Evolutivo" className="glass-panel">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 600 }}>Descripción General</label>
+              <label className="input-label" style={{ margin: 0, fontWeight: 700, color: '#0f172a' }}>Descripción General</label>
               <SpeechMicButton
                 onAppendText={(text) => setEvolutionaryReport(prev => prev ? `${prev} ${text}` : text)}
                 title="Dictar informe evolutivo por voz"
               />
             </div>
-            <textarea className="input-field" style={{ minHeight: '120px', resize: 'vertical', width: '100%' }} value={evolutionaryReport} onChange={e=>setEvolutionaryReport(e.target.value)} />
+            <textarea className="input-field" style={{ minHeight: '120px', resize: 'vertical', width: '100%', color: '#0f172a', fontWeight: '500', borderColor: '#94a3b8' }} value={evolutionaryReport} onChange={e=>setEvolutionaryReport(e.target.value)} />
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>* Recuerde que la inspección y examen físico evolutivo puede reflejarse en los campos de la Sección 4 superiores o documentarse en la descripción general.</p>
+          <p style={{ fontSize: '0.85rem', color: '#334155', fontWeight: '500' }}>* Recuerde que la evolución clínica y observaciones adicionales pueden documentarse en la descripción general o en el motivo de consulta.</p>
         </div>
       </Card>
 

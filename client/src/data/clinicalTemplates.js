@@ -482,12 +482,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -515,12 +510,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -548,12 +538,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -581,12 +566,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -614,12 +594,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -647,12 +622,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -680,12 +650,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -713,12 +678,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -746,12 +706,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -779,12 +734,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -812,12 +762,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -845,12 +790,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -878,12 +818,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -911,12 +846,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -944,12 +874,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -977,12 +902,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1010,12 +930,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1043,12 +958,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1076,12 +986,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1109,12 +1014,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1142,12 +1042,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1175,12 +1070,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1208,12 +1098,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1241,12 +1126,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1274,12 +1154,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1307,12 +1182,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1340,12 +1210,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1373,12 +1238,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1406,12 +1266,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1439,12 +1294,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1472,12 +1322,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1505,12 +1350,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1538,12 +1378,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1571,12 +1406,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1604,12 +1434,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1637,12 +1462,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1670,12 +1490,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1703,12 +1518,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1736,12 +1546,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1769,12 +1574,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1802,12 +1602,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1835,12 +1630,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1868,12 +1658,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1901,12 +1686,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1934,12 +1714,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -1967,12 +1742,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2000,12 +1770,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2033,12 +1798,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2066,12 +1826,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2099,12 +1854,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2132,12 +1882,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2165,12 +1910,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2198,12 +1938,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2231,12 +1966,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2264,12 +1994,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2297,12 +2022,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2330,12 +2050,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2363,12 +2078,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2396,12 +2106,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2429,12 +2134,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
   {
@@ -2462,12 +2162,7 @@ export const CLINICAL_TEMPLATES = [
       histologicType: '',
       stage: ''
     }],
-    treatmentPlan: [{
-      medication: 'Indicaciones Generales',
-      presentation: 'Consejería médica',
-      indication: 'Mantener tratamiento base y estilo de vida saludable.',
-      duration: 'Continuo'
-    }],
+    treatmentPlan: [],
     evolutionaryReport: 'Evaluación integral satisfactoria. Se solicita control periódico según pauta de la especialidad.'
   },
 ];

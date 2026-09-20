@@ -132,16 +132,19 @@
 }
 
 .nota-card {
-  background: #f9fafb;
-  border-left: 4px solid #3b82f6;
-  padding: 1rem;
-  border-radius: 0 8px 8px 0;
-  margin-bottom: 1rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-left: 5px solid #0284c7;
+  padding: 1.25rem;
+  border-radius: 0 10px 10px 0;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
 }
 
 .nota-date {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
   display: block;
   margin-bottom: 0.5rem;
 }
@@ -157,10 +160,11 @@
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .btn-upload:hover {
@@ -179,71 +183,79 @@
 }
 
 .clinical-data-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
+  color: #1e293b;
 }
 
 .clinical-data-item strong {
-  color: #fff;
+  color: #0f172a;
   font-size: 1rem;
   margin-right: 0.5rem;
 }
 
 .badge-time, .badge-stage, .badge-pill {
   display: inline-block;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 12px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-right: 0.5rem;
   vertical-align: middle;
 }
 
 .badge-time {
-  background: rgba(78, 205, 196, 0.2);
-  color: #4ecdc4;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
 .badge-stage {
-  background: rgba(255, 107, 107, 0.2);
-  color: #ff6b6b;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .badge-pill {
-  background: rgba(108, 92, 237, 0.2);
-  color: #a29bfe;
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
 }
 
 .sub-detail {
   font-size: 0.85rem;
-  color: #b2bec3;
-  margin-top: 0.3rem;
-  padding-left: 0.5rem;
-  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  color: #334155;
+  font-weight: 500;
+  margin-top: 0.35rem;
+  padding-left: 0.6rem;
+  border-left: 3px solid #cbd5e1;
 }
 
 .sub-detail.alert {
-  color: #ffeaa7;
-  border-left-color: #ffeaa7;
+  color: #9a3412;
+  font-weight: 600;
+  border-left-color: #ea580c;
 }
 
 .sub-detail.warn {
-  color: #ff7675;
-  border-left-color: #ff7675;
+  color: #991b1b;
+  font-weight: 600;
+  border-left-color: #dc2626;
 }
 
 .nota-section {
   margin-top: 1.2rem;
   padding-top: 0.8rem;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  border-top: 1px dashed #cbd5e1;
 }
 
 .nota-section h4 {
-  color: #a29bfe;
-  font-size: 0.9rem;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;

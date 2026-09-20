@@ -16,16 +16,16 @@
   --color-bg-main: #f4f7f6;
   /* Clean Light Gray/White Background */
   --color-bg-card: #ffffff;
-  --color-bg-glass: rgba(255, 255, 255, 0.35);
-  /* Glassmorphism background - more transparent */
+  --color-bg-glass: rgba(255, 255, 255, 0.92);
+  /* Glassmorphism background - solid high contrast */
 
   --color-secondary-bg: #d3edec;
   /* Light Mint/Teal for backgrounds/highlights */
 
-  --color-text-main: #1e293b;
-  /* Slate 800 */
-  --color-text-muted: #64748b;
-  /* Slate 500 */
+  --color-text-main: #0f172a;
+  /* Slate 900 - Deep, clear and sharp */
+  --color-text-muted: #334155;
+  /* Slate 700 - Highly legible on light surfaces */
   --color-text-light: #f8fafc;
 
   /* Alerts */
@@ -47,14 +47,14 @@
   --radius-sm: 0.375rem;
   --radius-md: 0.75rem;
   --radius-lg: 1.25rem;
-  --border-color: #e2e8f0;
+  --border-color: #cbd5e1;
 
   /* Keep legacy variables for older modules if they depend on them */
   --primary-color: #22505d;
   --primary-hover: #1b404a;
   --bg-app: #f4f7f6;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
+  --text-main: #0f172a;
+  --text-muted: #334155;
   --text-light: #f8fafc;
 }
 

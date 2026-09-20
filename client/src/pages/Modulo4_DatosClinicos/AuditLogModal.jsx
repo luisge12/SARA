@@ -420,11 +420,11 @@ export function AuditLogModal({ patient, patientId, onClose }) {
               style={{
                 padding: '0.35rem 0.75rem',
                 borderRadius: '8px',
-                border: filterType === 'ALL' ? '1px solid var(--color-primary)' : '1px solid #e2e8f0',
+                border: filterType === 'ALL' ? '1px solid var(--color-primary)' : '1px solid #cbd5e1',
                 backgroundColor: filterType === 'ALL' ? 'var(--color-primary)' : '#ffffff',
-                color: filterType === 'ALL' ? '#ffffff' : '#64748b',
-                fontWeight: '600',
-                fontSize: '0.8rem',
+                color: filterType === 'ALL' ? '#ffffff' : '#0f172a',
+                fontWeight: '700',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s'
               }}
@@ -436,11 +436,11 @@ export function AuditLogModal({ patient, patientId, onClose }) {
               style={{
                 padding: '0.35rem 0.75rem',
                 borderRadius: '8px',
-                border: filterType === 'DEMOGRAPHICS' ? '1px solid var(--color-accent)' : '1px solid #e2e8f0',
+                border: filterType === 'DEMOGRAPHICS' ? '1px solid var(--color-accent)' : '1px solid #cbd5e1',
                 backgroundColor: filterType === 'DEMOGRAPHICS' ? 'var(--color-accent)' : '#ffffff',
-                color: filterType === 'DEMOGRAPHICS' ? '#ffffff' : '#64748b',
-                fontWeight: '600',
-                fontSize: '0.8rem',
+                color: filterType === 'DEMOGRAPHICS' ? '#ffffff' : '#0f172a',
+                fontWeight: '700',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 display: 'flex',
@@ -455,11 +455,11 @@ export function AuditLogModal({ patient, patientId, onClose }) {
               style={{
                 padding: '0.35rem 0.75rem',
                 borderRadius: '8px',
-                border: filterType === 'CLINICAL' ? '1px solid #8b5cf6' : '1px solid #e2e8f0',
+                border: filterType === 'CLINICAL' ? '1px solid #8b5cf6' : '1px solid #cbd5e1',
                 backgroundColor: filterType === 'CLINICAL' ? '#8b5cf6' : '#ffffff',
-                color: filterType === 'CLINICAL' ? '#ffffff' : '#64748b',
-                fontWeight: '600',
-                fontSize: '0.8rem',
+                color: filterType === 'CLINICAL' ? '#ffffff' : '#0f172a',
+                fontWeight: '700',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s',
                 display: 'flex',
@@ -601,10 +601,10 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                     </div>
 
                     {/* Meta: Usuario modificador y fecha */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.82rem', color: '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.84rem', color: '#334155' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <span>Por:</span>
-                        <strong style={{ color: 'var(--color-text-main)' }}>
+                        <strong style={{ color: '#0f172a' }}>
                           {log.modifiedBy?.name || log.modifiedBy?.username || 'Sistema'}
                         </strong>
                         {log.modifiedBy?.role && (
@@ -613,7 +613,7 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                               padding: '0.15rem 0.45rem', 
                               borderRadius: '6px', 
                               fontSize: '0.72rem', 
-                              fontWeight: '600',
+                              fontWeight: '700',
                               backgroundColor: roleBadge.bg,
                               color: roleBadge.text
                             }}
@@ -622,8 +622,8 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                           </span>
                         )}
                       </div>
-                      <span style={{ color: '#cbd5e1' }}>•</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#64748b' }}>
+                      <span style={{ color: '#94a3b8' }}>•</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#334155', fontWeight: '500' }}>
                         <Clock size={13} />
                         <span>{formatDate(log.createdAt || log.created_at || log.timestamp)}</span>
                       </div>
@@ -633,17 +633,17 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                   {/* CUERPO DE LA TARJETA: RESUMEN Y TABLA DE CAMBIOS */}
                   <div style={{ padding: '1rem 1.25rem' }}>
                     {log.changesDescription?.summary && (
-                      <p style={{ fontSize: '0.88rem', fontWeight: '500', color: '#334155', marginBottom: diffs.length > 0 ? '0.75rem' : 0 }}>
+                      <p style={{ fontSize: '0.9rem', fontWeight: '600', color: '#0f172a', marginBottom: diffs.length > 0 ? '0.75rem' : 0 }}>
                         {log.changesDescription.summary}
                       </p>
                     )}
 
                     {/* TABLA DE DIFERENCIAS CAMPO POR CAMPO */}
                     {diffs.length > 0 && (
-                      <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', marginTop: '0.5rem' }}>
+                      <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #cbd5e1', marginTop: '0.5rem' }}>
                         <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                           <thead>
-                            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#475569' }}>
+                            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #cbd5e1', textAlign: 'left', color: '#0f172a' }}>
                               <th style={{ padding: '0.65rem 1rem', width: '30%', minWidth: '180px', fontWeight: '700' }}>Campo Modificado</th>
                               <th style={{ padding: '0.65rem 1rem', width: '35%', minWidth: '220px', fontWeight: '700' }}>Valor Anterior</th>
                               <th style={{ padding: '0.65rem 1rem', width: '35%', minWidth: '220px', fontWeight: '700' }}>Valor Nuevo</th>
@@ -658,7 +658,7 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                                   backgroundColor: dIdx % 2 === 0 ? '#ffffff' : '#fcfcfd'
                                 }}
                               >
-                                <td style={{ padding: '0.75rem 1rem', fontWeight: '600', color: 'var(--color-primary)' }}>
+                                <td style={{ padding: '0.75rem 1rem', fontWeight: '700', color: 'var(--color-primary)' }}>
                                   {diff.label || diff.field}
                                 </td>
                                 <td style={{ padding: '0.75rem 1rem' }}>
@@ -668,11 +668,11 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                                       padding: '0.35rem 0.65rem', 
                                       borderRadius: '6px', 
                                       backgroundColor: '#fee2e2', 
-                                      color: '#991b1b',
+                                      color: '#991b1b', 
                                       border: '1px solid #fecaca',
                                       wordBreak: 'break-word',
                                       fontSize: '0.84rem',
-                                      fontWeight: '500',
+                                      fontWeight: '600',
                                       lineHeight: '1.45'
                                     }}
                                   >
@@ -688,9 +688,9 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                                       padding: '0.35rem 0.65rem', 
                                       borderRadius: '6px', 
                                       backgroundColor: '#dcfce7', 
-                                      color: '#166534',
+                                      color: '#14532d',
                                       border: '1px solid #bbf7d0',
-                                      fontWeight: '600',
+                                      fontWeight: '700',
                                       wordBreak: 'break-word',
                                       fontSize: '0.84rem',
                                       lineHeight: '1.45'
@@ -714,14 +714,14 @@ export function AuditLogModal({ patient, patientId, onClose }) {
                         style={{
                           background: 'none',
                           border: 'none',
-                          color: '#64748b',
+                          color: '#334155',
                           cursor: 'pointer',
-                          fontSize: '0.75rem',
+                          fontSize: '0.78rem',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.25rem',
                           padding: 0,
-                          fontWeight: '500'
+                          fontWeight: '600'
                         }}
                       >
                         {isJsonOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}

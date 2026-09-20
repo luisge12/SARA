@@ -1,19 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
- * Hook reutilizable para dictado por voz directo al sistema mediante Web Speech API nativa.
- * Compatible con Google Chrome, Edge, Safari y navegadores Chromium sin costo adicional.
+ * Hook de dictado por voz de grado médico mediante Web Speech API.
+ * Con reconexión automática en pausas, gestión de instancias y mensajes claros de diagnóstico.
  */
 export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [interimText, setInterimText] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+
   const recognitionRef = useRef(null);
   const onTranscriptRef = useRef(onTranscript);
   const isListeningRef = useRef(false);
   const pendingInterimRef = useRef('');
+  const restartTimerRef = useRef(null);
+  const hasFatalErrorRef = useRef(false);
 
-  // Mantener la referencia del callback siempre actualizada
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
   }, [onTranscript]);
@@ -27,13 +30,23 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
 
   const stopListening = useCallback(() => {
     isListeningRef.current = false;
+    hasFatalErrorRef.current = false;
     setIsListening(false);
+
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.onerror = null;
         recognitionRef.current.stop();
       } catch (e) {}
+      recognitionRef.current = null;
     }
-    // Si quedó texto provisional pendiente al detener el micrófono, vaciarlo
+
     if (pendingInterimRef.current.trim() && onTranscriptRef.current) {
       onTranscriptRef.current(pendingInterimRef.current.trim());
       pendingInterimRef.current = '';
@@ -41,34 +54,36 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
     setInterimText('');
   }, []);
 
-  const startListening = useCallback(() => {
+  const createAndStartRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setIsSupported(false);
+      setErrorMessage('Tu navegador actual no tiene soporte para la API de reconocimiento de voz. Usa Chrome o Edge, o presiona Win + H.');
       return;
     }
 
-    // Detener y limpiar cualquier sesión previa activa
+    // Limpiar instancia previa si existe
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.onerror = null;
         recognitionRef.current.abort();
       } catch (e) {}
+      recognitionRef.current = null;
     }
-
-    isListeningRef.current = true;
-    setIsListening(true);
-    pendingInterimRef.current = '';
-    setInterimText('');
 
     try {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = lang || (navigator.language ? navigator.language : 'es-ES');
+      // Preferir es-ES o dialecto de español del sistema
+      const systemLang = navigator.language || 'es-ES';
+      recognition.lang = systemLang.startsWith('es') ? systemLang : (lang || 'es-ES');
 
       recognition.onstart = () => {
-        isListeningRef.current = true;
         setIsListening(true);
+        hasFatalErrorRef.current = false;
+        setErrorMessage(null);
       };
 
       recognition.onresult = (event) => {
@@ -76,8 +91,9 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
         let interimChunk = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const text = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
+          const item = event.results[i];
+          const text = item[0]?.transcript || '';
+          if (item.isFinal) {
             finalChunk += text + ' ';
           } else {
             interimChunk += text;
@@ -95,23 +111,30 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
       };
 
       recognition.onerror = (event) => {
-        // Silencios momentáneos no deben apagar la escucha activa
+        console.warn('SpeechRecognition error:', event.error);
+
         if (event.error === 'no-speech') {
+          // Silencio detectado momentáneamente; no es error fatal
           return;
         }
+
         if (event.error === 'aborted') {
-          if (!isListeningRef.current) {
-            setIsListening(false);
-          }
           return;
         }
-        if (event.error === 'not-allowed') {
-          isListeningRef.current = false;
-          setIsListening(false);
-          alert('Permiso de micrófono no otorgado. Habilita el acceso en el candado 🔒 de tu navegador.');
-          return;
+
+        hasFatalErrorRef.current = true;
+        isListeningRef.current = false;
+        setIsListening(false);
+
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          setErrorMessage('Permiso de micrófono bloqueado. Haz clic en el ícono del candado 🔒 junto a la dirección web y habilita el micrófono.');
+        } else if (event.error === 'audio-capture') {
+          setErrorMessage('No se detectó señal de micrófono. Revisa que el micrófono esté conectado y no esté silenciado en Windows.');
+        } else if (event.error === 'network') {
+          setErrorMessage('El servicio de voz de Google no respondió (error de red). Puedes usar el atajo nativo de Windows: Win + H.');
+        } else {
+          setErrorMessage(`Error de voz (${event.error}). Puedes usar la tecla Win + H para dictar directamente.`);
         }
-        console.warn('Aviso de reconocimiento de voz:', event.error);
       };
 
       recognition.onend = () => {
@@ -121,31 +144,65 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
         }
         setInterimText('');
 
-        // Si el usuario aún no presionó el botón de detener, mantener viva la escucha continuamente
-        if (isListeningRef.current) {
-          try {
-            recognition.start();
-          } catch (err) {
-            setTimeout(() => {
-              if (isListeningRef.current) {
-                try { recognition.start(); } catch (e) {}
-              }
-            }, 100);
-          }
+        // Si el usuario aún desea seguir escuchando y no hubo error fatal, crear una instancia fresca
+        if (isListeningRef.current && !hasFatalErrorRef.current) {
+          restartTimerRef.current = setTimeout(() => {
+            if (isListeningRef.current && !hasFatalErrorRef.current) {
+              createAndStartRecognition();
+            }
+          }, 150);
         } else {
           setIsListening(false);
+          isListeningRef.current = false;
         }
       };
 
       recognitionRef.current = recognition;
       recognition.start();
     } catch (e) {
-      console.warn('Error al iniciar reconocimiento de voz:', e);
-      setInterimText('');
+      console.error('Error al instanciar SpeechRecognition:', e);
+      hasFatalErrorRef.current = true;
       isListeningRef.current = false;
       setIsListening(false);
+      setErrorMessage('No se pudo iniciar el micrófono en este navegador. Presiona Win + H para dictar con Windows.');
     }
   }, [lang]);
+
+  const startListening = useCallback(async () => {
+    setErrorMessage(null);
+    hasFatalErrorRef.current = false;
+    isListeningRef.current = true;
+    setIsListening(true);
+    pendingInterimRef.current = '';
+    setInterimText('');
+
+    // Solicitar permiso de micrófono si el navegador lo permite
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Liberar el stream inmediatamente, solo queríamos confirmar permiso
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          hasFatalErrorRef.current = true;
+          isListeningRef.current = false;
+          setIsListening(false);
+          setErrorMessage('Permiso de micrófono denegado. Permite el acceso al micrófono en la barra de direcciones del navegador.');
+          return;
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          hasFatalErrorRef.current = true;
+          isListeningRef.current = false;
+          setIsListening(false);
+          setErrorMessage('No se encontró ningún micrófono conectado a tu equipo.');
+          return;
+        }
+        // Otros errores no fatales continúan a recognition
+      }
+    }
+
+    if (!isListeningRef.current) return;
+    createAndStartRecognition();
+  }, [createAndStartRecognition]);
 
   const toggleListening = useCallback(() => {
     if (isListeningRef.current) {
@@ -157,20 +214,18 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
 
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch (e) {}
-      }
+      stopListening();
     };
-  }, []);
+  }, [stopListening]);
 
   return {
     isSupported,
     isListening,
     interimText,
+    errorMessage,
     startListening,
     stopListening,
-    toggleListening
+    toggleListening,
+    clearError: () => setErrorMessage(null)
   };
 }

@@ -2,7 +2,7 @@
   background-color: var(--color-bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid #cbd5e1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -18,14 +18,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: #fafafa;
+  border-bottom: 1px solid #cbd5e1;
+  background-color: #f8fafc;
 }
 
 .card-title {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-main);
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
