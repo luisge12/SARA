@@ -103,7 +103,7 @@ function Modulo_CitasMedicas() {
 
   return (
     <DashboardLayout>
-      <div className="module-container">
+      <div className="module-container" style={{ maxWidth: '100%' }}>
         
         {/* Cabecera Principal */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.5rem' }}>
@@ -624,15 +624,15 @@ function Modulo_CitasMedicas() {
                 const currentMinutesFrom0 = nowTime.getHours() * 60 + nowTime.getMinutes();
                 const showCurrentTimeLine = isToday;
                 
-                // Header height: 45px. Time slot height: 20px (10 mins).
-                // 10 mins = 20px -> 1 min = 2px
-                const timeLineTop = 45 + (currentMinutesFrom0 * 2);
+                // Header height: 45px. Time slot height: 30px (10 mins).
+                // 10 mins = 30px -> 1 min = 3px
+                const timeLineTop = 45 + (currentMinutesFrom0 * 3);
 
                 return (
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: `80px repeat(${doctors.length}, minmax(200px, 1fr))`,
-                    gridAutoRows: 'minmax(20px, auto)',
+                    gridTemplateColumns: `80px repeat(${doctors.length}, minmax(300px, 1fr))`,
+                    gridAutoRows: 'minmax(30px, auto)',
                     borderTop: '1px solid var(--border-color)',
                     borderLeft: '1px solid var(--border-color)',
                     position: 'relative'
@@ -675,8 +675,8 @@ function Modulo_CitasMedicas() {
                     {timeSlots.map((time, idx) => {
                       return (
                         <React.Fragment key={time}>
-                          <div style={{ height: '20px', padding: '0.2rem', borderRight: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-muted)', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {time.endsWith('00') ? time : ''}
+                          <div style={{ height: '30px', padding: '0.2rem', borderRight: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', textAlign: 'center', fontSize: '0.75rem', color: time.endsWith('00') ? 'var(--color-primary)' : 'var(--color-text-muted)', fontWeight: time.endsWith('00') ? 'bold' : 'normal', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {time}
                           </div>
                           {doctors.map(doc => {
                             const aptsInSlot = dayAppointments.filter(a => {
@@ -697,7 +697,7 @@ function Modulo_CitasMedicas() {
                                   borderRight: '1px solid var(--border-color)', 
                                   borderBottom: '1px solid var(--border-color)',
                                   position: 'relative',
-                                  height: '20px',
+                                  height: '30px',
                                   backgroundColor: '#fff',
                                   transition: 'background 0.2s ease',
                                   display: 'flex',
