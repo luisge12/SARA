@@ -5,7 +5,7 @@ import { Button } from './Button';
 import api from '../services/api';
 import { Calendar, X, CheckCircle, Clock, Trash2 } from 'lucide-react';
 
-export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, appointmentToEdit = null }) {
+export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, appointmentToEdit = null, initialDate = null, initialDoctorName = null }) {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -16,6 +16,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
   const [sedeAtencion, setSedeAtencion] = useState(appointmentToEdit ? (appointmentToEdit.sedeAtencion || 'CENTRAL') : 'CENTRAL');
   const [appointmentDate, setAppointmentDate] = useState('');
   const [reason, setReason] = useState(appointmentToEdit ? (appointmentToEdit.reason || '') : '');
+  const [duration, setDuration] = useState(appointmentToEdit ? (appointmentToEdit.duration || 30) : 30);
   const [status, setStatus] = useState(appointmentToEdit ? (appointmentToEdit.status || 'Confirmada') : 'Confirmada');
   const [notes, setNotes] = useState(appointmentToEdit ? (appointmentToEdit.notes || '') : '');
 
@@ -62,7 +63,16 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
           }
 
           if (doctorList.length > 0) {
-            setDoctorId(doctorList[0].id);
+            if (initialDoctorName) {
+              const matchingDoc = doctorList.find(d => (d.name || d.username) === initialDoctorName);
+              if (matchingDoc) {
+                setDoctorId(matchingDoc.id);
+              } else {
+                setDoctorId(doctorList[0].id);
+              }
+            } else {
+              setDoctorId(doctorList[0].id);
+            }
           }
         }
       } catch (err) {
@@ -78,6 +88,10 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
     // Configurar fecha de la cita
     if (appointmentToEdit && appointmentToEdit.appointmentDate) {
       const d = new Date(appointmentToEdit.appointmentDate);
+      const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+      setAppointmentDate(localIso);
+    } else if (initialDate) {
+      const d = new Date(initialDate);
       const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
       setAppointmentDate(localIso);
     } else {
@@ -115,6 +129,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
         doctorId: doctorId ? parseInt(doctorId, 10) : null,
         sedeAtencion,
         appointmentDate: new Date(appointmentDate).toISOString(),
+        duration: parseInt(duration, 10),
         reason,
         status,
         notes,
@@ -327,6 +342,25 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                     <option value="Pendiente">Pendiente</option>
                     <option value="Completada">Completada</option>
                     <option value="Cancelada">Cancelada</option>
+                  </select>
+                </div>
+                
+                <div className="input-group">
+                  <label className="input-label">Duración</label>
+                  <select
+                    className="input-field"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    style={{ height: '42px', padding: '0.5rem 1rem', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    <option value="10">10 minutos</option>
+                    <option value="20">20 minutos</option>
+                    <option value="30">30 minutos</option>
+                    <option value="40">40 minutos</option>
+                    <option value="50">50 minutos</option>
+                    <option value="60">1 hora</option>
+                    <option value="90">1 hora y media</option>
+                    <option value="120">2 horas</option>
                   </select>
                 </div>
               </div>

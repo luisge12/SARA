@@ -60,6 +60,27 @@ const PatientProfile = sequelize.define('PatientProfile', {
   address: {
     type: DataTypes.TEXT
   },
+  ocupacion: {
+    type: DataTypes.STRING(150)
+  },
+
+  // Anamnesis Llenada por el Paciente
+  motivoConsulta: {
+    type: DataTypes.TEXT,
+    field: 'motivo_consulta'
+  },
+  enfermedadActual: {
+    type: DataTypes.TEXT,
+    field: 'enfermedad_actual'
+  },
+  habitosPsicobiologicos: {
+    type: DataTypes.TEXT,
+    field: 'habitos_psicobiologicos'
+  },
+  examenFuncional: {
+    type: DataTypes.TEXT,
+    field: 'examen_funcional'
+  },
 
   // Antecedentes Personales y Quirúrgicos
   personalHistory: {

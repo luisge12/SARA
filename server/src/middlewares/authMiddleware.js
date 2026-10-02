@@ -17,9 +17,11 @@ module.exports = {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecretkey_sara_18992791');
       req.user = decoded;
 
-      // Bloqueo de Seguridad Crítico para Pacientes
+      // Bloqueo de Seguridad Crítico para Pacientes (Con excepciones para su portal)
       if (req.user.role === 'Paciente' && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
-        return res.status(403).json({ error: 'Acceso denegado. El rol Paciente solo tiene permisos de lectura.' });
+        if (!req.originalUrl.startsWith('/api/patients/')) {
+          return res.status(403).json({ error: 'Acceso denegado. El rol Paciente solo tiene permisos de lectura.' });
+        }
       }
 
       next();

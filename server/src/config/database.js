@@ -109,7 +109,12 @@ const initDatabase = async () => {
         { name: 'bowel_frequency', type: 'VARCHAR(100)' },
         { name: 'strain_to_evacuate', type: 'VARCHAR(20)' },
         { name: 'incomplete_evacuation', type: 'VARCHAR(20)' },
-        { name: 'bowel_notes', type: 'TEXT' }
+        { name: 'bowel_notes', type: 'TEXT' },
+        { name: 'ocupacion', type: 'VARCHAR(150)' },
+        { name: 'motivo_consulta', type: 'TEXT' },
+        { name: 'enfermedad_actual', type: 'TEXT' },
+        { name: 'habitos_psicobiologicos', type: 'TEXT' },
+        { name: 'examen_funcional', type: 'TEXT' }
       ];
 
       for (const col of neededPCols) {

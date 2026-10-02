@@ -11,6 +11,9 @@ router.get('/:id/profile', verifyToken, patientController.getPatientProfile);
 // (Solo recepcionista y admin deberían poder modificar demográficos en teoría, pero por ahora permitimos que ambos roles actualicen)
 router.put('/:id/profile', verifyToken, patientController.updatePatientProfile);
 
+// === Portal de Pacientes ===
+router.post('/:id/request-appointment', verifyToken, patientController.requestAppointment);
+
 // === Rutas Médicas ===
 // Solo Médicos y Master
 router.post('/:patientId/consultations', verifyToken, checkRole(['Director Médico', 'Médico Tratante', 'Médico', 'Master']), patientController.saveConsultation);

@@ -34,8 +34,19 @@ const Appointment = sequelize.define('Appointment', {
   },
   appointmentDate: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     field: 'appointment_date'
+  },
+  priority: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    defaultValue: 'Normal'
+  },
+  duration: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 30,
+    comment: 'Duración de la cita en minutos'
   },
   reason: {
     type: DataTypes.TEXT

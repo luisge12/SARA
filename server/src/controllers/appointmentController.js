@@ -45,7 +45,7 @@ module.exports = {
     try {
       const { 
         patientId, doctorId, sedeAtencion, appointmentDate, reason, status, notes,
-        totalAmount, paidAmount, paymentMethod, paymentStatus 
+        totalAmount, paidAmount, paymentMethod, paymentStatus, duration 
       } = req.body;
 
       if (!patientId || !appointmentDate) {
@@ -75,6 +75,7 @@ module.exports = {
         sedeAtencion: sedeAtencion || patient.sedeAtencion || 'CENTRAL',
         appointmentDate,
         reason: reason || 'Consulta General',
+        duration: duration || 30,
         status: status || 'Confirmada',
         notes: notes || '',
         totalAmount: tot,
@@ -115,7 +116,7 @@ module.exports = {
       const { id } = req.params;
       const { 
         patientId, doctorId, sedeAtencion, appointmentDate, reason, status, notes,
-        totalAmount, paidAmount, paymentMethod, paymentStatus
+        totalAmount, paidAmount, paymentMethod, paymentStatus, duration
       } = req.body;
 
       const appointment = await Appointment.findByPk(id);
@@ -128,6 +129,7 @@ module.exports = {
       if (sedeAtencion) appointment.sedeAtencion = sedeAtencion;
       if (appointmentDate) appointment.appointmentDate = appointmentDate;
       if (reason) appointment.reason = reason;
+      if (duration !== undefined) appointment.duration = duration;
       if (status) appointment.status = status;
       if (notes !== undefined) appointment.notes = notes;
 

@@ -2,6 +2,7 @@ const User = require('../models/User');
 const PatientProfile = require('../models/PatientProfile');
 const Consultation = require('../models/Consultation');
 const AuditLog = require('../models/AuditLog');
+const Appointment = require('../models/Appointment');
 const { calculateDiff, logPatientAudit } = require('../services/auditService');
 const { Op } = require('sequelize');
 
@@ -79,6 +80,11 @@ module.exports = {
         referringEntity: profile.referringEntity || '',
         nextAppointment: safeIsoDate(profile.nextAppointment) || '',
         address: profile.address || '',
+        ocupacion: profile.ocupacion || '',
+        motivoConsulta: profile.motivoConsulta || '',
+        enfermedadActual: profile.enfermedadActual || '',
+        habitosPsicobiologicos: profile.habitosPsicobiologicos || '',
+        examenFuncional: profile.examenFuncional || '',
         personalHistory: profile.personalHistory || '',
         surgicalHistory: profile.surgicalHistory || '',
         familyHistory: profile.familyHistory || '',
@@ -117,10 +123,15 @@ module.exports = {
       if (data.address !== undefined) profile.address = data.address;
       if (data.bloodPressure !== undefined) profile.bloodPressure = data.bloodPressure;
 
-      // Antecedentes Médicos y Quirúrgicos
+      // Antecedentes Médicos y Quirúrgicos y Anamnesis
       if (data.personalHistory !== undefined) profile.personalHistory = data.personalHistory;
       if (data.surgicalHistory !== undefined) profile.surgicalHistory = data.surgicalHistory;
       if (data.familyHistory !== undefined) profile.familyHistory = data.familyHistory;
+      if (data.ocupacion !== undefined) profile.ocupacion = data.ocupacion;
+      if (data.motivoConsulta !== undefined) profile.motivoConsulta = data.motivoConsulta;
+      if (data.enfermedadActual !== undefined) profile.enfermedadActual = data.enfermedadActual;
+      if (data.habitosPsicobiologicos !== undefined) profile.habitosPsicobiologicos = data.habitosPsicobiologicos;
+      if (data.examenFuncional !== undefined) profile.examenFuncional = data.examenFuncional;
 
       // Sanitizar campos numéricos
       if (data.heartRate !== undefined) profile.heartRate = (data.heartRate === '' || data.heartRate === null || isNaN(data.heartRate)) ? null : parseInt(data.heartRate);
@@ -144,6 +155,11 @@ module.exports = {
         referringEntity: profile.referringEntity || '',
         nextAppointment: safeIsoDate(profile.nextAppointment) || '',
         address: profile.address || '',
+        ocupacion: profile.ocupacion || '',
+        motivoConsulta: profile.motivoConsulta || '',
+        enfermedadActual: profile.enfermedadActual || '',
+        habitosPsicobiologicos: profile.habitosPsicobiologicos || '',
+        examenFuncional: profile.examenFuncional || '',
         personalHistory: profile.personalHistory || '',
         surgicalHistory: profile.surgicalHistory || '',
         familyHistory: profile.familyHistory || '',
@@ -182,6 +198,40 @@ module.exports = {
     }
   },
 
+  // === Portal de Pacientes ===
+  requestAppointment: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reason, priority } = req.body;
+      
+      const patient = await User.findOne({ where: { id, role: 'Paciente' } });
+      if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });
+
+      const appointment = await Appointment.create({
+        patientId: patient.id,
+        sedeAtencion: patient.sedeAtencion || 'CENTRAL',
+        reason: reason || 'Solicitud de consulta',
+        priority: priority || 'Normal',
+        status: 'Solicitada',
+        appointmentDate: null // Aún sin agendar por un médico
+      });
+
+      // Si tenemos WebSockets activos en app, enviamos notificación al front-end médico
+      if (req.app.get('io')) {
+        req.app.get('io').emit('new_appointment_request', {
+          appointmentId: appointment.id,
+          patientName: patient.name,
+          reason,
+          priority
+        });
+      }
+
+      return res.status(201).json({ message: 'Solicitud enviada exitosamente', appointment });
+    } catch (error) {
+      console.error('Error al solicitar consulta:', error);
+      return res.status(500).json({ error: 'Error al solicitar consulta' });
+    }
+  },
 
   // === MÓDULO 4: Médico (Datos Clínicos) ===
 
