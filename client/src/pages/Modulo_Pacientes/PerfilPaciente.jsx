@@ -10,6 +10,8 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import { AppointmentModal } from '../../components/AppointmentModal';
 import { PatientRegistrationModal } from '../../components/PatientRegistrationModal';
 import { ClinicalWorkspace } from '../Modulo4_DatosClinicos/ClinicalWorkspace';
+import { CustomFormTemplateManager } from '../../components/CustomFormTemplates/CustomFormTemplateManager';
+import { DynamicFormRenderer } from '../../components/CustomFormTemplates/DynamicFormRenderer';
 import api from '../../services/api';
 import html2pdf from 'html2pdf.js';
 import { getClinicSettings } from '../../services/clinicSettings';
@@ -174,6 +176,26 @@ export default function PerfilPaciente() {
     recommendations: ''
   });
 
+  // Estados de Formularios Personalizados para Estudios
+  const [showCustomTemplateManager, setShowCustomTemplateManager] = useState(false);
+  const [patientStudyTemplates, setPatientStudyTemplates] = useState([]);
+  const [selectedStudyTemplate, setSelectedStudyTemplate] = useState(null);
+  const [customStudyValues, setCustomStudyValues] = useState({});
+
+  const fetchPatientStudyTemplates = async () => {
+    try {
+      const res = await api.get('/api/form-templates', { params: { targetModule: 'STUDY' } });
+      setPatientStudyTemplates(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error('Error al cargar plantillas de estudio:', e);
+    }
+  };
+
+  const filteredStudies = (Array.isArray(studies) ? studies : []).filter(study => {
+    if (studyFilterCategory === 'Todos') return true;
+    return (study.category || 'General') === studyFilterCategory;
+  });
+
   const handleDownloadPDF = () => {
     const element = document.getElementById('invoice-pdf-content');
     if (!element) return;
@@ -225,6 +247,7 @@ export default function PerfilPaciente() {
   useEffect(() => {
     fetchPatientData();
     fetchDoctors();
+    fetchPatientStudyTemplates();
   }, [id]);
 
   const handleCategoryChange = (e) => {
@@ -242,6 +265,8 @@ export default function PerfilPaciente() {
   const handleOpenStudyModal = () => {
     const isDoc = userRole.includes('MED') || userRole === 'MASTER';
     const defaultDocId = isDoc ? currentUser.id : (doctors.length > 0 ? doctors[0].id : '');
+    setSelectedStudyTemplate(null);
+    setCustomStudyValues({});
     setStudyForm({
       category: 'Imagenología y Radiología',
       studyType: 'Ultrasonido Abdominal / Pélvico',
@@ -278,7 +303,15 @@ export default function PerfilPaciente() {
         biopsySample: studyForm.biopsySample || 'No aplica',
         diagnosticImpression: studyForm.diagnosticImpression,
         recommendations: studyForm.recommendations,
-        status: studyForm.status
+        status: studyForm.status,
+        metadata: {
+          customForm: selectedStudyTemplate ? {
+            templateId: selectedStudyTemplate.id,
+            templateTitle: selectedStudyTemplate.title,
+            fields: selectedStudyTemplate.fields,
+            values: customStudyValues
+          } : null
+        }
       });
       setShowStudyModal(false);
       await fetchPatientData();
@@ -1170,6 +1203,75 @@ export default function PerfilPaciente() {
                   />
                 </div>
 
+                {/* Selector de Plantilla Personalizada para el Estudio */}
+                <div style={{
+                  background: '#f8fafc', padding: '1rem', borderRadius: '10px',
+                  border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+                      Plantilla / Formulario Dinámico (Opcional):
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomTemplateManager(true)}
+                      style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                    >
+                      <Sparkles size={14} /> Crear o Subir Plantilla
+                    </button>
+                  </div>
+
+                  <select
+                    value={selectedStudyTemplate?.id || ''}
+                    onChange={(e) => {
+                      const id = parseInt(e.target.value);
+                      if (!id) {
+                        setSelectedStudyTemplate(null);
+                        setCustomStudyValues({});
+                      } else {
+                        const found = patientStudyTemplates.find(t => t.id === id);
+                        if (found) {
+                          setSelectedStudyTemplate(found);
+                          setCustomStudyValues({});
+                        }
+                      }
+                    }}
+                    style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', fontWeight: 500 }}
+                  >
+                    <option value="">-- Sin Formulario Personalizado --</option>
+                    {patientStudyTemplates.map(tmpl => (
+                      <option key={tmpl.id} value={tmpl.id}>
+                        {tmpl.title} ({tmpl.category || 'General'})
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedStudyTemplate && (
+                    <div style={{
+                      background: '#ffffff', padding: '1rem', borderRadius: '8px',
+                      border: '1px solid #bae6fd', marginTop: '0.25rem'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0369a1' }}>
+                          Campos de {selectedStudyTemplate.title}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => { setSelectedStudyTemplate(null); setCustomStudyValues({}); }}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                      <DynamicFormRenderer
+                        fields={selectedStudyTemplate.fields || []}
+                        values={customStudyValues}
+                        onChange={(k, v) => setCustomStudyValues(prev => ({ ...prev, [k]: v }))}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
                     Recomendaciones Médicas y Plan de Seguimiento
@@ -1262,6 +1364,26 @@ export default function PerfilPaciente() {
                 <h3>Recomendaciones y Plan</h3>
                 <p>{selectedStudy.recommendations || 'Sin recomendaciones'}</p>
               </div>
+
+              {selectedStudy.metadata?.customForm && selectedStudy.metadata.customForm.fields && selectedStudy.metadata.customForm.fields.length > 0 && (
+                <div className="report-section" style={{ background: '#f0f9ff', padding: '1rem', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                  <h3 style={{ color: '#0369a1' }}>{selectedStudy.metadata.customForm.templateTitle || 'Parámetros Específicos del Estudio'}</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem', marginTop: '0.5rem' }}>
+                    {selectedStudy.metadata.customForm.fields.map(f => {
+                      const val = selectedStudy.metadata.customForm.values?.[f.id];
+                      if (val === undefined || val === '') return null;
+                      return (
+                        <div key={f.id} style={{ background: '#ffffff', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>{f.label}:</span>
+                          <span style={{ fontSize: '0.88rem', color: '#0f172a', fontWeight: 600 }}>
+                            {typeof val === 'boolean' ? (val ? 'Sí' : 'No') : String(val)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="report-modal-footer">
               <button className="btn-primary" onClick={() => window.print()}>Imprimir Informe</button>
@@ -1347,6 +1469,20 @@ export default function PerfilPaciente() {
           </div>
         </div>
       )}
+
+      {/* MODAL GESTOR DE PLANTILLAS Y FORMULARIOS PERSONALIZADOS */}
+      <CustomFormTemplateManager
+        isOpen={showCustomTemplateManager}
+        onClose={() => {
+          setShowCustomTemplateManager(false);
+          fetchPatientStudyTemplates();
+        }}
+        targetModule="STUDY"
+        onSelectTemplate={(tmpl) => {
+          setSelectedStudyTemplate(tmpl);
+          setCustomStudyValues({});
+        }}
+      />
     </DashboardLayout>
   );
 }

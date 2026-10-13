@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { hasAccess } from '../../components/ProtectedRoute';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
+import { CustomFormTemplateManager } from '../../components/CustomFormTemplates/CustomFormTemplateManager';
+import { DynamicFormRenderer } from '../../components/CustomFormTemplates/DynamicFormRenderer';
 
 export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: propPatientId }) {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -27,6 +29,21 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const [selectedReport, setSelectedReport] = useState(null);
   const [loadingStudies, setLoadingStudies] = useState(true);
   const [savingStudy, setSavingStudy] = useState(false);
+
+  // Estados de Formularios y Plantillas Personalizadas
+  const [showCustomTemplateManager, setShowCustomTemplateManager] = useState(false);
+  const [studyTemplates, setStudyTemplates] = useState([]);
+  const [selectedStudyTemplate, setSelectedStudyTemplate] = useState(null);
+  const [customStudyValues, setCustomStudyValues] = useState({});
+
+  const fetchStudyTemplates = async () => {
+    try {
+      const res = await api.get('/api/form-templates', { params: { targetModule: 'STUDY' } });
+      setStudyTemplates(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error('Error al cargar plantillas de estudio:', e);
+    }
+  };
 
   // Lista de estudios y procedimientos
   const [studies, setStudies] = useState([]);
@@ -48,18 +65,20 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   useEffect(() => {
     fetchPatients();
     fetchStudies();
+    fetchStudyTemplates();
   }, []);
 
   const fetchPatients = async () => {
     try {
       const res = await api.get('/api/patients');
-      setPatients(res.data || []);
+      setPatients(Array.isArray(res.data) ? res.data : []);
       if (propPatientId) {
         setSelectedPatientId(propPatientId);
         setFormData(prev => ({ ...prev, patientId: propPatientId }));
       }
     } catch (err) {
       console.error('Error al cargar lista de pacientes:', err);
+      setPatients([]);
     }
   };
 
@@ -67,9 +86,10 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     try {
       setLoadingStudies(true);
       const res = await api.get('/api/studies');
-      setStudies(res.data || []);
+      setStudies(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Error al cargar estudios desde el servidor:', err);
+      setStudies([]);
     } finally {
       setLoadingStudies(false);
     }
@@ -77,6 +97,8 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
   const handleOpenCreateModal = () => {
     setEditingStudyId(null);
+    setSelectedStudyTemplate(null);
+    setCustomStudyValues({});
     setFormData({
       patientId: propPatientId || '',
       studyType: '',
@@ -94,6 +116,13 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
   const handleOpenEditModal = (study) => {
     setEditingStudyId(study.id);
+    if (study.metadata?.customForm) {
+      setSelectedStudyTemplate(study.metadata.customForm);
+      setCustomStudyValues(study.metadata.customForm.values || {});
+    } else {
+      setSelectedStudyTemplate(null);
+      setCustomStudyValues({});
+    }
     setFormData({
       patientId: study.patientId || study.patient?.id || '',
       studyType: study.studyType || '',
@@ -142,7 +171,16 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         diagnosticImpression: formData.diagnosticImpression,
         recommendations: formData.recommendations,
         status: formData.status,
-        attachments: []
+        attachments: [],
+        metadata: {
+          ...(editingStudyId ? (studies.find(s => s.id === editingStudyId)?.metadata || {}) : {}),
+          customForm: selectedStudyTemplate ? {
+            templateId: selectedStudyTemplate.id,
+            templateTitle: selectedStudyTemplate.title,
+            fields: selectedStudyTemplate.fields,
+            values: customStudyValues
+          } : null
+        }
       };
 
       if (editingStudyId) {
@@ -181,15 +219,15 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     }
   };
 
-  const filteredStudies = studies.filter(item => {
-    const pName = item.patient?.name || item.patientName || '';
-    const pCedula = item.patient?.identificationNumber || item.patientCedula || '';
-    const dName = item.doctor?.name || item.doctorName || '';
-    const sType = item.studyType || '';
-    const dImpression = item.diagnosticImpression || '';
+  const filteredStudies = (Array.isArray(studies) ? studies : []).filter(item => {
+    const pName = item?.patient?.name || item?.patientName || '';
+    const pCedula = item?.patient?.identificationNumber || item?.patientCedula || '';
+    const dName = item?.doctor?.name || item?.doctorName || '';
+    const sType = item?.studyType || '';
+    const dImpression = item?.diagnosticImpression || '';
 
     const matchesType = filterType === 'Todos' || sType.toLowerCase().includes(filterType.toLowerCase());
-    const matchesStatus = filterStatus === 'Todos' || item.status === filterStatus;
+    const matchesStatus = filterStatus === 'Todos' || item?.status === filterStatus;
     const query = searchTerm.toLowerCase();
     const matchesSearch = 
       pName.toLowerCase().includes(query) ||
@@ -214,6 +252,13 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
           </p>
         </div>
         <div className="dashboard-actions">
+          <Button 
+            variant="outline"
+            onClick={() => setShowCustomTemplateManager(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Sparkles size={16} /> Diseñar / Subir Plantillas
+          </Button>
           <Button 
             onClick={handleOpenCreateModal} 
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -535,6 +580,76 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                 </div>
               </div>
 
+              {/* Sección de Plantilla Personalizada del Estudio */}
+              <div style={{
+                background: '#f8fafc', padding: '1rem', borderRadius: '10px',
+                border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+                    Plantilla / Formulario Dinámico (Opcional):
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomTemplateManager(true)}
+                    style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+                  >
+                    <Sparkles size={14} /> Crear o Subir Plantilla
+                  </button>
+                </div>
+
+                <select
+                  className="input-field"
+                  value={selectedStudyTemplate?.id || ''}
+                  onChange={(e) => {
+                    const id = parseInt(e.target.value);
+                    if (!id) {
+                      setSelectedStudyTemplate(null);
+                      setCustomStudyValues({});
+                    } else {
+                      const found = studyTemplates.find(t => t.id === id);
+                      if (found) {
+                        setSelectedStudyTemplate(found);
+                        setCustomStudyValues({});
+                      }
+                    }
+                  }}
+                  style={{ width: '100%', height: '40px', backgroundColor: '#fff', fontWeight: 600 }}
+                >
+                  <option value="">-- Sin Formulario Personalizado --</option>
+                  {studyTemplates.map(tmpl => (
+                    <option key={tmpl.id} value={tmpl.id}>
+                      {tmpl.title} ({tmpl.category || 'General'})
+                    </option>
+                  ))}
+                </select>
+
+                {selectedStudyTemplate && (
+                  <div style={{
+                    background: '#ffffff', padding: '1rem', borderRadius: '8px',
+                    border: '1px solid #bae6fd', marginTop: '0.25rem'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0369a1' }}>
+                        Campos de {selectedStudyTemplate.title}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedStudyTemplate(null); setCustomStudyValues({}); }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.78rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                    <DynamicFormRenderer
+                      fields={selectedStudyTemplate.fields || []}
+                      values={customStudyValues}
+                      onChange={(k, v) => setCustomStudyValues(prev => ({ ...prev, [k]: v }))}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label style={{ display: 'block', fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
                   Conducta / Recomendaciones Post-Procedimiento
@@ -581,7 +696,22 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
           findings: selectedReport?.findings,
           biopsySample: selectedReport?.biopsySample,
           diagnosticImpression: selectedReport?.diagnosticImpression,
-          recommendations: selectedReport?.recommendations
+          recommendations: selectedReport?.recommendations,
+          customForm: selectedReport?.metadata?.customForm
+        }}
+      />
+
+      {/* MODAL GESTOR DE PLANTILLAS */}
+      <CustomFormTemplateManager
+        isOpen={showCustomTemplateManager}
+        onClose={() => {
+          setShowCustomTemplateManager(false);
+          fetchStudyTemplates();
+        }}
+        targetModule="STUDY"
+        onSelectTemplate={(tmpl) => {
+          setSelectedStudyTemplate(tmpl);
+          setCustomStudyValues({});
         }}
       />
 

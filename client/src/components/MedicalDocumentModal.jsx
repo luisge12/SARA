@@ -421,6 +421,26 @@ export function MedicalDocumentModal({
                         <p className="doc-section-text">{data.evolutionaryReport}</p>
                       </div>
                     )}
+
+                    {data.customForm && data.customForm.fields && data.customForm.fields.length > 0 && (
+                      <div className="doc-section">
+                        <span className="doc-section-title">{data.customForm.templateTitle || 'Parámetros Especializados de Consulta'}</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem', marginTop: '0.5rem' }}>
+                          {data.customForm.fields.map(f => {
+                            const val = data.customForm.values?.[f.id];
+                            if (val === undefined || val === '') return null;
+                            return (
+                              <div key={f.id} style={{ background: '#f8fafc', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>{f.label}:</span>
+                                <span style={{ fontSize: '0.88rem', color: '#0f172a', fontWeight: 600 }}>
+                                  {typeof val === 'boolean' ? (val ? 'Sí' : 'No') : String(val)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -455,6 +475,26 @@ export function MedicalDocumentModal({
                       <div className="doc-section">
                         <span className="doc-section-title">Recomendaciones y Plan de Seguimiento</span>
                         <p className="doc-section-text">{data.recommendations}</p>
+                      </div>
+                    )}
+
+                    {data.customForm && data.customForm.fields && data.customForm.fields.length > 0 && (
+                      <div className="doc-section">
+                        <span className="doc-section-title">{data.customForm.templateTitle || 'Parámetros Específicos del Estudio'}</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem', marginTop: '0.5rem' }}>
+                          {data.customForm.fields.map(f => {
+                            const val = data.customForm.values?.[f.id];
+                            if (val === undefined || val === '') return null;
+                            return (
+                              <div key={f.id} style={{ background: '#f8fafc', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>{f.label}:</span>
+                                <span style={{ fontSize: '0.88rem', color: '#0f172a', fontWeight: 600 }}>
+                                  {typeof val === 'boolean' ? (val ? 'Sí' : 'No') : String(val)}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </>

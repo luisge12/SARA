@@ -62,6 +62,7 @@ const initDatabase = async () => {
     const Transaction = require('../models/Transaction');
     const Appointment = require('../models/Appointment');
     const Study = require('../models/Study');
+    const CustomFormTemplate = require('../models/CustomFormTemplate');
 
     // Asegurar columnas requeridas en users de forma no destructiva
     try {
@@ -169,6 +170,15 @@ const initDatabase = async () => {
           await sequelize.query(`ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
         }
       }
+
+      // Asegurar columnas en consultations
+      const [consCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'consultations';
+      `);
+      const existingConsCols = (consCols || []).map(c => c.column_name.toLowerCase());
+      if (!existingConsCols.includes('custom_template_data')) {
+        await sequelize.query(`ALTER TABLE consultations ADD COLUMN IF NOT EXISTS custom_template_data JSONB;`);
+      }
     } catch (err) {
       console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }
@@ -180,6 +190,7 @@ const initDatabase = async () => {
     await AuditLog.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo AuditLog:', err));
     await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
     await Study.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Study:', err));
+    await CustomFormTemplate.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo CustomFormTemplate:', err));
 
     // Sincronizar modelos solo si se solicita explícitamente en el entorno
     if (process.env.DB_SYNC === 'true') {

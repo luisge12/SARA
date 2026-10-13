@@ -93,6 +93,12 @@ const Consultation = sequelize.define('Consultation', {
   evolutionaryReport: {
     type: DataTypes.TEXT,
     field: 'evolutionary_report'
+  },
+
+  // Sección 8: Datos de Formulario / Plantilla Personalizada del Médico
+  customTemplateData: {
+    type: DataTypes.JSONB,
+    field: 'custom_template_data'
   }
 }, {
   tableName: 'consultations',

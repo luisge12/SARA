@@ -270,7 +270,7 @@ module.exports = {
       const consultFields = [
         'reasonForVisit', 'clinicalSummary', 'consultationFlow', 'reasonGeneral', 'reasonSpecific',
         'physicalInspection', 'physicalPalpation', 'rectalExamination', 
-        'anoscopy', 'diagnoses', 'treatmentPlan', 'evolutionaryReport'
+        'anoscopy', 'diagnoses', 'treatmentPlan', 'evolutionaryReport', 'customTemplateData'
       ];
 
       consultFields.forEach(field => {

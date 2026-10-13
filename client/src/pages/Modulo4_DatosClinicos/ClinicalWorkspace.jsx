@@ -7,6 +7,8 @@ import { Save, Clock, ArrowLeft, Plus, Trash, Sparkles, FileText, Printer, UserC
 import { AuditLogModal } from './AuditLogModal';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 import { SpeechMicButton } from '../../components/SpeechMicButton';
+import { CustomFormTemplateManager } from '../../components/CustomFormTemplates/CustomFormTemplateManager';
+import { DynamicFormRenderer } from '../../components/CustomFormTemplates/DynamicFormRenderer';
 import { 
   CLINICAL_TEMPLATES, 
   COMMON_DIAGNOSES, 
@@ -101,6 +103,21 @@ export function ClinicalWorkspace({ patient, onBack }) {
   const [printDocType, setPrintDocType] = useState('prescription');
   const [showPrintModal, setShowPrintModal] = useState(false);
 
+  // Estados de Formularios y Plantillas Personalizadas del Médico
+  const [showCustomTemplateManager, setShowCustomTemplateManager] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState([]);
+  const [selectedCustomTemplate, setSelectedCustomTemplate] = useState(null);
+  const [customFormValues, setCustomFormValues] = useState({});
+
+  const fetchCustomTemplates = async () => {
+    try {
+      const res = await api.get('/api/form-templates', { params: { targetModule: 'CONSULTATION' } });
+      setCustomTemplates(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error('Error al cargar plantillas personalizadas:', e);
+    }
+  };
+
   // Auto-fill template loader
   const handleApplyTemplate = (tmplId) => {
     if (!tmplId) {
@@ -183,6 +200,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
   useEffect(() => {
     fetchProfileAndHistory();
+    fetchCustomTemplates();
   }, [patient.id]);
 
   const fetchProfileAndHistory = async () => {
@@ -195,6 +213,16 @@ export function ClinicalWorkspace({ patient, onBack }) {
       const consultRes = await api.get(`/api/patients/${patient.id}/consultations`);
       if (Array.isArray(consultRes.data) && consultRes.data.length > 0) {
         setConsultationFlow('RECONSULTA');
+        const latest = consultRes.data[0];
+        if (latest && latest.customTemplateData) {
+          const ctd = latest.customTemplateData;
+          setSelectedCustomTemplate({
+            id: ctd.templateId,
+            title: ctd.templateTitle,
+            fields: ctd.fields || []
+          });
+          setCustomFormValues(ctd.values || {});
+        }
       } else {
         setConsultationFlow('PRIMERA_VEZ');
       }
@@ -251,7 +279,13 @@ export function ClinicalWorkspace({ patient, onBack }) {
         anoscopy,
         diagnoses,
         treatmentPlan,
-        evolutionaryReport
+        evolutionaryReport,
+        customTemplateData: selectedCustomTemplate ? {
+          templateId: selectedCustomTemplate.id,
+          templateTitle: selectedCustomTemplate.title,
+          fields: selectedCustomTemplate.fields,
+          values: customFormValues
+        } : null
       };
       
       const res = await api.post(`/api/patients/${patient.id}/consultations`, payload);
@@ -852,6 +886,113 @@ export function ClinicalWorkspace({ patient, onBack }) {
         </div>
       </Card>
 
+      {/* SECCIÓN 7: FORMULARIO Y PLANTILLA PERSONALIZADA DEL MÉDICO */}
+      <Card 
+        title="7. Formulario Personalizado del Médico" 
+        className="glass-panel"
+        action={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowCustomTemplateManager(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+          >
+            <Sparkles size={16} /> Gestionar / Subir Plantillas
+          </Button>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            flexWrap: 'wrap', gap: '1rem', background: '#f8fafc', padding: '1rem',
+            borderRadius: '10px', border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ flex: 1, minWidth: '240px' }}>
+              <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
+                Seleccionar Plantilla / Ficha Clínica para esta Consulta:
+              </label>
+              <select
+                className="input-field"
+                value={selectedCustomTemplate?.id || ''}
+                onChange={(e) => {
+                  const tId = parseInt(e.target.value);
+                  if (!tId) {
+                    setSelectedCustomTemplate(null);
+                    setCustomFormValues({});
+                  } else {
+                    const found = customTemplates.find(t => t.id === tId);
+                    if (found) {
+                      setSelectedCustomTemplate(found);
+                      setCustomFormValues({});
+                    }
+                  }
+                }}
+                style={{ width: '100%', height: '42px', backgroundColor: '#fff', fontWeight: 600 }}
+              >
+                <option value="">-- Sin Formulario Personalizado Adicional --</option>
+                {customTemplates.map(tmpl => (
+                  <option key={tmpl.id} value={tmpl.id}>
+                    {tmpl.title} ({tmpl.category || 'General'}) {tmpl.isGlobal ? '★ Global' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setShowCustomTemplateManager(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', alignSelf: 'flex-end', height: '42px' }}
+            >
+              <Plus size={16} /> Nueva Plantilla
+            </Button>
+          </div>
+
+          {selectedCustomTemplate ? (
+            <div style={{
+              background: '#ffffff', padding: '1.5rem', borderRadius: '12px',
+              border: '1px solid #bae6fd', boxShadow: '0 2px 8px rgba(2, 132, 199, 0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #e0f2fe', paddingBottom: '0.75rem' }}>
+                <div>
+                  <h4 style={{ margin: 0, color: '#0369a1', fontSize: '1.1rem', fontWeight: 700 }}>
+                    {selectedCustomTemplate.title}
+                  </h4>
+                  {selectedCustomTemplate.description && (
+                    <p style={{ margin: '0.2rem 0 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                      {selectedCustomTemplate.description}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('¿Desea quitar este formulario de la consulta actual?')) {
+                      setSelectedCustomTemplate(null);
+                      setCustomFormValues({});
+                    }
+                  }}
+                  style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Quitar Formulario
+                </button>
+              </div>
+
+              <DynamicFormRenderer
+                fields={selectedCustomTemplate.fields || []}
+                values={customFormValues}
+                onChange={(key, val) => setCustomFormValues(prev => ({ ...prev, [key]: val }))}
+              />
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '10px', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                Ningún formulario personalizado seleccionado. Puedes elegir uno en el menú superior o diseñar tu propia plantilla para recopilar datos clínicos adicionales con este paciente.
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
+
       {/* ACCIONES Y BOTONES DE IMPRESIÓN Y GUARDADO */}
       <div style={{ position: 'sticky', bottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(8px)', padding: '1rem 1.5rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15)', border: '1px solid var(--border-color)', zIndex: 10 }}>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -909,6 +1050,20 @@ export function ClinicalWorkspace({ patient, onBack }) {
           evolutionaryReport: evolutionaryReport,
           recommendations: evolutionaryReport,
           sede: patient.sedeAtencion || profile.sedeAtencion || 'CENTRAL'
+        }}
+      />
+
+      {/* MODAL GESTOR DE PLANTILLAS Y FORMULARIOS PERSONALIZADOS */}
+      <CustomFormTemplateManager
+        isOpen={showCustomTemplateManager}
+        onClose={() => {
+          setShowCustomTemplateManager(false);
+          fetchCustomTemplates();
+        }}
+        targetModule="CONSULTATION"
+        onSelectTemplate={(tmpl) => {
+          setSelectedCustomTemplate(tmpl);
+          setCustomFormValues({});
         }}
       />
 
