@@ -79,6 +79,34 @@ class LicenseService {
   }
 
   /**
+   * Sumar meses calendario manteniendo el mismo día del mes exacto
+   * (ej. si se activa el 12, vence exactamente el 12 del siguiente mes).
+   * Maneja meses más cortos (ej. día 31 en febrero pasa al último día del mes).
+   */
+  static addCalendarMonths(date, months = 1) {
+    const result = new Date(date);
+    const targetDay = result.getDate();
+    result.setMonth(result.getMonth() + months);
+    if (result.getDate() !== targetDay) {
+      result.setDate(0);
+    }
+    return result;
+  }
+
+  /**
+   * Sumar años calendario manteniendo el mismo día y mes exacto.
+   */
+  static addCalendarYears(date, years = 1) {
+    const result = new Date(date);
+    const targetDay = result.getDate();
+    result.setFullYear(result.getFullYear() + years);
+    if (result.getDate() !== targetDay) {
+      result.setDate(0);
+    }
+    return result;
+  }
+
+  /**
    * Canjear una clave de licencia para la clínica
    */
   static async redeemKey(clinicId = 1, rawKey) {
@@ -114,7 +142,18 @@ class LicenseService {
 
     // Si aún está vigente, se suma a la fecha restante. Si ya venció, se suma desde hoy.
     const baseDate = currentExpiry > now ? currentExpiry : now;
-    const newExpiresAt = new Date(baseDate.getTime() + keyRecord.durationDays * 24 * 60 * 60 * 1000);
+    
+    // Cálculo exacto de mes calendario (mismo día de corte, ej. día 12) o año calendario
+    let newExpiresAt;
+    if (keyRecord.planType === 'MONTHLY' && (keyRecord.durationDays === 30 || !keyRecord.durationDays)) {
+      newExpiresAt = LicenseService.addCalendarMonths(baseDate, 1);
+    } else if (keyRecord.planType === 'ANNUAL' && (keyRecord.durationDays === 365 || !keyRecord.durationDays)) {
+      newExpiresAt = LicenseService.addCalendarYears(baseDate, 1);
+    } else {
+      newExpiresAt = new Date(baseDate.getTime() + keyRecord.durationDays * 24 * 60 * 60 * 1000);
+    }
+
+    const addedDays = Math.round((newExpiresAt.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
 
     // Actualizar clínica
     clinic.expiresAt = newExpiresAt;
@@ -131,9 +170,9 @@ class LicenseService {
 
     return {
       success: true,
-      message: `¡Licencia activada exitosamente! Se han añadido ${keyRecord.durationDays} días de vigencia.`,
+      message: `¡Licencia activada exitosamente! Se renovó el servicio hasta el ${newExpiresAt.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`,
       planType: keyRecord.planType,
-      addedDays: keyRecord.durationDays,
+      addedDays,
       newExpiresAt,
       clinic: {
         id: clinic.id,
@@ -154,7 +193,15 @@ class LicenseService {
     const now = new Date();
     const currentExpiry = new Date(clinic.expiresAt);
     const baseDate = currentExpiry > now ? currentExpiry : now;
-    const newExpiresAt = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+
+    let newExpiresAt;
+    if (days === 30) {
+      newExpiresAt = LicenseService.addCalendarMonths(baseDate, 1);
+    } else if (days === 365) {
+      newExpiresAt = LicenseService.addCalendarYears(baseDate, 1);
+    } else {
+      newExpiresAt = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+    }
 
     clinic.expiresAt = newExpiresAt;
     clinic.licenseStatus = 'ACTIVE';
@@ -163,7 +210,7 @@ class LicenseService {
     return {
       success: true,
       newExpiresAt,
-      message: `Se han añadido ${days} días de cortesía a la clínica.`
+      message: `Se ha extendido el servicio hasta el ${newExpiresAt.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`
     };
   }
 
