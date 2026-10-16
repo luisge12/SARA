@@ -244,13 +244,14 @@ const initDatabase = async () => {
         username: masterUser,
         passwordHash: passwordHash,
         role: 'Master',
-        name: 'Administrador Master SARA',
-        sedeAtencion: 'CENTRAL'
+        name: 'Master / Director UNIMECO',
+        sedeAtencion: 'CENTRAL',
+        clinicId: 1
       });
-      console.log('Usuario Master (UNIMECO) creado exitosamente.');
+      console.log('Usuario Master de Clínica (UNIMECO) creado exitosamente.');
     }
 
-    // Semillar usuario de prueba luisge con clave 1234
+    // Semillar usuario Super Master luisge con clave 1234
     const luisgeExists = await User.findOne({ where: { username: 'luisge' } });
     if (!luisgeExists) {
       const salt = await bcrypt.genSalt(10);
@@ -258,11 +259,12 @@ const initDatabase = async () => {
       await User.create({
         username: 'luisge',
         passwordHash: passwordHash,
-        role: 'Master',
-        name: 'Luis G. SARA Master',
-        sedeAtencion: 'CENTRAL'
+        role: 'SuperMaster',
+        name: 'Luis G. (Super Master SARA)',
+        sedeAtencion: 'CENTRAL',
+        clinicId: 1
       });
-      console.log('Usuario de prueba Master (luisge) creado exitosamente.');
+      console.log('Usuario Super Master (luisge) creado exitosamente.');
     }
 
     // Semillar usuario master con clave 1234 solo si no existe
@@ -274,10 +276,11 @@ const initDatabase = async () => {
         username: 'master',
         passwordHash: passwordHash,
         role: 'Master',
-        name: 'Usuario Master SARA',
-        sedeAtencion: 'CENTRAL'
+        name: 'Master Clínica SARA',
+        sedeAtencion: 'CENTRAL',
+        clinicId: 1
       });
-      console.log('Usuario Master (master) creado exitosamente.');
+      console.log('Usuario Master de Clínica (master) creado exitosamente.');
     }
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);

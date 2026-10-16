@@ -33,8 +33,8 @@ module.exports = {
     if (!req.user) {
       return res.status(403).json({ error: 'Acceso denegado. Permisos insuficientes.' });
     }
-    // El rol Master tiene acceso ilimitado a todos los recursos y endpoints
-    if (req.user.role === 'Master') {
+    // El rol Master y SuperMaster tienen acceso ilimitado a todos los recursos y endpoints
+    if (req.user.role === 'Master' || req.user.role === 'SuperMaster') {
       return next();
     }
     if (!roles.includes(req.user.role)) {
@@ -45,7 +45,7 @@ module.exports = {
   
   // Agrupación de Roles para facilitar acceso
   ROLES: {
-    ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master'],
+    ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master', 'SuperMaster'],
     MEDICO: ['Director Médico', 'Médico Tratante', 'Médico'],
     RECEPCIONISTA: ['Asistente Administrativo', 'Asistente Medico', 'Recepcionista'],
     PACIENTE: ['Paciente']

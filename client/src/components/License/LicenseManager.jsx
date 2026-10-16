@@ -13,9 +13,9 @@ export default function LicenseManager() {
   const [redeeming, setRedeeming] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
-  // Estados exclusivos para Super Master
+  // Estados exclusivos para Super Master (luisge)
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const isMaster = currentUser?.role?.toLowerCase() === 'master';
+  const isSuperMaster = currentUser?.username?.toLowerCase() === 'luisge' || currentUser?.role?.toLowerCase() === 'supermaster';
 
   const [keysList, setKeysList] = useState([]);
   const [genPlanType, setGenPlanType] = useState('MONTHLY');
@@ -32,7 +32,7 @@ export default function LicenseManager() {
       const data = await licenseService.getStatus();
       setLicense(data);
 
-      if (isMaster) {
+      if (isSuperMaster) {
         const keys = await licenseService.listKeys();
         setKeysList(keys);
       }
@@ -259,7 +259,7 @@ export default function LicenseManager() {
       </div>
 
       {/* 3. SECCIÓN EXCLUSIVA PARA SUPER MASTER: GENERADOR Y ADMINISTRACIÓN */}
-      {isMaster && (
+      {isSuperMaster && (
         <div className="super-master-section">
           <div className="master-header">
             <div>

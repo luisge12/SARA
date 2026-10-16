@@ -2,15 +2,16 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 export const ROLES = {
-  ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master'],
+  ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master', 'SuperMaster', 'Super Master'],
   MEDICO: ['Director Médico', 'Médico Tratante', 'Médico'],
   RECEPCIONISTA: ['Asistente Administrativo', 'Asistente Medico', 'Recepcionista'],
 };
 
 export const hasAccess = (userRole, allowedGroups) => {
   if (!userRole) return false;
-  // Master siempre tiene acceso a todo en SARA PWA
-  if (userRole.toLowerCase() === 'master') return true;
+  // Master y SuperMaster siempre tienen acceso a todo en SARA PWA
+  const normalized = userRole.toLowerCase().replace(/\s+/g, '');
+  if (normalized === 'master' || normalized === 'supermaster') return true;
   
   for (const group of allowedGroups) {
     if (ROLES[group] && ROLES[group].includes(userRole)) {

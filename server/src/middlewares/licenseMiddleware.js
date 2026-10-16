@@ -7,8 +7,8 @@ const LicenseService = require('../services/licenseService');
  *   operaciones de escritura (POST, PUT, DELETE), excepto el canje de licencias.
  */
 const verifyClinicLicense = async (req, res, next) => {
-  // Los usuarios con rol Master nunca sufren bloqueo operativo
-  if (req.user && req.user.role === 'Master') {
+  // El Super Master global nunca sufre bloqueo operativo de clínicas
+  if (req.user && (req.user.role === 'SuperMaster' || req.user.username?.toLowerCase() === 'luisge')) {
     return next();
   }
 
