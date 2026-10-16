@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modulo2_GestionAdministrativa from '../Modulo2_GestionAdministrativa/Modulo2_GestionAdministrativa';
-import { Users, Settings, Building2, CheckCircle, Upload, Trash2, Eye } from 'lucide-react';
+import LicenseManager from '../../components/License/LicenseManager';
+import { Users, Settings, Building2, CheckCircle, Upload, Trash2, Eye, ShieldCheck } from 'lucide-react';
 import { getClinicSettings, saveClinicSettings } from '../../services/clinicSettings';
 import './Configuracion.css';
 
 export default function Configuracion() {
-  const [activeTab, setActiveTab] = useState('usuarios');
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialTab = searchParams.get('tab') || 'usuarios';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [settings, setSettings] = useState(getClinicSettings());
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -67,6 +73,12 @@ export default function Configuracion() {
             onClick={() => setActiveTab('clinica')}
           >
             <Settings size={18} /> Personalización de la Clínica
+          </button>
+          <button 
+            className={`config-tab-btn ${activeTab === 'licencia' ? 'active' : ''}`}
+            onClick={() => setActiveTab('licencia')}
+          >
+            <ShieldCheck size={18} /> Licencia y Suscripción
           </button>
         </div>
 
@@ -256,6 +268,7 @@ export default function Configuracion() {
               </form>
             </div>
           )}
+          {activeTab === 'licencia' && <LicenseManager />}
         </div>
       </div>
     </DashboardLayout>

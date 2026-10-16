@@ -20,6 +20,7 @@ export function Sidebar() {
     { name: 'Estudios y Procedimientos', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Estadísticas', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
+    { name: 'Licencia y Configuración', path: '/configuracion?tab=licencia', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');

@@ -18,6 +18,21 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor de respuesta para detectar bloqueo por licencia vencida
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 402) {
+      window.dispatchEvent(
+        new CustomEvent('sara_license_expired', {
+          detail: error.response.data || { error: 'Licencia de la clínica vencida' }
+        })
+      );
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
 
 export const portalApi = axios.create({

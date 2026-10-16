@@ -63,6 +63,14 @@ const initDatabase = async () => {
     const Appointment = require('../models/Appointment');
     const Study = require('../models/Study');
     const CustomFormTemplate = require('../models/CustomFormTemplate');
+    const Clinic = require('../models/Clinic');
+    const LicenseKey = require('../models/LicenseKey');
+
+    // Asociaciones
+    Clinic.hasMany(User, { foreignKey: 'clinic_id', as: 'users' });
+    User.belongsTo(Clinic, { foreignKey: 'clinic_id', as: 'clinic' });
+    Clinic.hasMany(LicenseKey, { foreignKey: 'used_by_clinic_id', as: 'redeemedKeys' });
+    LicenseKey.belongsTo(Clinic, { foreignKey: 'used_by_clinic_id', as: 'clinic' });
 
     // Asegurar columnas requeridas en users de forma no destructiva
     try {
@@ -82,7 +90,8 @@ const initDatabase = async () => {
         { name: 'gender', type: 'VARCHAR(50)' },
         { name: 'date_of_birth', type: 'DATE' },
         { name: 'email', type: 'VARCHAR(150)' },
-        { name: 'phone', type: 'VARCHAR(50)' }
+        { name: 'phone', type: 'VARCHAR(50)' },
+        { name: 'clinic_id', type: 'INTEGER DEFAULT 1' }
       ];
 
       for (const col of neededCols) {
@@ -184,6 +193,8 @@ const initDatabase = async () => {
     }
 
     // Sincronizar modelos automáticamente
+    await Clinic.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Clinic:', err));
+    await LicenseKey.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo LicenseKey:', err));
     await User.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo User:', err));
     await PatientProfile.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo PatientProfile:', err));
     await Consultation.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Consultation:', err));
@@ -191,6 +202,28 @@ const initDatabase = async () => {
     await Appointment.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Appointment:', err));
     await Study.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Study:', err));
     await CustomFormTemplate.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo CustomFormTemplate:', err));
+
+    // Asegurar que exista la clínica principal con ID 1 y licencia activa de 30 días
+    try {
+      const clinicCount = await Clinic.count();
+      if (clinicCount === 0) {
+        const initialExpiration = new Date();
+        initialExpiration.setDate(initialExpiration.getDate() + 30); // 30 días iniciales
+        await Clinic.create({
+          id: 1,
+          name: 'UNIMECO - Centro Médico Principal',
+          rif: 'J-50123456-7',
+          planType: 'MONTHLY',
+          licenseStatus: 'ACTIVE',
+          expiresAt: initialExpiration,
+          activeLicenseKey: 'SARA-M-PRO-START-2026',
+          maxDoctors: 15
+        });
+        console.log('Clínica Principal UNIMECO creada con 30 días de licencia activa.');
+      }
+    } catch (cErr) {
+      console.warn('Aviso al semillar clínica principal:', cErr.message);
+    }
 
     // Sincronizar modelos solo si se solicita explícitamente en el entorno
     if (process.env.DB_SYNC === 'true') {

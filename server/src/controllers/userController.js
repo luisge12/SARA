@@ -35,11 +35,20 @@ module.exports = {
         return res.status(401).json({ error: 'La contraseña ingresada es incorrecta. Verifique sus datos.' });
       }
 
+      const clinicId = user.clinicId || 1;
       const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
+        { id: user.id, username: user.username, role: user.role, clinicId },
         process.env.JWT_SECRET || 'supersecretkey_sara_18992791',
         { expiresIn: '24h' }
       );
+
+      let license = null;
+      try {
+        const LicenseService = require('../services/licenseService');
+        license = await LicenseService.getClinicLicense(clinicId);
+      } catch (licErr) {
+        console.warn('Aviso al obtener licencia en login:', licErr.message);
+      }
 
       return res.json({
         token,
@@ -48,8 +57,10 @@ module.exports = {
           username: user.username,
           role: user.role,
           name: user.name,
-          sedeAtencion: user.sedeAtencion
-        }
+          sedeAtencion: user.sedeAtencion,
+          clinicId
+        },
+        license
       });
     } catch (error) {
       console.error('Error en login:', error);

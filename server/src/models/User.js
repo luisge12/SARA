@@ -67,6 +67,11 @@ const User = sequelize.define('User', {
   expiresAt: {
     type: DataTypes.DATE,
     field: 'expires_at'
+  },
+  clinicId: {
+    type: DataTypes.INTEGER,
+    field: 'clinic_id',
+    defaultValue: 1
   }
 }, {
   tableName: 'users',

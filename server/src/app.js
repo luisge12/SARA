@@ -35,6 +35,11 @@ const statsRoutes = require('./routes/statsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const studyRoutes = require('./routes/studyRoutes');
 const formTemplateRoutes = require('./routes/formTemplateRoutes');
+const licenseRoutes = require('./routes/licenseRoutes');
+const { verifyClinicLicense } = require('./middlewares/licenseMiddleware');
+
+// Middleware global para protección de licencias
+app.use(verifyClinicLicense);
 
 // Registrar Rutas de la API
 app.use('/api/users', userRoutes);
@@ -45,6 +50,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/studies', studyRoutes);
 app.use('/api/form-templates', formTemplateRoutes);
+app.use('/api/licenses', licenseRoutes);
 
 // Ruta de estado del servidor
 app.get('/status', (req, res) => {
