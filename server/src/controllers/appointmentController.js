@@ -27,7 +27,7 @@ module.exports = {
         where: whereClause,
         include: [
           { model: User, as: 'patient', attributes: ['id', 'name', 'username', 'identificationNumber'] },
-          { model: User, as: 'doctor', attributes: ['id', 'name', 'username', 'sedeAtencion'] },
+          { model: User, as: 'doctor', attributes: ['id', 'name', 'username', 'sedeAtencion', 'role', 'specialty'] },
           { model: User, as: 'creator', attributes: ['id', 'name', 'username'] }
         ],
         order: [['appointmentDate', 'ASC']]
