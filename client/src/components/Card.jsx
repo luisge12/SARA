@@ -1,9 +1,9 @@
 import React from 'react';
 import './Card.css';
 
-export function Card({ children, className = '', title, action }) {
+export function Card({ children, className = '', title, action, ...props }) {
   return (
-    <div className={`card ${className}`}>
+    <div className={`card ${className}`} {...props}>
       {(title || action) && (
         <div className="card-header">
           {title && <h3 className="card-title">{title}</h3>}
