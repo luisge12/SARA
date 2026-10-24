@@ -326,18 +326,21 @@ function Modulo2_GestionAdministrativa() {
                           <h4 style={{ fontWeight: '600', color: 'var(--color-text-main)', fontSize: '0.95rem', margin: 0 }}>
                             {usr.name || 'Sin Nombre Registrado'}
                           </h4>
-                          {usr.role === 'Paciente' && (
-                            <span style={{ 
-                              fontSize: '0.7rem', 
-                              padding: '1px 6px', 
-                              borderRadius: '10px', 
-                              backgroundColor: (usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '#dcfce7' : '#e0f2fe',
-                              color: (usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '#166534' : '#075985',
-                              fontWeight: 700 
-                            }}>
-                              {(usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' ? '1ª Vez' : 'Reconsulta'}
-                            </span>
-                          )}
+                          {usr.role === 'Paciente' && (() => {
+                            const isFirstTime = (usr.patientProfile?.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' && !(usr.patientProfile?.consultations && usr.patientProfile.consultations.length > 0);
+                            return (
+                              <span style={{ 
+                                fontSize: '0.7rem', 
+                                padding: '1px 6px', 
+                                borderRadius: '10px', 
+                                backgroundColor: isFirstTime ? '#dcfce7' : '#e0f2fe',
+                                color: isFirstTime ? '#166534' : '#075985',
+                                fontWeight: 700 
+                              }}>
+                                {isFirstTime ? '1ª Vez' : 'Reconsulta'}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: '0.15rem 0 0 0' }}>
                           Usuario: <strong>{usr.username}</strong> | Rol: <span style={{ color: usr.role === 'Master' ? 'var(--color-alert)' : 'var(--color-primary)', fontWeight: 'bold' }}>{usr.role}</span>

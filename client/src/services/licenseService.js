@@ -29,6 +29,30 @@ export const licenseService = {
   manualExtend: async ({ days, notes, clinicId }) => {
     const response = await api.post('/api/licenses/manual-extend', { days, notes, clinicId });
     return response.data;
+  },
+
+  // Obtener todas las clínicas para Super Master
+  getClinics: async () => {
+    const response = await api.get('/api/licenses/clinics');
+    return response.data;
+  },
+
+  // Crear nueva clínica (Super Master)
+  createClinic: async (clinicData) => {
+    const response = await api.post('/api/licenses/clinics', clinicData);
+    return response.data;
+  },
+
+  // Actualizar clínica (Super Master)
+  updateClinic: async (id, clinicData) => {
+    const response = await api.put(`/api/licenses/clinics/${id}`, clinicData);
+    return response.data;
+  },
+
+  // Obtener información de la versión e instalador
+  getDownloadInfo: async () => {
+    const response = await api.get('/api/licenses/download/info');
+    return response.data;
   }
 };
 

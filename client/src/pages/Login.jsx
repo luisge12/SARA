@@ -182,6 +182,15 @@ export function Login() {
       )}
 
       <footer className="login-footer-text">
+        <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap' }}>
+          <Link to="/descargas" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            📥 Descargar SARA para Windows (.exe)
+          </Link>
+          <span style={{ color: 'rgba(255,255,255,0.25)' }}>&bull;</span>
+          <Link to="/descargas" style={{ color: '#fbbf24', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            👑 Control Super Master
+          </Link>
+        </div>
         <div className="login-footer">
           Producto Desarrollado para SARA Clínicas
         </div>

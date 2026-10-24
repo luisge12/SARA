@@ -222,6 +222,112 @@ class LicenseService {
       order: [['created_at', 'DESC']]
     });
   }
+
+  /**
+   * Obtener todas las clínicas registradas con estadísticas para el Super Master
+   */
+  static async getAllClinics() {
+    let clinics = await Clinic.findAll({
+      order: [['id', 'ASC']]
+    });
+
+    if (clinics.length === 0) {
+      // Inicializar clínica por defecto si está vacía
+      await LicenseService.getClinicLicense(1);
+      clinics = await Clinic.findAll({ order: [['id', 'ASC']] });
+    }
+
+    const now = new Date();
+    const enrichedClinics = clinics.map(clinic => {
+      const expiresAt = new Date(clinic.expiresAt);
+      const timeDiff = expiresAt.getTime() - now.getTime();
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      const isExpired = expiresAt <= now;
+      const isExpiringSoon = !isExpired && daysRemaining <= 7;
+      const currentStatus = isExpired ? 'EXPIRED' : 'ACTIVE';
+
+      return {
+        id: clinic.id,
+        name: clinic.name,
+        rif: clinic.rif || 'N/A',
+        planType: clinic.planType,
+        licenseStatus: currentStatus,
+        expiresAt: clinic.expiresAt,
+        activeLicenseKey: clinic.activeLicenseKey || 'N/A',
+        maxDoctors: clinic.maxDoctors || 10,
+        daysRemaining: isExpired ? 0 : daysRemaining,
+        isExpired,
+        isExpiringSoon,
+        createdAt: clinic.created_at || clinic.createdAt,
+        updatedAt: clinic.updated_at || clinic.updatedAt
+      };
+    });
+
+    const totalKeys = await LicenseKey.count();
+    const usedKeys = await LicenseKey.count({ where: { isUsed: true } });
+    const availableKeys = totalKeys - usedKeys;
+
+    const stats = {
+      totalClinics: enrichedClinics.length,
+      activeClinics: enrichedClinics.filter(c => !c.isExpired).length,
+      expiringSoonClinics: enrichedClinics.filter(c => c.isExpiringSoon).length,
+      expiredClinics: enrichedClinics.filter(c => c.isExpired).length,
+      totalKeys,
+      usedKeys,
+      availableKeys
+    };
+
+    return {
+      clinics: enrichedClinics,
+      stats
+    };
+  }
+
+  /**
+   * Crear nueva clínica institucional
+   */
+  static async createClinic({ name, rif, planType = 'MONTHLY', initialDays = 30, maxDoctors = 10 }) {
+    if (!name) throw new Error('El nombre de la clínica es requerido');
+    const now = new Date();
+    let expiresAt;
+    if (planType === 'ANNUAL') {
+      expiresAt = LicenseService.addCalendarYears(now, 1);
+    } else {
+      expiresAt = LicenseService.addCalendarMonths(now, 1);
+    }
+    if (initialDays && initialDays !== 30 && initialDays !== 365) {
+      expiresAt = new Date(now.getTime() + initialDays * 24 * 60 * 60 * 1000);
+    }
+
+    const clinic = await Clinic.create({
+      name,
+      rif: rif || null,
+      planType,
+      licenseStatus: 'ACTIVE',
+      expiresAt,
+      maxDoctors: parseInt(maxDoctors) || 10
+    });
+
+    return clinic;
+  }
+
+  /**
+   * Actualizar datos de una clínica
+   */
+  static async updateClinic(id, data) {
+    const clinic = await Clinic.findByPk(id);
+    if (!clinic) throw new Error('Clínica no encontrada');
+
+    if (data.name !== undefined) clinic.name = data.name;
+    if (data.rif !== undefined) clinic.rif = data.rif;
+    if (data.planType !== undefined) clinic.planType = data.planType;
+    if (data.maxDoctors !== undefined) clinic.maxDoctors = parseInt(data.maxDoctors) || clinic.maxDoctors;
+    if (data.licenseStatus !== undefined) clinic.licenseStatus = data.licenseStatus;
+    if (data.expiresAt !== undefined) clinic.expiresAt = new Date(data.expiresAt);
+
+    await clinic.save();
+    return clinic;
+  }
 }
 
 module.exports = LicenseService;

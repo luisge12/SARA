@@ -11,6 +11,7 @@ import Modulo7_GestionMedicaEstadistica from './pages/Modulo7_GestionMedicaEstad
 import Modulo_Pacientes from './pages/Modulo_Pacientes/Modulo_Pacientes';
 import PerfilPaciente from './pages/Modulo_Pacientes/PerfilPaciente';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import SaraWebPortal from './pages/SaraWebPortal/SaraWebPortal';
 
 // Portal de Pacientes
 import { PortalPacienteLogin } from './pages/PortalPaciente/PortalPacienteLogin';
@@ -95,6 +96,12 @@ function App() {
             <PortalPacienteHistoriaMedica />
           </PortalPacienteProtectedRoute>
         } />
+
+        {/* Portal Web Oficial, Descargas y Control de Licencias Super Master */}
+        <Route path="/descargas" element={<SaraWebPortal />} />
+        <Route path="/descarga" element={<Navigate to="/descargas" replace />} />
+        <Route path="/download" element={<Navigate to="/descargas" replace />} />
+        <Route path="/web" element={<SaraWebPortal />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/login" replace />} />

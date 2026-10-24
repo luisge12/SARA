@@ -14,8 +14,25 @@ module.exports = {
     try {
       const patients = await User.findAll({
         where: { role: 'Paciente' },
-        include: [{ model: PatientProfile, as: 'patientProfile' }]
+        include: [{ 
+          model: PatientProfile, 
+          as: 'patientProfile',
+          include: [{ model: Consultation, as: 'consultations', attributes: ['id', 'consultationFlow', 'created_at'] }]
+        }],
+        order: [['created_at', 'ASC']]
       });
+
+      // Auto-actualizar flowType a RECONSULTA si el paciente ya posee consultas registradas
+      for (const p of patients) {
+        if (p.patientProfile) {
+          const hasConsultations = p.patientProfile.consultations && p.patientProfile.consultations.length > 0;
+          if (hasConsultations && p.patientProfile.flowType === 'PRIMERA_VEZ') {
+            p.patientProfile.flowType = 'RECONSULTA';
+            p.patientProfile.save().catch(err => console.error('Error auto-updating patient flowType:', err));
+          }
+        }
+      }
+
       return res.json(patients);
     } catch (error) {
       console.error(error);
@@ -29,9 +46,22 @@ module.exports = {
       const { id } = req.params;
       const patient = await User.findOne({
         where: { id, role: 'Paciente' },
-        include: [{ model: PatientProfile, as: 'patientProfile' }]
+        include: [{ 
+          model: PatientProfile, 
+          as: 'patientProfile',
+          include: [{ model: Consultation, as: 'consultations', attributes: ['id', 'consultationFlow', 'created_at'] }]
+        }]
       });
       if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });
+
+      if (patient.patientProfile) {
+        const hasConsultations = patient.patientProfile.consultations && patient.patientProfile.consultations.length > 0;
+        if (hasConsultations && patient.patientProfile.flowType === 'PRIMERA_VEZ') {
+          patient.patientProfile.flowType = 'RECONSULTA';
+          await patient.patientProfile.save();
+        }
+      }
+
       return res.json(patient);
     } catch (error) {
       console.error(error);
@@ -304,6 +334,12 @@ module.exports = {
         summary = 'Nueva consulta médica registrada';
       }
 
+      // Actualizar automáticamente la condición del paciente a RECONSULTA después de registrar su consulta
+      if (profile.flowType === 'PRIMERA_VEZ') {
+        profile.flowType = 'RECONSULTA';
+        await profile.save();
+      }
+
       // Registrar Trazabilidad
       await logPatientAudit({
         patientId: profile.id,
@@ -314,7 +350,7 @@ module.exports = {
         metadata: { oldData, newData }
       });
 
-      return res.json({ message: 'Consulta guardada', consultation });
+      return res.json({ message: 'Consulta guardada', consultation, profile });
     } catch (error) {
       console.error('Error al guardar consulta:', error);
       return res.status(500).json({ error: 'Error al guardar consulta' });

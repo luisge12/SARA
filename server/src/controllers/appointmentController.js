@@ -130,7 +130,16 @@ module.exports = {
       if (appointmentDate) appointment.appointmentDate = appointmentDate;
       if (reason) appointment.reason = reason;
       if (duration !== undefined) appointment.duration = duration;
-      if (status) appointment.status = status;
+      if (status) {
+        appointment.status = status;
+        if (status === 'Completada') {
+          const patientProfile = await PatientProfile.findOne({ where: { userId: appointment.patientId } });
+          if (patientProfile && patientProfile.flowType === 'PRIMERA_VEZ') {
+            patientProfile.flowType = 'RECONSULTA';
+            await patientProfile.save();
+          }
+        }
+      }
       if (notes !== undefined) appointment.notes = notes;
 
       // Actualizar campos financieros si se proporcionan

@@ -509,16 +509,21 @@ export default function PerfilPaciente() {
                         <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a' }}>{patient.name || patient.username}</h4>
                         <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Cédula: <strong>{patient.identificationNumber || 'S/N'}</strong></span>
                         <div style={{ marginTop: '0.35rem' }}>
-                          <span style={{ 
-                            fontSize: '0.75rem', 
-                            padding: '0.2rem 0.6rem', 
-                            borderRadius: '12px', 
-                            fontWeight: '600', 
-                            backgroundColor: profile.flowType === 'PRIMERA_VEZ' ? '#e0f2fe' : '#dcfce7',
-                            color: profile.flowType === 'PRIMERA_VEZ' ? '#0369a1' : '#15803d'
-                          }}>
-                            {profile.flowType === 'PRIMERA_VEZ' ? 'Primera Vez (Apertura)' : 'Reconsulta (Seguimiento)'}
-                          </span>
+                          {(() => {
+                            const isFirstTime = (profile.flowType || 'PRIMERA_VEZ') === 'PRIMERA_VEZ' && !(consultations && consultations.length > 0);
+                            return (
+                              <span style={{ 
+                                fontSize: '0.75rem', 
+                                padding: '0.2rem 0.6rem', 
+                                borderRadius: '12px', 
+                                fontWeight: '600', 
+                                backgroundColor: isFirstTime ? '#e0f2fe' : '#dcfce7',
+                                color: isFirstTime ? '#0369a1' : '#15803d'
+                              }}>
+                                {isFirstTime ? 'Primera Vez (Apertura)' : 'Reconsulta (Seguimiento)'}
+                              </span>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>

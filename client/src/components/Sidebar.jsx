@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, Calendar, FileText, Users } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, Calendar, FileText, Users, Download } from 'lucide-react';
 import './Sidebar.css';
 
 export function Sidebar() {
@@ -21,6 +21,7 @@ export function Sidebar() {
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Estadísticas', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
     { name: 'Licencia y Configuración', path: '/configuracion?tab=licencia', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
+    { name: 'Descargas & Web SARA', path: '/descargas', icon: Download, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');

@@ -290,6 +290,11 @@ export function ClinicalWorkspace({ patient, onBack }) {
       
       const res = await api.post(`/api/patients/${patient.id}/consultations`, payload);
       setConsultationId(res.data.consultation.id);
+      if (res.data.profile) {
+        setProfile(res.data.profile);
+      } else {
+        setProfile(prev => ({ ...prev, flowType: 'RECONSULTA' }));
+      }
       alert('Consulta guardada exitosamente.');
     } catch (err) {
       console.error(err);

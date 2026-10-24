@@ -3,6 +3,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const PatientProfile = require('../models/PatientProfile');
+const Consultation = require('../models/Consultation');
 const AuditLog = require('../models/AuditLog');
 
 module.exports = {
@@ -10,8 +11,27 @@ module.exports = {
     try {
       const users = await User.findAll({
         attributes: { exclude: ['passwordHash'] },
+        include: [
+          {
+            model: PatientProfile,
+            as: 'patientProfile',
+            include: [{ model: Consultation, as: 'consultations', attributes: ['id', 'consultationFlow', 'created_at'] }]
+          }
+        ],
         order: [['created_at', 'ASC']]
       });
+
+      // Asegurar que para pacientes con consultas registradas, flowType refleje RECONSULTA
+      for (const u of users) {
+        if (u.role === 'Paciente' && u.patientProfile) {
+          const hasConsultations = u.patientProfile.consultations && u.patientProfile.consultations.length > 0;
+          if (hasConsultations && u.patientProfile.flowType === 'PRIMERA_VEZ') {
+            u.patientProfile.flowType = 'RECONSULTA';
+            u.patientProfile.save().catch(err => console.error('Error auto-updating user patientProfile flowType:', err));
+          }
+        }
+      }
+
       return res.json(users);
     } catch (error) {
       console.error('Error al obtener usuarios:', error);

@@ -21,5 +21,12 @@ router.post('/redeem', verifyToken, checkRole(ROLES.ADMINISTRADOR), licenseContr
 router.post('/generate', verifyToken, verifySuperMaster, licenseController.generate);
 router.get('/list', verifyToken, verifySuperMaster, licenseController.listKeys);
 router.post('/manual-extend', verifyToken, verifySuperMaster, licenseController.manualExtend);
+router.get('/clinics', verifyToken, verifySuperMaster, licenseController.getClinics);
+router.post('/clinics', verifyToken, verifySuperMaster, licenseController.createClinic);
+router.put('/clinics/:id', verifyToken, verifySuperMaster, licenseController.updateClinic);
+
+// Rutas públicas de descarga de la aplicación
+router.get('/download/info', licenseController.getDownloadInfo);
+router.get('/download/setup', licenseController.downloadSetup);
 
 module.exports = router;

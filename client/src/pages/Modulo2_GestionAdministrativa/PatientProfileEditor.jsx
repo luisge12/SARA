@@ -59,7 +59,8 @@ export function PatientProfileEditor({ patient, onClose }) {
 
       const p = data.patientProfile || {};
       setPhotoUrl(p.photoUrl || p.photo_url || '');
-      setFlowType(p.flowType || p.flow_type || 'PRIMERA_VEZ');
+      const hasConsults = p.consultations && p.consultations.length > 0;
+      setFlowType(hasConsults ? 'RECONSULTA' : (p.flowType || p.flow_type || 'PRIMERA_VEZ'));
       setCustomFields(p.customFields || p.custom_fields || {});
 
       setGender(p.gender || data.gender || patient.gender || '');
