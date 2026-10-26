@@ -95,18 +95,26 @@ export default function LicenseManager() {
     setTimeout(() => setCopiedKey(false), 2500);
   };
 
-  const handleManualExtend = async () => {
-    if (!window.confirm(`¿Confirmas extender manualmente ${manualDays} días a la clínica actual?`)) return;
-    setManualExtending(true);
+  const handleRevokeKey = async (keyId, licenseKey) => {
+    const reason = window.prompt(`¿Estás seguro de REVOCAR la clave ${licenseKey}?\nIndica el motivo de revocación:`, 'Revocada por Super Master');
+    if (reason === null) return;
     try {
-      await licenseService.manualExtend({ days: manualDays, notes: 'Extensión manual Super Master' });
-      alert(`¡Se añadieron ${manualDays} días con éxito!`);
+      await licenseService.revokeKey(keyId, reason.trim() || 'Revocada por Super Master');
+      alert(`¡La clave ${licenseKey} ha sido revocada!`);
       await fetchLicenseData();
-      window.dispatchEvent(new Event('sara_license_updated'));
     } catch (err) {
-      alert('Error: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setManualExtending(false);
+      alert('Error al revocar clave: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleApproveKey = async (keyId, licenseKey) => {
+    if (!window.confirm(`¿Deseas APROBAR y reactivar la clave ${licenseKey}?`)) return;
+    try {
+      await licenseService.approveKey(keyId);
+      alert(`¡La clave ${licenseKey} ha sido aprobada y rehabilitada!`);
+      await fetchLicenseData();
+    } catch (err) {
+      alert('Error al aprobar clave: ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -362,42 +370,10 @@ export default function LicenseManager() {
             </div>
           )}
 
-          {/* Extensión manual de cortesía rápida */}
-          <div style={{ marginTop: '2rem', padding: '1.25rem', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <h4 style={{ margin: '0 0 0.5rem', color: '#0f172a', fontSize: '1rem', fontWeight: 700 }}>
-              Extensión Rápida de Cortesía (Sin Código)
-            </h4>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: '#64748b' }}>
-              Suma días directamente a la clínica activa de esta instancia si el cliente pagó por transferencia directa.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button 
-                type="button" 
-                className="btn-redeem"
-                onClick={handleManualExtend}
-                disabled={manualExtending}
-                style={{ padding: '0.65rem 1.25rem', fontSize: '0.88rem' }}
-              >
-                {manualExtending ? <RefreshCw className="animate-spin" size={16} /> : <Clock size={16} />}
-                <span>Sumar +{manualDays} Días a la Clínica</span>
-              </button>
-              <select 
-                value={manualDays} 
-                onChange={(e) => setManualDays(Number(e.target.value))}
-                style={{ padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontWeight: 600 }}
-              >
-                <option value={7}>+7 días (Período de Gracia)</option>
-                <option value={15}>+15 días (Medio Mes)</option>
-                <option value={30}>+30 días (1 Mes)</option>
-                <option value={365}>+365 días (1 Año)</option>
-              </select>
-            </div>
-          </div>
-
           {/* Historial de Claves emitidas */}
           <div style={{ marginTop: '2.5rem' }}>
             <h4 style={{ margin: '0 0 0.5rem', color: '#0f172a', fontSize: '1.05rem', fontWeight: 700 }}>
-              Historial de Claves Emitidas ({keysList.length})
+              Historial y Control de Claves Emitidas ({keysList.length})
             </h4>
             <div className="keys-table-wrapper">
               <table className="keys-table">
@@ -409,7 +385,7 @@ export default function LicenseManager() {
                     <th>Estado</th>
                     <th>Notas / Cliente</th>
                     <th>Fecha Emisión</th>
-                    <th>Acción</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -420,42 +396,91 @@ export default function LicenseManager() {
                       </td>
                     </tr>
                   ) : (
-                    keysList.map((k) => (
-                      <tr key={k.id}>
-                        <td style={{ fontFamily: 'monospace', fontWeight: 700 }}>{k.licenseKey}</td>
-                        <td><strong>{k.planType === 'ANNUAL' ? 'Anual' : 'Mensual'}</strong></td>
-                        <td>{k.durationDays} días</td>
-                        <td>
-                          {k.isUsed ? (
-                            <span className="key-badge-status used">Canjeada</span>
-                          ) : (
-                            <span className="key-badge-status available">Disponible</span>
-                          )}
-                        </td>
-                        <td>{k.notes || '-'}</td>
-                        <td>{new Date(k.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <button 
-                            type="button"
-                            onClick={() => handleCopy(k.licenseKey)}
-                            style={{ 
-                              background: 'transparent', 
-                              border: '1px solid #cbd5e1', 
-                              borderRadius: '6px', 
-                              padding: '0.35rem 0.65rem', 
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              fontSize: '0.78rem',
-                              fontWeight: 600
-                            }}
-                          >
-                            <Copy size={13} /> Copiar
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    keysList.map((k) => {
+                      const isRevoked = k.status === 'REVOKED';
+                      return (
+                        <tr key={k.id} style={{ opacity: isRevoked ? 0.75 : 1 }}>
+                          <td style={{ fontFamily: 'monospace', fontWeight: 700, color: isRevoked ? '#dc2626' : 'inherit' }}>
+                            {k.licenseKey}
+                          </td>
+                          <td><strong>{k.planType === 'ANNUAL' ? 'Anual' : 'Mensual'}</strong></td>
+                          <td>{k.durationDays} días</td>
+                          <td>
+                            {isRevoked ? (
+                              <span className="key-badge-status expired" style={{ background: '#fee2e2', color: '#dc2626' }}>
+                                Revocada
+                              </span>
+                            ) : k.isUsed ? (
+                              <span className="key-badge-status used">Canjeada</span>
+                            ) : (
+                              <span className="key-badge-status available">Disponible</span>
+                            )}
+                          </td>
+                          <td>{k.notes || '-'}</td>
+                          <td>{new Date(k.created_at || k.createdAt).toLocaleDateString()}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                              <button 
+                                type="button"
+                                onClick={() => handleCopy(k.licenseKey)}
+                                style={{ 
+                                  background: 'transparent', 
+                                  border: '1px solid #cbd5e1', 
+                                  borderRadius: '6px', 
+                                  padding: '0.35rem 0.65rem', 
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600
+                                }}
+                              >
+                                <Copy size={13} />
+                              </button>
+
+                              {isRevoked ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveKey(k.id, k.licenseKey)}
+                                  style={{
+                                    background: '#dcfce7',
+                                    color: '#15803d',
+                                    border: '1px solid #86efac',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.65rem',
+                                    cursor: 'pointer',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700
+                                  }}
+                                  title="Aprobar y rehabilitar clave"
+                                >
+                                  Aprobar
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRevokeKey(k.id, k.licenseKey)}
+                                  style={{
+                                    background: '#fee2e2',
+                                    color: '#b91c1c',
+                                    border: '1px solid #fca5a5',
+                                    borderRadius: '6px',
+                                    padding: '0.35rem 0.65rem',
+                                    cursor: 'pointer',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700
+                                  }}
+                                  title="Revocar o suspender clave"
+                                >
+                                  Revocar
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

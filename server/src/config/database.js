@@ -13,6 +13,14 @@ const databaseUrl = process.env.DATABASE_URL;
 
 let sequelize;
 
+const poolConfig = {
+  max: 10,
+  min: 0,
+  acquire: 30000,
+  idle: 10000,
+  evict: 2000
+};
+
 if (databaseUrl) {
   sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
@@ -21,8 +29,10 @@ if (databaseUrl) {
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
+      },
+      keepAlive: true
     },
+    pool: poolConfig,
     define: {
       timestamps: true, // Agrega createdAt y updatedAt automáticamente
       underscored: true // Usa snake_case para nombres de columnas generados
@@ -38,8 +48,12 @@ if (databaseUrl) {
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
-    } : {},
+      },
+      keepAlive: true
+    } : {
+      keepAlive: true
+    },
+    pool: poolConfig,
     define: {
       timestamps: true, // Agrega createdAt y updatedAt automáticamente
       underscored: true // Usa snake_case para nombres de columnas generados

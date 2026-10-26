@@ -1,4 +1,8 @@
 const LicenseService = require('../services/licenseService');
+const User = require('../models/User');
+const Clinic = require('../models/Clinic');
+const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 
 module.exports = {
   // Obtener estado de la licencia de la clínica actual
@@ -66,29 +70,44 @@ module.exports = {
     }
   },
 
-  // Extensión manual de días (Solo Super Master)
-  manualExtend: async (req, res) => {
+  // Obtener estadísticas de claves para el Super Master
+  getKeyStats: async (req, res) => {
     try {
-      const { days, notes, clinicId } = req.body;
-      const targetClinicId = clinicId || req.user?.clinicId || 1;
-      const daysCount = parseInt(days) || 30;
+      const stats = await LicenseService.getKeyStats();
+      return res.json(stats);
+    } catch (error) {
+      console.error('Error al obtener estadísticas de claves:', error);
+      return res.status(500).json({ error: 'Error al obtener métricas de licencias' });
+    }
+  },
 
-      const result = await LicenseService.manualExtend(targetClinicId, daysCount, notes);
+  // Revocar clave de licencia (Exclusivo Super Master)
+  revokeKey: async (req, res) => {
+    try {
+      const { keyId, reason } = req.body;
+      if (!keyId) {
+        return res.status(400).json({ error: 'Debe especificar el ID o código de la clave a revocar.' });
+      }
+      const result = await LicenseService.revokeKey(keyId, reason);
       return res.json(result);
     } catch (error) {
-      console.error('Error en extensión manual de licencia:', error);
+      console.error('Error al revocar clave:', error.message);
       return res.status(400).json({ error: error.message });
     }
   },
 
-  // Obtener todas las clínicas para el Super Master
-  getClinics: async (req, res) => {
+  // Aprobar o reactivar clave de licencia (Exclusivo Super Master)
+  approveKey: async (req, res) => {
     try {
-      const data = await LicenseService.getAllClinics();
-      return res.json(data);
+      const { keyId } = req.body;
+      if (!keyId) {
+        return res.status(400).json({ error: 'Debe especificar el ID o código de la clave a aprobar.' });
+      }
+      const result = await LicenseService.approveKey(keyId);
+      return res.json(result);
     } catch (error) {
-      console.error('Error al obtener clínicas para Super Master:', error);
-      return res.status(500).json({ error: 'Error al consultar lista de clínicas' });
+      console.error('Error al aprobar clave:', error.message);
+      return res.status(400).json({ error: error.message });
     }
   },
 
@@ -206,6 +225,143 @@ module.exports = {
     } catch (error) {
       console.error('Error al descargar instalador:', error);
       return res.status(500).json({ error: 'Error al procesar la descarga del instalador' });
+    }
+  },
+
+  // Crear usuario con rol Master y asignar/crear la clínica correspondiente (Exclusivo para Super Master)
+  createMasterUser: async (req, res) => {
+    try {
+      const { username, password, name, clinicName, clinicRif, clinicId, initialDays } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ error: 'El nombre de usuario y la contraseña son requeridos.' });
+      }
+
+      const existingUser = await User.findOne({ where: { username: username.trim() } });
+      if (existingUser) {
+        return res.status(400).json({ error: `El nombre de usuario "${username}" ya está registrado en el sistema.` });
+      }
+
+      let targetClinic = null;
+
+      // 1. Si se especificó el nombre de la clínica (permite crear una clínica nueva sobre la marcha)
+      if (clinicName && clinicName.trim()) {
+        const cleanClinicName = clinicName.trim();
+        targetClinic = await Clinic.findOne({
+          where: {
+            name: {
+              [Op.iLike]: cleanClinicName
+            }
+          }
+        });
+
+        // Si la clínica no existe, la creamos automáticamente
+        if (!targetClinic) {
+          const days = parseInt(initialDays) || 30;
+          const initialExpiration = new Date();
+          initialExpiration.setDate(initialExpiration.getDate() + days);
+
+          targetClinic = await Clinic.create({
+            name: cleanClinicName,
+            rif: clinicRif ? clinicRif.trim() : null,
+            planType: 'MONTHLY',
+            licenseStatus: 'ACTIVE',
+            expiresAt: initialExpiration,
+            activeLicenseKey: `SARA-NEW-${Date.now().toString(36).toUpperCase()}`,
+            maxDoctors: 15
+          });
+          console.log(`[SuperMaster] Nueva clínica creada: "${targetClinic.name}" (ID: ${targetClinic.id})`);
+        } else if (clinicRif && clinicRif.trim() && !targetClinic.rif) {
+          // Si existía pero no tenía RIF, actualizamos su RIF
+          targetClinic.rif = clinicRif.trim();
+          await targetClinic.save();
+        }
+      } else if (clinicId) {
+        targetClinic = await Clinic.findByPk(parseInt(clinicId));
+      }
+
+      if (!targetClinic) {
+        return res.status(400).json({ 
+          error: 'Debes indicar el nombre de la clínica a la que se le asignará este usuario Master.' 
+        });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      const newMaster = await User.create({
+        username: username.trim(),
+        passwordHash,
+        role: 'Master',
+        name: name ? name.trim() : `Director / Master ${username.trim()}`,
+        sedeAtencion: 'CENTRAL',
+        clinicId: targetClinic.id
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: `¡Usuario Master "${newMaster.username}" creado y asignado exitosamente a la clínica "${targetClinic.name}"!`,
+        user: {
+          id: newMaster.id,
+          username: newMaster.username,
+          name: newMaster.name,
+          role: newMaster.role,
+          clinicId: newMaster.clinicId
+        },
+        clinic: {
+          id: targetClinic.id,
+          name: targetClinic.name,
+          rif: targetClinic.rif,
+          expiresAt: targetClinic.expiresAt
+        }
+      });
+    } catch (error) {
+      console.error('Error al crear usuario Master:', error);
+      return res.status(500).json({ error: error.message || 'Error interno al crear el usuario Master.' });
+    }
+  },
+
+  // Listar usuarios Master registrados (Exclusivo para Super Master)
+  listMasterUsers: async (req, res) => {
+    try {
+      const masters = await User.findAll({
+        where: { role: 'Master' },
+        attributes: ['id', 'username', 'name', 'role', 'clinicId', 'createdAt'],
+        order: [['id', 'ASC']]
+      });
+
+      const clinics = await Clinic.findAll({ attributes: ['id', 'name', 'rif'] });
+      const clinicMap = {};
+      clinics.forEach(c => { clinicMap[c.id] = c; });
+
+      const formatted = masters.map(m => ({
+        id: m.id,
+        username: m.username,
+        name: m.name,
+        role: m.role,
+        clinicId: m.clinicId,
+        clinicName: clinicMap[m.clinicId]?.name || `Clínica #${m.clinicId}`,
+        clinicRif: clinicMap[m.clinicId]?.rif || '—',
+        createdAt: m.createdAt
+      }));
+
+      return res.json(formatted);
+    } catch (error) {
+      console.error('Error al listar usuarios Master:', error);
+      return res.status(500).json({ error: 'Error al obtener la lista de usuarios Master.' });
+    }
+  },
+
+  // Listar clínicas registradas (Exclusivo para Super Master)
+  listClinicsSummary: async (req, res) => {
+    try {
+      const clinics = await Clinic.findAll({
+        attributes: ['id', 'name', 'rif', 'planType', 'licenseStatus', 'expiresAt', 'maxDoctors'],
+        order: [['id', 'ASC']]
+      });
+      return res.json(clinics);
+    } catch (error) {
+      console.error('Error al listar clínicas:', error);
+      return res.status(500).json({ error: 'Error al obtener el listado de clínicas.' });
     }
   }
 };

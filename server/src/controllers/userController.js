@@ -45,7 +45,15 @@ module.exports = {
         return res.status(400).json({ error: 'El usuario y la contraseña son requeridos.' });
       }
 
-      const user = await User.findOne({ where: { username } });
+      let user;
+      try {
+        user = await User.findOne({ where: { username } });
+      } catch (dbErr) {
+        // Si la base de datos estaba en reposo (Neon serverless auto-suspend), reintentar una vez tras reconectar
+        console.warn('Aviso: reconectando consulta tras suspensión de base de datos...', dbErr.message);
+        user = await User.findOne({ where: { username } });
+      }
+
       if (!user) {
         return res.status(404).json({ error: 'El usuario ingresado no existe en el sistema.' });
       }
@@ -101,6 +109,13 @@ module.exports = {
         return res.status(400).json({ error: 'Campos requeridos faltantes' });
       }
       
+      // Restricción crítica: Ningún usuario en la clínica (ni siquiera Master) puede crear cuentas Master o SuperMaster
+      if (role.toLowerCase().includes('master')) {
+        return res.status(403).json({ 
+          error: 'Acceso denegado: El rol Master es exclusivo y solo puede ser creado por el Super Master desde la consola central de licencias.' 
+        });
+      }
+
       // Restringir a Recepcionistas/Médicos para que solo creen Pacientes
       if (req.user && req.user.role !== 'Master' && role !== 'Paciente') {
         return res.status(403).json({ error: 'No tienes permisos para crear usuarios de este tipo' });

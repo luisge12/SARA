@@ -93,7 +93,11 @@ export function Sidebar() {
             to="/login"
             className="sidebar-link logout"
             title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              setIsMobileOpen(false);
+            }}
           >
             <LogOut size={20} className="sidebar-icon" />
             <span className="link-text">Cerrar Sesión</span>

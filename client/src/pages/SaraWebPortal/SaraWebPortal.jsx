@@ -27,14 +27,6 @@ export default function SaraWebPortal() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadingType, setDownloadingType] = useState('exe');
 
-  // Estados de Super Master
-  const [showMasterSection, setShowMasterSection] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authUsername, setAuthUsername] = useState('luisge');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState('');
-
   // Usuario actual
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -48,36 +40,36 @@ export default function SaraWebPortal() {
     currentUser?.username?.toLowerCase() === 'luisge' || 
     currentUser?.role?.toLowerCase() === 'supermaster';
 
-  // Datos del Panel Super Master
-  const [masterTab, setMasterTab] = useState('generator'); // 'generator' | 'clinics' | 'keys'
+  // Estados de Super Master: Si ya está autenticado, abrir su panel de licencias automáticamente
+  const [showMasterSection, setShowMasterSection] = useState(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || 'null');
+      return u?.username?.toLowerCase() === 'luisge' || u?.role?.toLowerCase() === 'supermaster';
+    } catch {
+      return false;
+    }
+  });
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authUsername, setAuthUsername] = useState('luisge');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  // Datos del Panel Super Master (Exclusivo Emisión y Control de Licencias)
+  const [masterTab, setMasterTab] = useState('generator'); // 'generator' | 'keys'
   const [loadingMasterData, setLoadingMasterData] = useState(false);
-  const [clinicsData, setClinicsData] = useState({ clinics: [], stats: {} });
+  const [keyStats, setKeyStats] = useState({ totalKeys: 0, availableKeys: 0, usedKeys: 0, revokedKeys: 0 });
   const [keysList, setKeysList] = useState([]);
-  const [keyFilter, setKeyFilter] = useState('ALL'); // 'ALL' | 'AVAILABLE' | 'USED'
+  const [keyFilter, setKeyFilter] = useState('ALL'); // 'ALL' | 'AVAILABLE' | 'USED' | 'REVOKED'
   const [searchTerm, setSearchTerm] = useState('');
 
   // Formulario Generador de Claves
   const [planType, setPlanType] = useState('MONTHLY'); // 'MONTHLY' | 'QUARTERLY' | 'SEMESTER' | 'ANNUAL' | 'CUSTOM'
   const [customDays, setCustomDays] = useState(30);
   const [clientNotes, setClientNotes] = useState('');
-  const [targetClinicId, setTargetClinicId] = useState('');
   const [generatingKey, setGeneratingKey] = useState(false);
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState(null);
   const [copiedKey, setCopiedKey] = useState(false);
-
-  // Modal Nueva Clínica
-  const [showNewClinicModal, setShowNewClinicModal] = useState(false);
-  const [newClinicName, setNewClinicName] = useState('');
-  const [newClinicRif, setNewClinicRif] = useState('');
-  const [newClinicPlan, setNewClinicPlan] = useState('MONTHLY');
-  const [newClinicDays, setNewClinicDays] = useState(30);
-  const [creatingClinic, setCreatingClinic] = useState(false);
-
-  // Modal Extensión Rápida
-  const [extendModalClinic, setExtendModalClinic] = useState(null);
-  const [extendDaysInput, setExtendDaysInput] = useState(30);
-  const [extendNotesInput, setExtendNotesInput] = useState('Cortesía Super Master');
-  const [extending, setExtending] = useState(false);
 
   // Cargar información de descarga al montar
   useEffect(() => {
@@ -93,11 +85,11 @@ export default function SaraWebPortal() {
     if (!isSuperMaster) return;
     try {
       setLoadingMasterData(true);
-      const [clinicsRes, keysRes] = await Promise.all([
-        licenseService.getClinics(),
-        licenseService.listKeys()
+      const [statsRes, keysRes] = await Promise.all([
+        licenseService.getKeyStats().catch(() => ({})),
+        licenseService.listKeys().catch(() => [])
       ]);
-      setClinicsData(clinicsRes);
+      setKeyStats(statsRes || {});
       setKeysList(Array.isArray(keysRes) ? keysRes : []);
     } catch (err) {
       console.error('Error al cargar datos de Super Master:', err);
@@ -131,10 +123,8 @@ export default function SaraWebPortal() {
         
         if (res.data.user.role === 'SuperMaster' || res.data.user.username.toLowerCase() === 'luisge') {
           setShowAuthModal(false);
-          setShowMasterSection(true);
           setAuthPassword('');
-          // Recargar datos
-          setTimeout(() => fetchMasterData(), 100);
+          navigate('/supermaster');
         } else {
           setAuthError('El usuario ingresado no posee permisos de Super Master.');
         }
@@ -189,63 +179,37 @@ export default function SaraWebPortal() {
     setTimeout(() => setCopiedKey(false), 2500);
   };
 
-  // Extensión rápida de clínica
-  const handleQuickExtend = async (clinicId, days) => {
+  // Revocar clave de licencia
+  const handleRevokeKey = async (keyId, licenseKey) => {
+    const reason = window.prompt(`¿Estás seguro de REVOCAR la clave ${licenseKey}?\nIndica el motivo de revocación (ej: Falta de pago, cancelación de contrato):`, 'Revocada por Super Master');
+    if (reason === null) return;
+
     try {
-      await licenseService.manualExtend({ 
-        days, 
-        notes: `Extensión rápida +${days} días`, 
-        clinicId 
-      });
-      alert(`¡Se añadieron +${days} días con éxito!`);
+      setLoadingMasterData(true);
+      await licenseService.revokeKey(keyId, reason.trim() || 'Revocada por Super Master');
       await fetchMasterData();
+      alert(`¡La clave ${licenseKey} ha sido revocada exitosamente!`);
     } catch (err) {
-      alert('Error al extender: ' + (err.response?.data?.error || err.message));
+      alert('Error al revocar clave: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setLoadingMasterData(false);
     }
   };
 
-  // Enviar extensión personalizada
-  const handleCustomExtend = async (e) => {
-    e.preventDefault();
-    if (!extendModalClinic) return;
-    setExtending(true);
-    try {
-      await licenseService.manualExtend({
-        days: parseInt(extendDaysInput),
-        notes: extendNotesInput,
-        clinicId: extendModalClinic.id
-      });
-      alert(`¡Se añadieron +${extendDaysInput} días a ${extendModalClinic.name}!`);
-      setExtendModalClinic(null);
-      await fetchMasterData();
-    } catch (err) {
-      alert('Error al extender: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setExtending(false);
-    }
-  };
+  // Aprobar o reactivar clave de licencia
+  const handleApproveKey = async (keyId, licenseKey) => {
+    const confirm = window.confirm(`¿Deseas APROBAR y reactivar la clave de licencia ${licenseKey}?`);
+    if (!confirm) return;
 
-  // Crear nueva clínica
-  const handleCreateClinic = async (e) => {
-    e.preventDefault();
-    if (!newClinicName.trim()) return;
-    setCreatingClinic(true);
     try {
-      await licenseService.createClinic({
-        name: newClinicName.trim(),
-        rif: newClinicRif.trim(),
-        planType: newClinicPlan,
-        initialDays: parseInt(newClinicDays) || 30
-      });
-      alert('¡Nueva clínica cliente registrada con éxito!');
-      setShowNewClinicModal(false);
-      setNewClinicName('');
-      setNewClinicRif('');
+      setLoadingMasterData(true);
+      await licenseService.approveKey(keyId);
       await fetchMasterData();
+      alert(`¡La clave ${licenseKey} ha sido aprobada y rehabilitada con éxito!`);
     } catch (err) {
-      alert('Error al registrar clínica: ' + (err.response?.data?.error || err.message));
+      alert('Error al aprobar clave: ' + (err.response?.data?.error || err.message));
     } finally {
-      setCreatingClinic(false);
+      setLoadingMasterData(false);
     }
   };
 
@@ -276,15 +240,21 @@ export default function SaraWebPortal() {
 
   // Filtrado de claves
   const filteredKeys = keysList.filter(k => {
+    const isRevoked = k.status === 'REVOKED';
+    const isUsed = k.isUsed && !isRevoked;
+    const isAvailable = !k.isUsed && !isRevoked;
+
     const matchesFilter = 
       keyFilter === 'ALL' ? true :
-      keyFilter === 'AVAILABLE' ? !k.isUsed :
-      k.isUsed;
+      keyFilter === 'AVAILABLE' ? isAvailable :
+      keyFilter === 'USED' ? isUsed :
+      keyFilter === 'REVOKED' ? isRevoked : true;
 
     const matchesSearch = 
       !searchTerm || 
       (k.licenseKey && k.licenseKey.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (k.notes && k.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+      (k.notes && k.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (k.revokedReason && k.revokedReason.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return matchesFilter && matchesSearch;
   });
@@ -339,14 +309,14 @@ export default function SaraWebPortal() {
             className="btn-portal-master"
             onClick={() => {
               if (isSuperMaster) {
-                setShowMasterSection(prev => !prev);
+                navigate('/supermaster');
               } else {
                 setShowAuthModal(true);
               }
             }}
           >
             <Zap size={16} />
-            {isSuperMaster ? (showMasterSection ? 'Ocultar Panel Master' : '👑 Panel Super Master') : 'Acceso Super Master'}
+            {isSuperMaster ? '👑 Panel Super Master' : 'Acceso Super Master'}
           </button>
         </div>
       </nav>
@@ -444,30 +414,30 @@ export default function SaraWebPortal() {
               </div>
             </div>
 
-            {/* KPIs del Super Master */}
+            {/* KPIs del Super Master (Control Exclusivo de Licencias) */}
             <div className="master-kpi-grid">
               <div className="master-kpi-card">
-                <span className="kpi-label">Clínicas Registradas</span>
-                <span className="kpi-value cyan">{clinicsData.stats?.totalClinics || 0}</span>
-                <span className="kpi-sub">Instalaciones institucionales</span>
-              </div>
-
-              <div className="master-kpi-card">
-                <span className="kpi-label">Licencias Activas</span>
-                <span className="kpi-value green">{clinicsData.stats?.activeClinics || 0}</span>
-                <span className="kpi-sub">Servicio vigente sin cortes</span>
+                <span className="kpi-label">Total Claves Emitidas</span>
+                <span className="kpi-value cyan">{keyStats.totalKeys || keysList.length}</span>
+                <span className="kpi-sub">Generadas en la plataforma</span>
               </div>
 
               <div className="master-kpi-card">
                 <span className="kpi-label">Claves Disponibles</span>
-                <span className="kpi-value gold">{clinicsData.stats?.availableKeys || 0}</span>
-                <span className="kpi-sub">Listas para emitir a clientes</span>
+                <span className="kpi-value green">{keyStats.availableKeys || keysList.filter(k => !k.isUsed && k.status !== 'REVOKED').length}</span>
+                <span className="kpi-sub">Listas para canje</span>
               </div>
 
               <div className="master-kpi-card">
                 <span className="kpi-label">Claves Canjeadas</span>
-                <span className="kpi-value">{clinicsData.stats?.usedKeys || 0}</span>
-                <span className="kpi-sub">Activadas en clínicas</span>
+                <span className="kpi-value gold">{keyStats.usedKeys || keysList.filter(k => k.isUsed && k.status !== 'REVOKED').length}</span>
+                <span className="kpi-sub">Activadas por clínicas</span>
+              </div>
+
+              <div className="master-kpi-card">
+                <span className="kpi-label">Claves Revocadas</span>
+                <span className="kpi-value" style={{ color: '#f87171' }}>{keyStats.revokedKeys || keysList.filter(k => k.status === 'REVOKED').length}</span>
+                <span className="kpi-sub">Anuladas / Suspendidas</span>
               </div>
             </div>
 
@@ -480,16 +450,10 @@ export default function SaraWebPortal() {
                 <Key size={18} /> Generador de Licencias
               </button>
               <button 
-                className={`master-tab-btn ${masterTab === 'clinics' ? 'active' : ''}`}
-                onClick={() => setMasterTab('clinics')}
-              >
-                <Building size={18} /> Control de Clínicas ({clinicsData.clinics?.length || 0})
-              </button>
-              <button 
                 className={`master-tab-btn ${masterTab === 'keys' ? 'active' : ''}`}
                 onClick={() => setMasterTab('keys')}
               >
-                <FileText size={18} /> Inventario de Claves ({keysList.length})
+                <FileText size={18} /> Control y Aprobación de Claves ({keysList.length})
               </button>
             </div>
 
@@ -623,112 +587,7 @@ export default function SaraWebPortal() {
               </div>
             )}
 
-            {/* PESTAÑA 2: CONTROL DE CLÍNICAS */}
-            {masterTab === 'clinics' && (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff' }}>Clínicas e Instituciones Conectadas</h3>
-                    <p style={{ margin: '0.2rem 0 0', color: 'var(--portal-text-muted)', fontSize: '0.88rem' }}>
-                      Controla la vigencia de cada centro médico y añade días de servicio directamente.
-                    </p>
-                  </div>
-
-                  <button 
-                    className="btn-portal-secondary"
-                    onClick={() => setShowNewClinicModal(true)}
-                    style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#34d399' }}
-                  >
-                    <Plus size={16} /> Registrar Nueva Clínica
-                  </button>
-                </div>
-
-                <div className="master-table-container">
-                  <table className="master-data-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Clínica</th>
-                        <th>RIF / ID Fiscal</th>
-                        <th>Plan</th>
-                        <th>Estado</th>
-                        <th>Días Restantes</th>
-                        <th>Fecha Vencimiento</th>
-                        <th>Clave Activa</th>
-                        <th>Acciones Super Master</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {clinicsData.clinics?.length === 0 ? (
-                        <tr>
-                          <td colSpan="9" style={{ textAlign: 'center', padding: '2rem', color: 'var(--portal-text-dim)' }}>
-                            No hay clínicas registradas aún.
-                          </td>
-                        </tr>
-                      ) : (
-                        clinicsData.clinics?.map(clinic => (
-                          <tr key={clinic.id}>
-                            <td style={{ fontWeight: 700, color: '#38bdf8' }}>#{clinic.id}</td>
-                            <td style={{ fontWeight: 600, color: '#fff' }}>{clinic.name}</td>
-                            <td>{clinic.rif || 'Sin RIF'}</td>
-                            <td><strong>{clinic.planType}</strong></td>
-                            <td>
-                              {clinic.isExpired ? (
-                                <span className="badge-status-pill expired">Vencida</span>
-                              ) : clinic.isExpiringSoon ? (
-                                <span className="badge-status-pill warning">Por Vencer</span>
-                              ) : (
-                                <span className="badge-status-pill active">Activa</span>
-                              )}
-                            </td>
-                            <td style={{ fontWeight: 700, color: clinic.isExpired ? '#f87171' : clinic.isExpiringSoon ? '#fbbf24' : '#34d399' }}>
-                              {clinic.daysRemaining} días
-                            </td>
-                            <td>{new Date(clinic.expiresAt).toLocaleDateString()}</td>
-                            <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                              {clinic.activeLicenseKey || 'N/A'}
-                            </td>
-                            <td>
-                              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                                <button 
-                                  className="btn-portal-secondary"
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }}
-                                  onClick={() => handleQuickExtend(clinic.id, 30)}
-                                  title="Extender 30 días"
-                                >
-                                  +30d
-                                </button>
-                                <button 
-                                  className="btn-portal-secondary"
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem' }}
-                                  onClick={() => handleQuickExtend(clinic.id, 365)}
-                                  title="Extender 1 año"
-                                >
-                                  +1 Año
-                                </button>
-                                <button 
-                                  className="btn-portal-secondary"
-                                  style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem', color: '#fbbf24', borderColor: 'rgba(245, 158, 11, 0.3)' }}
-                                  onClick={() => {
-                                    setExtendModalClinic(clinic);
-                                    setExtendDaysInput(30);
-                                  }}
-                                  title="Extensión personalizada"
-                                >
-                                  A Medida
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* PESTAÑA 3: INVENTARIO DE CLAVES */}
+            {/* PESTAÑA 2: CONTROL Y APROBACIÓN DE CLAVES */}
             {masterTab === 'keys' && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -744,14 +603,21 @@ export default function SaraWebPortal() {
                       onClick={() => setKeyFilter('AVAILABLE')}
                       style={{ color: '#34d399' }}
                     >
-                      Disponibles ({keysList.filter(k => !k.isUsed).length})
+                      Disponibles ({keysList.filter(k => !k.isUsed && k.status !== 'REVOKED').length})
                     </button>
                     <button 
                       className={`btn-portal-secondary ${keyFilter === 'USED' ? 'active' : ''}`}
                       onClick={() => setKeyFilter('USED')}
                       style={{ color: '#94a3b8' }}
                     >
-                      Canjeadas ({keysList.filter(k => k.isUsed).length})
+                      Canjeadas ({keysList.filter(k => k.isUsed && k.status !== 'REVOKED').length})
+                    </button>
+                    <button 
+                      className={`btn-portal-secondary ${keyFilter === 'REVOKED' ? 'active' : ''}`}
+                      onClick={() => setKeyFilter('REVOKED')}
+                      style={{ color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                    >
+                      Revocadas ({keysList.filter(k => k.status === 'REVOKED').length})
                     </button>
                   </div>
 
@@ -759,7 +625,7 @@ export default function SaraWebPortal() {
                     <Search size={16} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--portal-text-dim)' }} />
                     <input 
                       type="text"
-                      placeholder="Buscar por clave o cliente..."
+                      placeholder="Buscar por clave, cliente o nota..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       style={{ width: '100%', padding: '0.55rem 0.75rem 0.55rem 2.25rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff', fontSize: '0.85rem' }}
@@ -778,7 +644,7 @@ export default function SaraWebPortal() {
                         <th>Notas / Cliente</th>
                         <th>Fecha de Emisión</th>
                         <th>Fecha Canje</th>
-                        <th>Copiar</th>
+                        <th>Acciones Super Master</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -789,38 +655,75 @@ export default function SaraWebPortal() {
                           </td>
                         </tr>
                       ) : (
-                        filteredKeys.map(k => (
-                          <tr key={k.id}>
-                            <td style={{ fontFamily: 'monospace', fontWeight: 700, color: k.isUsed ? '#94a3b8' : '#34d399' }}>
-                              {k.licenseKey}
-                            </td>
-                            <td>{k.planType}</td>
-                            <td>{k.durationDays} días</td>
-                            <td>
-                              {k.isUsed ? (
-                                <span className="badge-status-pill" style={{ background: 'rgba(148, 163, 184, 0.1)', color: '#94a3b8' }}>
-                                  Canjeada
-                                </span>
-                              ) : (
-                                <span className="badge-status-pill active">
-                                  Disponible
-                                </span>
-                              )}
-                            </td>
-                            <td>{k.notes || '—'}</td>
-                            <td>{new Date(k.created_at || k.createdAt).toLocaleDateString()}</td>
-                            <td>{k.usedAt ? new Date(k.usedAt).toLocaleDateString() : '—'}</td>
-                            <td>
-                              <button 
-                                className="btn-portal-secondary"
-                                style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
-                                onClick={() => handleCopyText(k.licenseKey)}
-                              >
-                                <Copy size={13} /> Copiar
-                              </button>
-                            </td>
-                          </tr>
-                        ))
+                        filteredKeys.map(k => {
+                          const isRevoked = k.status === 'REVOKED';
+                          return (
+                            <tr key={k.id} style={{ opacity: isRevoked ? 0.78 : 1 }}>
+                              <td style={{ fontFamily: 'monospace', fontWeight: 700, color: isRevoked ? '#f87171' : k.isUsed ? '#94a3b8' : '#34d399' }}>
+                                {k.licenseKey}
+                              </td>
+                              <td>{k.planType}</td>
+                              <td>{k.durationDays} días</td>
+                              <td>
+                                {isRevoked ? (
+                                  <span className="badge-status-pill expired" title={k.revokedReason || 'Revocada'}>
+                                    Revocada
+                                  </span>
+                                ) : k.isUsed ? (
+                                  <span className="badge-status-pill" style={{ background: 'rgba(148, 163, 184, 0.1)', color: '#94a3b8' }}>
+                                    Canjeada
+                                  </span>
+                                ) : (
+                                  <span className="badge-status-pill active">
+                                    Disponible
+                                  </span>
+                                )}
+                              </td>
+                              <td>
+                                <div>{k.notes || '—'}</div>
+                                {isRevoked && k.revokedReason && (
+                                  <div style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '2px' }}>
+                                    {k.revokedReason}
+                                  </div>
+                                )}
+                              </td>
+                              <td>{new Date(k.created_at || k.createdAt).toLocaleDateString()}</td>
+                              <td>{k.usedAt ? new Date(k.usedAt).toLocaleDateString() : '—'}</td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                  <button 
+                                    className="btn-portal-secondary"
+                                    style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+                                    onClick={() => handleCopyText(k.licenseKey)}
+                                    title="Copiar clave"
+                                  >
+                                    <Copy size={13} />
+                                  </button>
+
+                                  {isRevoked ? (
+                                    <button 
+                                      className="btn-portal-secondary"
+                                      style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', color: '#34d399', borderColor: 'rgba(52, 211, 153, 0.4)' }}
+                                      onClick={() => handleApproveKey(k.id, k.licenseKey)}
+                                      title="Aprobar y rehabilitar clave"
+                                    >
+                                      <CheckCircle2 size={13} /> Aprobar
+                                    </button>
+                                  ) : (
+                                    <button 
+                                      className="btn-portal-secondary"
+                                      style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.4)' }}
+                                      onClick={() => handleRevokeKey(k.id, k.licenseKey)}
+                                      title="Revocar o suspender clave"
+                                    >
+                                      <X size={13} /> Revocar
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -1178,150 +1081,6 @@ export default function SaraWebPortal() {
               >
                 {authLoading ? <RefreshCw className="animate-spin" size={18} /> : <Zap size={18} />}
                 <span>Ingresar al Control de Licencias</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          MODAL: REGISTRAR NUEVA CLÍNICA
-          ==================================================================== */}
-      {showNewClinicModal && (
-        <div className="master-auth-modal" onClick={() => setShowNewClinicModal(false)}>
-          <div className="master-auth-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
-            <button 
-              onClick={() => setShowNewClinicModal(false)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--portal-text-muted)', cursor: 'pointer' }}
-            >
-              <X size={20} />
-            </button>
-
-            <h3 style={{ margin: '0 0 1rem', color: '#fff' }}>Registrar Nueva Clínica Cliente</h3>
-
-            <form onSubmit={handleCreateClinic}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                  Nombre de la Clínica / Centro Médico:
-                </label>
-                <input 
-                  type="text"
-                  placeholder="Ej: Clínica Los Cedros"
-                  value={newClinicName}
-                  onChange={(e) => setNewClinicName(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                  RIF / Cédula Jurídica:
-                </label>
-                <input 
-                  type="text"
-                  placeholder="Ej: J-30123456-0"
-                  value={newClinicRif}
-                  onChange={(e) => setNewClinicRif(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                    Plan Inicial:
-                  </label>
-                  <select 
-                    value={newClinicPlan} 
-                    onChange={(e) => setNewClinicPlan(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                  >
-                    <option value="MONTHLY">Mensual</option>
-                    <option value="ANNUAL">Anual</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                    Días Iniciales:
-                  </label>
-                  <input 
-                    type="number"
-                    min="1"
-                    value={newClinicDays}
-                    onChange={(e) => setNewClinicDays(e.target.value)}
-                    style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit"
-                className="btn-card-download primary"
-                disabled={creatingClinic}
-              >
-                {creatingClinic ? <RefreshCw className="animate-spin" size={18} /> : <Building size={18} />}
-                <span>Guardar y Registrar Clínica</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          MODAL: EXTENSIÓN PERSONALIZADA DE CLÍNICA
-          ==================================================================== */}
-      {extendModalClinic && (
-        <div className="master-auth-modal" onClick={() => setExtendModalClinic(null)}>
-          <div className="master-auth-card" onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setExtendModalClinic(null)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--portal-text-muted)', cursor: 'pointer' }}
-            >
-              <X size={20} />
-            </button>
-
-            <h3 style={{ margin: '0 0 0.5rem', color: '#fff' }}>Extensión de Servicio a Medida</h3>
-            <p style={{ color: 'var(--portal-text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-              Clínica: <strong>{extendModalClinic.name}</strong> (ID #{extendModalClinic.id})
-            </p>
-
-            <form onSubmit={handleCustomExtend}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                  Cantidad de Días a Sumar:
-                </label>
-                <input 
-                  type="number"
-                  min="1"
-                  max="3650"
-                  value={extendDaysInput}
-                  onChange={(e) => setExtendDaysInput(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.3rem', fontWeight: 600 }}>
-                  Motivo o Nota:
-                </label>
-                <input 
-                  type="text"
-                  value={extendNotesInput}
-                  onChange={(e) => setExtendNotesInput(e.target.value)}
-                  style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
-                />
-              </div>
-
-              <button 
-                type="submit"
-                className="btn-card-download primary"
-                disabled={extending}
-              >
-                {extending ? <RefreshCw className="animate-spin" size={18} /> : <Clock size={18} />}
-                <span>Aplicar Extensión</span>
               </button>
             </form>
           </div>

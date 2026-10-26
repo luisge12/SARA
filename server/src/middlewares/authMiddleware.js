@@ -24,6 +24,17 @@ module.exports = {
         }
       }
 
+      // El rol SuperMaster está estrictamente restringido a la administración de licencias (/api/licenses)
+      if (req.user.role === 'SuperMaster' || req.user.role === 'Super Master') {
+        const path = req.originalUrl || req.url || '';
+        const isAllowedPath = path.startsWith('/api/licenses') || path.startsWith('/api/users/profile') || path.startsWith('/api/users/login');
+        if (!isAllowedPath) {
+          return res.status(403).json({
+            error: 'Acceso denegado. El usuario Super Master tiene acceso exclusivo a la gestión de licencias y no puede consultar información de las clínicas.'
+          });
+        }
+      }
+
       next();
     } catch (error) {
       return res.status(403).json({ error: 'Token inválido o expirado.' });
@@ -33,8 +44,14 @@ module.exports = {
     if (!req.user) {
       return res.status(403).json({ error: 'Acceso denegado. Permisos insuficientes.' });
     }
-    // El rol Master y SuperMaster tienen acceso ilimitado a todos los recursos y endpoints
-    if (req.user.role === 'Master' || req.user.role === 'SuperMaster') {
+    // El rol SuperMaster únicamente gestiona licencias de SARA
+    if (req.user.role === 'SuperMaster' || req.user.role === 'Super Master') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado. El usuario Super Master gestiona exclusivamente la emisión y control de licencias, sin acceso a información clínica.' 
+      });
+    }
+    // El rol Master de la clínica tiene acceso ilimitado a los módulos de su clínica
+    if (req.user.role === 'Master') {
       return next();
     }
     if (!roles.includes(req.user.role)) {
@@ -45,7 +62,7 @@ module.exports = {
   
   // Agrupación de Roles para facilitar acceso
   ROLES: {
-    ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master', 'SuperMaster'],
+    ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master'],
     MEDICO: ['Director Médico', 'Médico Tratante', 'Médico'],
     RECEPCIONISTA: ['Asistente Administrativo', 'Asistente Medico', 'Recepcionista'],
     PACIENTE: ['Paciente']

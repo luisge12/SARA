@@ -25,33 +25,53 @@ export const licenseService = {
     return response.data;
   },
 
-  // Extensión manual de días (Super Master)
-  manualExtend: async ({ days, notes, clinicId }) => {
-    const response = await api.post('/api/licenses/manual-extend', { days, notes, clinicId });
+  // Obtener estadísticas de claves (Super Master)
+  getKeyStats: async () => {
+    const response = await api.get('/api/licenses/stats');
     return response.data;
   },
 
-  // Obtener todas las clínicas para Super Master
-  getClinics: async () => {
-    const response = await api.get('/api/licenses/clinics');
+  // Revocar clave de licencia (Super Master)
+  revokeKey: async (keyId, reason) => {
+    const response = await api.post('/api/licenses/revoke', { keyId, reason });
     return response.data;
   },
 
-  // Crear nueva clínica (Super Master)
-  createClinic: async (clinicData) => {
-    const response = await api.post('/api/licenses/clinics', clinicData);
-    return response.data;
-  },
-
-  // Actualizar clínica (Super Master)
-  updateClinic: async (id, clinicData) => {
-    const response = await api.put(`/api/licenses/clinics/${id}`, clinicData);
+  // Aprobar / Reactivar clave de licencia (Super Master)
+  approveKey: async (keyId) => {
+    const response = await api.post('/api/licenses/approve', { keyId });
     return response.data;
   },
 
   // Obtener información de la versión e instalador
   getDownloadInfo: async () => {
     const response = await api.get('/api/licenses/download/info');
+    return response.data;
+  },
+
+  // Crear usuario con rol Master y clínica (Super Master)
+  createMasterUser: async ({ username, password, name, clinicName, clinicRif, clinicId, initialDays }) => {
+    const response = await api.post('/api/licenses/masters', {
+      username,
+      password,
+      name,
+      clinicName,
+      clinicRif,
+      clinicId,
+      initialDays
+    });
+    return response.data;
+  },
+
+  // Listar usuarios Master registrados (Super Master)
+  listMasterUsers: async () => {
+    const response = await api.get('/api/licenses/masters');
+    return response.data;
+  },
+
+  // Listar clínicas registradas (Super Master)
+  listClinicsSummary: async () => {
+    const response = await api.get('/api/licenses/clinics-summary');
     return response.data;
   }
 };

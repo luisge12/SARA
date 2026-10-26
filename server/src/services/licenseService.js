@@ -24,6 +24,7 @@ class LicenseService {
       planType: isAnnual ? 'ANNUAL' : 'MONTHLY',
       durationDays: finalDuration,
       isUsed: false,
+      status: 'APPROVED',
       notes,
       createdBy
     });
@@ -119,6 +120,11 @@ class LicenseService {
     const keyRecord = await LicenseKey.findOne({ where: { licenseKey: cleanedKey } });
     if (!keyRecord) {
       throw new Error('La clave de licencia ingresada no es válida o no existe en los registros de SARA.');
+    }
+
+    if (keyRecord.status === 'REVOKED') {
+      const reasonText = keyRecord.revokedReason ? ` Motivo: "${keyRecord.revokedReason}"` : '';
+      throw new Error(`Esta clave de licencia fue revocada o suspendida por el Super Master.${reasonText} No puede ser utilizada.`);
     }
 
     if (keyRecord.isUsed) {
@@ -221,6 +227,96 @@ class LicenseService {
     return await LicenseKey.findAll({
       order: [['created_at', 'DESC']]
     });
+  }
+
+  /**
+   * Revocar o anular una clave de licencia (Exclusivo Super Master)
+   */
+  static async revokeKey(keyIdentifier, reason = 'Revocada por Super Master') {
+    let keyRecord;
+    if (!isNaN(Number(keyIdentifier))) {
+      keyRecord = await LicenseKey.findByPk(Number(keyIdentifier));
+    }
+    if (!keyRecord) {
+      keyRecord = await LicenseKey.findOne({ where: { licenseKey: String(keyIdentifier).trim().toUpperCase() } });
+    }
+    if (!keyRecord) {
+      throw new Error('La clave de licencia especificada no existe.');
+    }
+
+    keyRecord.status = 'REVOKED';
+    keyRecord.revokedAt = new Date();
+    keyRecord.revokedReason = reason || 'Revocada por Super Master';
+    await keyRecord.save();
+
+    // Si la clave ya fue canjeada en una clínica y está activa, suspender la licencia de esa clínica
+    if (keyRecord.isUsed && keyRecord.usedByClinicId) {
+      const clinic = await Clinic.findByPk(keyRecord.usedByClinicId);
+      if (clinic && clinic.activeLicenseKey === keyRecord.licenseKey) {
+        clinic.licenseStatus = 'REVOKED';
+        await clinic.save();
+      }
+    }
+
+    return {
+      success: true,
+      message: `Clave ${keyRecord.licenseKey} revocada exitosamente.`,
+      key: keyRecord
+    };
+  }
+
+  /**
+   * Aprobar o reactivar una clave de licencia (Exclusivo Super Master)
+   */
+  static async approveKey(keyIdentifier) {
+    let keyRecord;
+    if (!isNaN(Number(keyIdentifier))) {
+      keyRecord = await LicenseKey.findByPk(Number(keyIdentifier));
+    }
+    if (!keyRecord) {
+      keyRecord = await LicenseKey.findOne({ where: { licenseKey: String(keyIdentifier).trim().toUpperCase() } });
+    }
+    if (!keyRecord) {
+      throw new Error('La clave de licencia especificada no existe.');
+    }
+
+    keyRecord.status = 'APPROVED';
+    keyRecord.revokedAt = null;
+    keyRecord.revokedReason = null;
+    await keyRecord.save();
+
+    // Si la clave ya estaba canjeada en una clínica y su fecha de expiración es futura, rehabilitar clínica
+    if (keyRecord.isUsed && keyRecord.usedByClinicId) {
+      const clinic = await Clinic.findByPk(keyRecord.usedByClinicId);
+      if (clinic && clinic.activeLicenseKey === keyRecord.licenseKey) {
+        const now = new Date();
+        clinic.licenseStatus = new Date(clinic.expiresAt) > now ? 'ACTIVE' : 'EXPIRED';
+        await clinic.save();
+      }
+    }
+
+    return {
+      success: true,
+      message: `Clave ${keyRecord.licenseKey} aprobada y restablecida con éxito.`,
+      key: keyRecord
+    };
+  }
+
+  /**
+   * Obtener métricas resumidas de licencias exclusivamente (sin datos clínicos)
+   */
+  static async getKeyStats() {
+    const totalKeys = await LicenseKey.count();
+    const revokedKeys = await LicenseKey.count({ where: { status: 'REVOKED' } });
+    const usedKeys = await LicenseKey.count({ where: { isUsed: true, status: 'APPROVED' } });
+    const availableKeys = await LicenseKey.count({ where: { isUsed: false, status: 'APPROVED' } });
+
+    return {
+      totalKeys,
+      availableKeys,
+      usedKeys,
+      revokedKeys
+    };
   }
 
   /**

@@ -12,6 +12,7 @@ import Modulo_Pacientes from './pages/Modulo_Pacientes/Modulo_Pacientes';
 import PerfilPaciente from './pages/Modulo_Pacientes/PerfilPaciente';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import SaraWebPortal from './pages/SaraWebPortal/SaraWebPortal';
+import SuperMasterPanel from './pages/SuperMaster/SuperMasterPanel';
 
 // Portal de Pacientes
 import { PortalPacienteLogin } from './pages/PortalPaciente/PortalPacienteLogin';
@@ -25,6 +26,21 @@ function PortalPacienteIndex() {
     return <Navigate to="/users/login" replace />;
   }
   return <Navigate to="/users/dashboard" replace />;
+}
+
+// Redirección inteligente de raíz: en móviles/tablets va directo al Login/Dashboard
+function RootIndexRoute() {
+  const isMobile = typeof navigator !== 'undefined' && (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|mobile/i.test(navigator.userAgent) ||
+    (typeof window !== 'undefined' && window.innerWidth <= 768)
+  );
+
+  if (isMobile) {
+    const token = localStorage.getItem('token');
+    return <Navigate to={token ? "/dashboard" : "/login"} replace />;
+  }
+
+  return <SaraWebPortal />;
 }
 
 function App() {
@@ -97,11 +113,16 @@ function App() {
           </PortalPacienteProtectedRoute>
         } />
 
-        {/* Portal Web Oficial, Descargas y Control de Licencias Super Master */}
+        {/* Portal Web Oficial y Descargas */}
+        <Route path="/" element={<RootIndexRoute />} />
         <Route path="/descargas" element={<SaraWebPortal />} />
         <Route path="/descarga" element={<Navigate to="/descargas" replace />} />
         <Route path="/download" element={<Navigate to="/descargas" replace />} />
         <Route path="/web" element={<SaraWebPortal />} />
+
+        {/* Panel Exclusivo Super Master (Licencias) */}
+        <Route path="/supermaster" element={<SuperMasterPanel />} />
+        <Route path="/licencias" element={<Navigate to="/supermaster" replace />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/login" replace />} />

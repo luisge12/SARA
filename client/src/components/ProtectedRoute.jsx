@@ -2,16 +2,18 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 export const ROLES = {
-  ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master', 'SuperMaster', 'Super Master'],
+  ADMINISTRADOR: ['Master/administrador', 'Administrador', 'Master'],
   MEDICO: ['Director Médico', 'Médico Tratante', 'Médico'],
   RECEPCIONISTA: ['Asistente Administrativo', 'Asistente Medico', 'Recepcionista'],
 };
 
 export const hasAccess = (userRole, allowedGroups) => {
   if (!userRole) return false;
-  // Master y SuperMaster siempre tienen acceso a todo en SARA PWA
   const normalized = userRole.toLowerCase().replace(/\s+/g, '');
-  if (normalized === 'master' || normalized === 'supermaster') return true;
+  // SuperMaster no tiene acceso a módulos clínicos ni administrativos de las clínicas
+  if (normalized === 'supermaster') return false;
+  // El rol Master de la clínica tiene acceso a todo en su clínica
+  if (normalized === 'master') return true;
   
   for (const group of allowedGroups) {
     if (ROLES[group] && ROLES[group].includes(userRole)) {
@@ -30,6 +32,12 @@ export const ProtectedRoute = ({ children, allowedGroups }) => {
   
   try {
     const user = JSON.parse(userStr);
+    const normalized = user.role?.toLowerCase().replace(/\s+/g, '');
+    
+    // El Super Master únicamente administra licencias de la plataforma (no información de clínicas)
+    if (normalized === 'supermaster') {
+      return <Navigate to="/supermaster" replace />;
+    }
     
     // Si no se requieren grupos específicos, solo estar logueado basta
     if (!allowedGroups || allowedGroups.length === 0) {

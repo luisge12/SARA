@@ -17,13 +17,15 @@ router.get('/status', verifyToken, licenseController.getStatus);
 // Canjear clave de activación (Permitido para el Master y Administrador de la clínica)
 router.post('/redeem', verifyToken, checkRole(ROLES.ADMINISTRADOR), licenseController.redeem);
 
-// Rutas exclusivas para Super Master (Dueño de la plataforma SARA)
+// Rutas exclusivas para Super Master (Emisión, aprobación y revocación de licencias, y gestión de Masters)
 router.post('/generate', verifyToken, verifySuperMaster, licenseController.generate);
 router.get('/list', verifyToken, verifySuperMaster, licenseController.listKeys);
-router.post('/manual-extend', verifyToken, verifySuperMaster, licenseController.manualExtend);
-router.get('/clinics', verifyToken, verifySuperMaster, licenseController.getClinics);
-router.post('/clinics', verifyToken, verifySuperMaster, licenseController.createClinic);
-router.put('/clinics/:id', verifyToken, verifySuperMaster, licenseController.updateClinic);
+router.get('/stats', verifyToken, verifySuperMaster, licenseController.getKeyStats);
+router.post('/revoke', verifyToken, verifySuperMaster, licenseController.revokeKey);
+router.post('/approve', verifyToken, verifySuperMaster, licenseController.approveKey);
+router.post('/masters', verifyToken, verifySuperMaster, licenseController.createMasterUser);
+router.get('/masters', verifyToken, verifySuperMaster, licenseController.listMasterUsers);
+router.get('/clinics-summary', verifyToken, verifySuperMaster, licenseController.listClinicsSummary);
 
 // Rutas públicas de descarga de la aplicación
 router.get('/download/info', licenseController.getDownloadInfo);

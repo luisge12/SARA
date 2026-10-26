@@ -45,6 +45,20 @@ const LicenseKey = sequelize.define('LicenseKey', {
   createdBy: {
     type: DataTypes.STRING(100),
     field: 'created_by'
+  },
+  status: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    defaultValue: 'APPROVED', // 'APPROVED' o 'REVOKED'
+    field: 'status'
+  },
+  revokedAt: {
+    type: DataTypes.DATE,
+    field: 'revoked_at'
+  },
+  revokedReason: {
+    type: DataTypes.STRING(255),
+    field: 'revoked_reason'
   }
 }, {
   tableName: 'license_keys',

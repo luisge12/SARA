@@ -54,6 +54,26 @@ export function Login() {
     return () => clearInterval(timer);
   }, []);
 
+  // Si ya existe una sesión activa, redirigir automáticamente al panel correspondiente
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
+        if (isSuper) {
+          navigate('/supermaster', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      } catch {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -72,8 +92,13 @@ export function Login() {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      // Redirigir al Dashboard nuevo de SARA
-      navigate('/dashboard');
+      // Redirigir según el rol
+      const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
+      if (isSuper) {
+        navigate('/supermaster');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('Error de login:', err);
       const errMsg = err.response?.data?.error || 'Error de conexión con el servidor backend';
@@ -187,7 +212,7 @@ export function Login() {
             📥 Descargar SARA para Windows (.exe)
           </Link>
           <span style={{ color: 'rgba(255,255,255,0.25)' }}>&bull;</span>
-          <Link to="/descargas" style={{ color: '#fbbf24', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <Link to="/supermaster" style={{ color: '#fbbf24', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             👑 Control Super Master
           </Link>
         </div>
