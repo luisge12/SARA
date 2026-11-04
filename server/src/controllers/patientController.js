@@ -12,8 +12,16 @@ module.exports = {
   // Obtener todos los pacientes
   getPatients: async (req, res) => {
     try {
+      const clinicId = req.user?.clinicId || 1;
+      const isSuper = req.user?.role === 'SuperMaster' || req.user?.role === 'Super Master';
+
+      const patientWhere = { role: 'Paciente' };
+      if (!isSuper) {
+        patientWhere.clinicId = clinicId;
+      }
+
       const patients = await User.findAll({
-        where: { role: 'Paciente' },
+        where: patientWhere,
         include: [{ 
           model: PatientProfile, 
           as: 'patientProfile',

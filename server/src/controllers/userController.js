@@ -5,11 +5,24 @@ const jwt = require('jsonwebtoken');
 const PatientProfile = require('../models/PatientProfile');
 const Consultation = require('../models/Consultation');
 const AuditLog = require('../models/AuditLog');
+const { Op } = require('sequelize');
 
 module.exports = {
   getUsers: async (req, res) => {
     try {
+      const clinicId = req.user?.clinicId || 1;
+      const isSuper = req.user?.role === 'SuperMaster' || req.user?.role === 'Super Master';
+
+      // Filtrar usuarios por clínica y excluir al SuperMaster
+      const whereClause = {
+        role: { [Op.ne]: 'SuperMaster' }
+      };
+      if (!isSuper) {
+        whereClause.clinicId = clinicId;
+      }
+
       const users = await User.findAll({
+        where: whereClause,
         attributes: { exclude: ['passwordHash'] },
         include: [
           {

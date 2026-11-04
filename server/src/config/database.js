@@ -276,26 +276,15 @@ const initDatabase = async () => {
         role: 'SuperMaster',
         name: 'Luis G. (Super Master SARA)',
         sedeAtencion: 'CENTRAL',
-        clinicId: 1
+        clinicId: null
       });
       console.log('Usuario Super Master (luisge) creado exitosamente.');
+    } else if (luisgeExists.clinicId !== null) {
+      await User.update({ clinicId: null }, { where: { username: 'luisge' } });
     }
 
-    // Semillar usuario master con clave 1234 solo si no existe
-    const masterExists = await User.findOne({ where: { username: 'master' } });
-    if (!masterExists) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('1234', salt);
-      await User.create({
-        username: 'master',
-        passwordHash: passwordHash,
-        role: 'Master',
-        name: 'Master Clínica SARA',
-        sedeAtencion: 'CENTRAL',
-        clinicId: 1
-      });
-      console.log('Usuario Master de Clínica (master) creado exitosamente.');
-    }
+    // Eliminar el usuario de prueba genérico "master" para que solo exista el Master oficial UNIMECO
+    await User.destroy({ where: { username: 'master' } }).catch(() => {});
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);
   }

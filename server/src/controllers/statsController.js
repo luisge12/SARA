@@ -9,10 +9,15 @@ module.exports = {
   // Resumen de estadísticas del Dashboard
   getDashboardStats: async (req, res) => {
     try {
-      // 1. Total Pacientes en BD
-      const totalPatients = await User.count({
-        where: { role: 'Paciente' }
-      });
+      const clinicId = req.user?.clinicId || 1;
+      const isSuper = req.user?.role === 'SuperMaster' || req.user?.role === 'Super Master';
+
+      // 1. Total Pacientes en BD para la clínica actual
+      const patientWhere = { role: 'Paciente' };
+      if (!isSuper) {
+        patientWhere.clinicId = clinicId;
+      }
+      const totalPatients = await User.count({ where: patientWhere });
 
       // 2. Citas para hoy en BD (Calculadas en rango de medianoche a medianoche sin mutación de objeto)
       const now = new Date();
@@ -70,13 +75,21 @@ module.exports = {
   // Estadísticas históricas avanzadas para Módulo 7 (Director Médico)
   getHistoricalStats: async (req, res) => {
     try {
-      const totalPatients = await User.count({ where: { role: 'Paciente' } });
+      const clinicId = req.user?.clinicId || 1;
+      const isSuper = req.user?.role === 'SuperMaster' || req.user?.role === 'Super Master';
+
+      const patientWhere = { role: 'Paciente' };
+      if (!isSuper) {
+        patientWhere.clinicId = clinicId;
+      }
+
+      const totalPatients = await User.count({ where: patientWhere });
       const totalConsultations = await Consultation.count();
       const totalAppointments = await Appointment.count();
 
-      // Pacientes agrupados por sede de atención
+      // Pacientes agrupados por sede de atención de la clínica
       const patientsBySede = await User.findAll({
-        where: { role: 'Paciente' },
+        where: patientWhere,
         attributes: ['sedeAtencion', [fn('COUNT', col('id')), 'count']],
         group: ['sedeAtencion']
       });
@@ -87,8 +100,16 @@ module.exports = {
         group: ['status']
       });
 
-      // Lista completa de distribución de usuarios por rol
+      // Lista de distribución de usuarios por rol de esta clínica (EXCLUYE SuperMaster estrictamente)
+      const userRoleWhere = {
+        role: { [Op.ne]: 'SuperMaster' }
+      };
+      if (!isSuper) {
+        userRoleWhere.clinicId = clinicId;
+      }
+
       const usersByRole = await User.findAll({
+        where: userRoleWhere,
         attributes: ['role', [fn('COUNT', col('id')), 'count']],
         group: ['role']
       });
