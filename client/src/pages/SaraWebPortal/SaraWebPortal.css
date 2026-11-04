@@ -285,24 +285,33 @@
   background: linear-gradient(135deg, #34d399 0%, #059669 100%);
 }
 
-.btn-hero-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--portal-border);
-  color: #ffffff;
-  padding: 0.95rem 1.75rem;
+.btn-hero-secondary,
+.btn-hero-web {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  padding: 0.95rem 1.85rem;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
+  justify-content: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.12);
 }
 
-.btn-hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+.btn-hero-secondary:hover,
+.btn-hero-web:hover {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
 }
 
 .hero-trust-badges {
