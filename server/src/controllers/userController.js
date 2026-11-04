@@ -18,7 +18,14 @@ module.exports = {
         role: { [Op.ne]: 'SuperMaster' }
       };
       if (!isSuper) {
-        whereClause.clinicId = clinicId;
+        if (clinicId === 1) {
+          whereClause[Op.or] = [
+            { clinicId: 1 },
+            { clinicId: null }
+          ];
+        } else {
+          whereClause.clinicId = clinicId;
+        }
       }
 
       const users = await User.findAll({
@@ -168,7 +175,8 @@ module.exports = {
         gender: gender || null,
         dateOfBirth: safeDateOnly(dateOfBirth),
         email: email || null,
-        phone: phone || null
+        phone: phone || null,
+        clinicId: req.user?.clinicId || 1
       });
 
       if (role === 'Paciente') {

@@ -105,7 +105,14 @@ module.exports = {
         role: { [Op.ne]: 'SuperMaster' }
       };
       if (!isSuper) {
-        userRoleWhere.clinicId = clinicId;
+        if (clinicId === 1) {
+          userRoleWhere[Op.or] = [
+            { clinicId: 1 },
+            { clinicId: null }
+          ];
+        } else {
+          userRoleWhere.clinicId = clinicId;
+        }
       }
 
       const usersByRole = await User.findAll({

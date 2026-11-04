@@ -285,6 +285,14 @@ const initDatabase = async () => {
 
     // Eliminar el usuario de prueba genérico "master" para que solo exista el Master oficial UNIMECO
     await User.destroy({ where: { username: 'master' } }).catch(() => {});
+
+    // Asegurar que cualquier usuario existente (excepto SuperMaster) esté vinculado a la clínica 1 (UNIMECO)
+    await User.update({ clinicId: 1 }, { 
+      where: { 
+        clinicId: null, 
+        role: { [Op.ne]: 'SuperMaster' } 
+      } 
+    }).catch(() => {});
   } catch (error) {
     console.error('Error al conectar e inicializar la base de datos PostgreSQL:', error);
   }
