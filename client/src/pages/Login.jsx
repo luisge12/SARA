@@ -214,7 +214,7 @@ export function Login() {
           
         </div>
         <div className="login-footer">
-          Producto Desarrollado para SARA Clínicas
+          © 2026 SARA • Sistema Asistencial de Registro Automatizado
         </div>
       </footer>
     </div>
