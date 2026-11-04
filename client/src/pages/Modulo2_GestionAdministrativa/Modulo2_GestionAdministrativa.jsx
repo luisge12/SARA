@@ -3,7 +3,8 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Trash2, UserPlus, ShieldAlert, Users, User, Calendar, CalendarPlus, Clock, CheckCircle } from 'lucide-react';
+import { Trash2, UserPlus, ShieldAlert, Users, User, Calendar, CalendarPlus, Clock, CheckCircle, Edit } from 'lucide-react';
+import { StaffUserEditModal } from './StaffUserEditModal';
 
 import { PatientProfileEditor } from './PatientProfileEditor';
 import { AppointmentModal } from '../../components/AppointmentModal';
@@ -15,6 +16,7 @@ function Modulo2_GestionAdministrativa() {
   const isMaster = currentUser.role === 'Master';
   const hasAccess = ['Master', 'Administrador', 'Recepcionista', 'Médico'].includes(currentUser.role);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [editingStaffUser, setEditingStaffUser] = useState(null);
   const [auditPatient, setAuditPatient] = useState(null);
 
   // Citas states
@@ -409,6 +411,27 @@ function Modulo2_GestionAdministrativa() {
                           </button>
                         </>
                       )}
+                      {usr.role !== 'Paciente' && isMaster && (
+                        <button
+                          onClick={() => setEditingStaffUser(usr)}
+                          style={{
+                            background: 'rgba(56, 189, 248, 0.12)',
+                            border: '1px solid rgba(56, 189, 248, 0.35)',
+                            color: '#0284c7',
+                            cursor: 'pointer',
+                            padding: '0.4rem 0.75rem',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.35rem'
+                          }}
+                          title="Editar Datos y Credenciales del Usuario"
+                        >
+                          <Edit size={14} /> Editar
+                        </button>
+                      )}
                       {isMaster && (
                         <button
                           onClick={() => handleDeleteUser(usr.id, usr.username)}
@@ -634,6 +657,16 @@ function Modulo2_GestionAdministrativa() {
           patient={selectedPatient}
           onClose={() => {
             setSelectedPatient(null);
+            fetchUsers();
+          }}
+        />
+      )}
+
+            {editingStaffUser && (
+        <StaffUserEditModal
+          user={editingStaffUser}
+          onClose={() => setEditingStaffUser(null)}
+          onSaveSuccess={() => {
             fetchUsers();
           }}
         />

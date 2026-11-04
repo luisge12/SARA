@@ -257,12 +257,110 @@ module.exports = {
       return res.status(500).json({ error: 'Error al crear usuario' });
     }
   },
+  updateUser: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      // Proteger que no se pueda modificar al SuperMaster desde este módulo
+      if (user.role === 'SuperMaster' && req.user.role !== 'SuperMaster') {
+        return res.status(403).json({ error: 'No tienes permisos para modificar a este usuario' });
+      }
+
+      // Validar clínica si no es SuperMaster
+      if (req.user.role !== 'SuperMaster') {
+        const callerClinic = req.user.clinicId || 1;
+        const targetClinic = user.clinicId || 1;
+        if (callerClinic !== targetClinic) {
+          return res.status(403).json({ error: 'No tienes permisos para modificar usuarios de otra clínica' });
+        }
+      }
+
+      const {
+        name,
+        role,
+        sedeAtencion,
+        shift,
+        academicDegree,
+        specialty,
+        mppsNumber,
+        medicalCollegeNumber,
+        identificationNumber,
+        gender,
+        dateOfBirth,
+        email,
+        phone,
+        newPassword
+      } = req.body;
+
+      if (name !== undefined) user.name = name;
+      // Solo Master/SuperMaster puede cambiar roles
+      if (role !== undefined && (req.user.role === 'Master' || req.user.role === 'SuperMaster')) {
+        if (role !== 'SuperMaster') {
+          user.role = role;
+        }
+      }
+      if (sedeAtencion !== undefined) user.sedeAtencion = sedeAtencion;
+      if (shift !== undefined) user.shift = shift;
+      if (academicDegree !== undefined) user.academicDegree = academicDegree;
+      if (specialty !== undefined) user.specialty = specialty;
+      if (mppsNumber !== undefined) user.mppsNumber = mppsNumber;
+      if (medicalCollegeNumber !== undefined) user.medicalCollegeNumber = medicalCollegeNumber;
+      if (identificationNumber !== undefined) user.identificationNumber = identificationNumber;
+      if (gender !== undefined) user.gender = gender;
+      if (dateOfBirth !== undefined) user.dateOfBirth = dateOfBirth || null;
+      if (email !== undefined) user.email = email;
+      if (phone !== undefined) user.phone = phone;
+
+      if (newPassword && newPassword.trim().length > 0) {
+        const salt = await bcrypt.genSalt(10);
+        user.passwordHash = await bcrypt.hash(newPassword.trim(), salt);
+      }
+
+      await user.save();
+
+      return res.json({
+        message: 'Usuario actualizado exitosamente',
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          name: user.name,
+          identificationNumber: user.identificationNumber,
+          sedeAtencion: user.sedeAtencion,
+          specialty: user.specialty,
+          shift: user.shift,
+          email: user.email,
+          phone: user.phone
+        }
+      });
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
+      return res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+  },
   deleteUser: async (req, res) => {
     try {
       const { id } = req.params;
       const user = await User.findByPk(id);
       if (!user) {
         return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      if (user.role === 'SuperMaster') {
+        return res.status(403).json({ error: 'No se puede eliminar al usuario Super Master' });
+      }
+
+      // Validar clínica si no es SuperMaster
+      if (req.user.role !== 'SuperMaster') {
+        const callerClinic = req.user.clinicId || 1;
+        const targetClinic = user.clinicId || 1;
+        if (callerClinic !== targetClinic) {
+          return res.status(403).json({ error: 'No tienes permisos para eliminar usuarios de otra clínica' });
+        }
       }
 
       await user.destroy();
