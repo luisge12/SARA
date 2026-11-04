@@ -146,22 +146,7 @@ export default function SaraWebPortal() {
           </button>
         </div>
 
-        {/* Badges de Confianza */}
-        <div className="hero-trust-badges">
-          <div className="trust-badge-item">
-            <Shield size={16} color="#34d399" />
-            <span>Firma Digital Segura y Verificada</span>
-          </div>
-          <div className="trust-badge-item">
-            <Laptop size={16} color="#38bdf8" />
-            <span>Compatible con Windows 10 y Windows 11</span>
-          </div>
-          <div className="trust-badge-item">
-            <Lock size={16} color="#fbbf24" />
-            <span>Encriptación y Control Criptográfico de Licencias</span>
-          </div>
-        </div>
-      </header>
+        </header>
 
       {/* ====================================================================
           SECCIÓN: CENTRO DE DESCARGAS DEL SOFTWARE
