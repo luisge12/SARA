@@ -130,11 +130,8 @@ export default function SaraWebPortal() {
             className="btn-hero-download"
             onClick={() => handleStartDownload('exe')}
           >
-            <Download size={22} />
-            <div style={{ textAlign: 'left' }}>
-              <span className="btn-title">Descargar SARA para Windows</span>
-              <span className="btn-subtitle">Instalador Oficial .exe &bull; 64-bit ({downloadInfo.fileSize})</span>
-            </div>
+            <Download size={20} />
+            <span>Descargar para Windows</span>
           </button>
 
           <button 
