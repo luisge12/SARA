@@ -78,11 +78,6 @@ export default function SaraWebPortal() {
           </div>
         </a>
 
-        <ul className="portal-nav-links">
-          <li><a href="#descargas" className="portal-nav-link">Descargas</a></li>
-          <li><a href="#caracteristicas" className="portal-nav-link">Módulos</a></li>
-          <li><a href="#guia" className="portal-nav-link">Guía de Instalación</a></li>
-        </ul>
 
         <div className="portal-nav-actions">
           <button 
