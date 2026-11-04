@@ -371,33 +371,38 @@ export default function SaraWebPortal() {
 
         <div className="downloads-grid">
           <div className="step-box">
-            <h4 style={{ color: '#38bdf8' }}>1. Control de Acceso &amp; Roles</h4>
+            <h4>1. Control de Acceso &amp; Roles</h4>
             <p>Separación estricta de perfiles: Administrador, Médico, Recepcionista y Paciente con auditoría forense.</p>
           </div>
 
           <div className="step-box">
-            <h4 style={{ color: '#34d399' }}>2. Recepción &amp; Pacientes</h4>
+            <h4>2. Recepción &amp; Pacientes</h4>
             <p>Registro demográfico, control de primera vez vs reconsulta, apertura rápida y carnet digital.</p>
           </div>
 
           <div className="step-box">
-            <h4 style={{ color: '#fbbf24' }}>3. Caja &amp; Facturación Multimoneda</h4>
+            <h4>3. Caja &amp; Facturación Multimoneda</h4>
             <p>Soporte de tasas BCV y Paralelo en vivo, cobros en USD/VES, arqueo de caja e impresión de facturas.</p>
           </div>
 
           <div className="step-box">
-            <h4 style={{ color: '#a78bfa' }}>4. Estación Clínica &amp; Asistente IA</h4>
+            <h4>4. Estación Clínica &amp; Asistente IA</h4>
             <p>Signos vitales, HCE, catálogo farmacológico, plantillas personalizadas y síntesis clínica con Google Gemini.</p>
           </div>
 
           <div className="step-box">
-            <h4 style={{ color: '#f472b6' }}>5. Citas &amp; Sala de Espera</h4>
+            <h4>5. Citas &amp; Sala de Espera</h4>
             <p>Calendario dinámico por sede médica, gestión de turnos y sincronización con el portal del paciente.</p>
           </div>
 
           <div className="step-box">
-            <h4 style={{ color: '#38bdf8' }}>6. Estudios &amp; Procedimientos</h4>
+            <h4>6. Estudios &amp; Procedimientos</h4>
             <p>Rayos X, Ultrasonido, Laboratorio, Endoscopias, toma de biopsias e informes descargables en PDF.</p>
+          </div>
+
+          <div className="step-box">
+            <h4>7. Gestión Médica Estadística</h4>
+            <p>Métricas de productividad, reportes de morbilidad, resúmenes contables y exportación ejecutiva.</p>
           </div>
         </div>
       </section>
