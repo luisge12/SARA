@@ -81,7 +81,6 @@ export default function SaraWebPortal() {
         <ul className="portal-nav-links">
           <li><a href="#descargas" className="portal-nav-link">Descargas</a></li>
           <li><a href="#caracteristicas" className="portal-nav-link">Módulos</a></li>
-          <li><a href="#requisitos" className="portal-nav-link">Requisitos</a></li>
           <li><a href="#guia" className="portal-nav-link">Guía de Instalación</a></li>
         </ul>
 
@@ -283,61 +282,6 @@ export default function SaraWebPortal() {
             <h4>Inicia Sesión y Activa</h4>
             <p>Ingresa con tu usuario y contraseña institucional, o canjea la clave criptográfica proporcionada por tu distribuidor autorizado.</p>
           </div>
-        </div>
-      </section>
-
-      {/* ====================================================================
-          REQUISITOS DEL SISTEMA
-          ==================================================================== */}
-      <section className="portal-section" id="requisitos">
-        <div className="section-header-center">
-          <span className="section-tag">Especificaciones Técnicas</span>
-          <h2>Requisitos del Sistema</h2>
-          <p>SARA ha sido optimizado para trabajar con fluidez en computadoras modernas y equipos estándar de consultorio.</p>
-        </div>
-
-        <div className="requirements-table-box">
-          <table className="req-table">
-            <thead>
-              <tr>
-                <th>Componente</th>
-                <th>Requisito Mínimo</th>
-                <th>Requisito Recomendado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Sistema Operativo</strong></td>
-                <td>Windows 10 (64-bit)</td>
-                <td>Windows 11 Pro (64-bit)</td>
-              </tr>
-              <tr>
-                <td><strong>Procesador (CPU)</strong></td>
-                <td>Intel Core i3 o AMD Ryzen 3 (2.0 GHz)</td>
-                <td>Intel Core i5 / i7 o AMD Ryzen 5 o superior</td>
-              </tr>
-              <tr>
-                <td><strong>Memoria RAM</strong></td>
-                <td>4 GB de RAM</td>
-                <td>8 GB de RAM o más</td>
-              </tr>
-              <tr>
-                <td><strong>Almacenamiento</strong></td>
-                <td>500 MB libres en disco</td>
-                <td>1 GB libre en unidad de estado sólido (SSD)</td>
-              </tr>
-              <tr>
-                <td><strong>Resolución de Pantalla</strong></td>
-                <td>1280 x 720 (HD)</td>
-                <td>1920 x 1080 (Full HD) o superior</td>
-              </tr>
-              <tr>
-                <td><strong>Conexión</strong></td>
-                <td>Red Local o Internet 5 Mbps</td>
-                <td>Conexión de Banda Ancha Fibra Óptica</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </section>
 
