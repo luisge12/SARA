@@ -8,7 +8,7 @@ import LicenseBannerModal from '../License/LicenseBannerModal';
 function DashboardLayout({ children }) {
   const navigate = useNavigate();
 
-  // Monitor continuo del tiempo de sesión (expiración estricta de 24 horas)
+  // Monitor continuo del tiempo de sesión y renovación automática por actividad
   useEffect(() => {
     const checkSessionExpiration = () => {
       const expiresAt = localStorage.getItem('session_expires_at');
@@ -20,11 +20,31 @@ function DashboardLayout({ children }) {
       }
     };
 
+    // Renovación por interacción en pantalla (si han pasado más de 10 minutos desde el último refresco)
+    let lastRefresh = Date.now();
+    const handleUserInteraction = () => {
+      const now = Date.now();
+      if (now - lastRefresh > 600000) { // cada 10 minutos de uso activo
+        lastRefresh = now;
+        const expiresAt = localStorage.getItem('session_expires_at');
+        if (expiresAt && Number(expiresAt) > now) {
+          localStorage.setItem('session_expires_at', String(now + 24 * 60 * 60 * 1000));
+        }
+      }
+    };
+
     // Verificar de inmediato al montar y luego cada 30 segundos
     checkSessionExpiration();
     const interval = setInterval(checkSessionExpiration, 30000);
 
-    return () => clearInterval(interval);
+    window.addEventListener('click', handleUserInteraction);
+    window.addEventListener('keydown', handleUserInteraction);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+    };
   }, [navigate]);
 
   return (

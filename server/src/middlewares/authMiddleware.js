@@ -49,6 +49,35 @@ module.exports = {
         }
       }
 
+      // Renovación Automática de Sesión (Sliding Window):
+      // Si el usuario está activo y han pasado más de 10 minutos desde que se firmó el token,
+      // renovamos la Cookie HttpOnly por 24 horas completas adicionales desde este momento.
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const tokenAge = nowInSeconds - (decoded.iat || 0);
+      if (tokenAge > 600) {
+        try {
+          const refreshedToken = jwt.sign(
+            { id: decoded.id, username: decoded.username, role: decoded.role, clinicId: decoded.clinicId },
+            process.env.JWT_SECRET || 'supersecretkey_sara_18992791',
+            { expiresIn: '24h' }
+          );
+
+          const cookieOptions = {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000, // 24 horas nuevas
+            sameSite: 'lax',
+            path: '/'
+          };
+          if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+            cookieOptions.secure = true;
+          }
+          res.cookie('sara_token', refreshedToken, cookieOptions);
+          res.setHeader('X-Refreshed-Token', refreshedToken);
+        } catch (rErr) {
+          console.warn('Aviso en renovación automática de token:', rErr.message);
+        }
+      }
+
       next();
     } catch (error) {
       return res.status(403).json({ error: 'Token inválido o expirado.' });

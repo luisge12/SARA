@@ -21,7 +21,17 @@ api.interceptors.request.use(
 
 // Interceptor de respuesta para detectar expiración de sesión y bloqueo de licencias
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Renovación automática por actividad: cada interacción exitosa renueva 24h más
+    const newExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    localStorage.setItem('session_expires_at', String(newExpiresAt));
+
+    const refreshedToken = response.headers?.['x-refreshed-token'];
+    if (refreshedToken) {
+      localStorage.setItem('token', refreshedToken);
+    }
+    return response;
+  },
   (error) => {
     if (error.response) {
       const status = error.response.status;

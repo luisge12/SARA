@@ -21,7 +21,8 @@ app.use(cors({
     // Permitir solicitudes locales (Vite, Electron, etc.) y desde la IP de producción o sin origin
     callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['X-Refreshed-Token']
 }));
 app.use(express.json());
 
