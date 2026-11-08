@@ -56,26 +56,15 @@ export function Login() {
 
   // Si ya existe una sesión activa, redirigir automáticamente al panel correspondiente
   useEffect(() => {
-    // Si viene redirigido por sesión expirada
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('expired')) {
-      setErrorMsg('Su sesión ha expirado por seguridad (límite de 24 horas). Por favor inicie sesión nuevamente.');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('session_expires_at');
-      return;
-    }
-
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     const expiresAt = localStorage.getItem('session_expires_at');
 
-    // Verificar si el tiempo límite de 24h ya pasó
+    // Si el tiempo límite ya pasó, limpiar silenciosamente sin alertas
     if (expiresAt && Date.now() > Number(expiresAt)) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('session_expires_at');
-      setErrorMsg('Su sesión ha expirado por seguridad (límite de 24 horas). Por favor inicie sesión nuevamente.');
       return;
     }
 

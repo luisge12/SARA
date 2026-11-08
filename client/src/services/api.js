@@ -43,9 +43,9 @@ api.interceptors.response.use(
         localStorage.removeItem('user');
         localStorage.removeItem('session_expires_at');
 
-        // Redirigir al login si no estamos ya allí
+        // Redirigir limpiamente al login si no estamos ya allí
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login?expired=1';
+          window.location.href = '/login';
         }
       }
 

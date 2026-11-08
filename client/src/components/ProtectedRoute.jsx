@@ -30,7 +30,7 @@ export const ProtectedRoute = ({ children, allowedGroups }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('session_expires_at');
-    return <Navigate to="/login?expired=1" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   const userStr = localStorage.getItem('user');

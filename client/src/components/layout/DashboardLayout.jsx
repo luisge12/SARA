@@ -16,7 +16,7 @@ function DashboardLayout({ children }) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('session_expires_at');
-        navigate('/login?expired=1', { replace: true });
+        navigate('/login', { replace: true });
       }
     };
 
