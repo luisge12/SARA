@@ -3,14 +3,28 @@ const jwt = require('jsonwebtoken');
 
 module.exports = {
   verifyToken: (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-      return res.status(401).json({ error: 'Acceso denegado. No se proporcionó token.' });
+    let token = null;
+
+    // 1. Intentar leer desde Cookie HttpOnly sara_token
+    if (req.cookies && req.cookies.sara_token) {
+      token = req.cookies.sara_token;
+    } else if (req.headers.cookie) {
+      const match = req.headers.cookie.match(/(?:^|;\s*)sara_token=([^;]+)/);
+      if (match) {
+        token = decodeURIComponent(match[1]);
+      }
     }
 
-    const token = authHeader.split(' ')[1];
+    // 2. Fallback a la cabecera Authorization Bearer
     if (!token) {
-      return res.status(401).json({ error: 'Acceso denegado. Token mal formateado.' });
+      const authHeader = req.headers['authorization'];
+      if (authHeader) {
+        token = authHeader.split(' ')[1];
+      }
+    }
+
+    if (!token) {
+      return res.status(401).json({ error: 'Acceso denegado. No se proporcionó token o la sesión ha expirado.' });
     }
 
     try {

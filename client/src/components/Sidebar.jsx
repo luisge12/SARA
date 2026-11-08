@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
+import api from '../services/api';
 import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, Calendar, FileText, Users, Download } from 'lucide-react';
 import './Sidebar.css';
 
@@ -94,8 +95,10 @@ export function Sidebar() {
             className="sidebar-link logout"
             title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}
             onClick={() => {
+              api.post('/api/users/logout').catch(() => {});
               localStorage.removeItem('token');
               localStorage.removeItem('user');
+              localStorage.removeItem('session_expires_at');
               setIsMobileOpen(false);
             }}
           >

@@ -24,6 +24,15 @@ export const hasAccess = (userRole, allowedGroups) => {
 };
 
 export const ProtectedRoute = ({ children, allowedGroups }) => {
+  // 1. Verificación estricta de tiempo de vida de la sesión (24 horas)
+  const expiresAt = localStorage.getItem('session_expires_at');
+  if (expiresAt && Date.now() > Number(expiresAt)) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('session_expires_at');
+    return <Navigate to="/login?expired=1" replace />;
+  }
+
   const userStr = localStorage.getItem('user');
   
   if (!userStr) {
@@ -52,6 +61,9 @@ export const ProtectedRoute = ({ children, allowedGroups }) => {
     return <Navigate to="/dashboard" replace />;
   } catch (error) {
     console.error("Error parsing user from localStorage", error);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('session_expires_at');
     return <Navigate to="/login" replace />;
   }
 };

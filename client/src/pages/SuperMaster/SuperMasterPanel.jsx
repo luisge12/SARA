@@ -92,8 +92,10 @@ export default function SuperMasterPanel() {
 
   // Manejador de Logout
   const handleLogout = () => {
+    api.post('/api/users/logout').catch(() => {});
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('session_expires_at');
     navigate('/login', { replace: true });
   };
 

@@ -98,8 +98,21 @@ module.exports = {
         console.warn('Aviso al obtener licencia en login:', licErr.message);
       }
 
+      // Establecer Cookie HttpOnly con duración estricta de 24 horas
+      const cookieOptions = {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas (86.400.000 ms)
+        sameSite: 'lax',
+        path: '/'
+      };
+      if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+        cookieOptions.secure = true;
+      }
+      res.cookie('sara_token', token, cookieOptions);
+
       return res.json({
         token,
+        expiresIn: 24 * 60 * 60 * 1000,
         user: {
           id: user.id,
           username: user.username,
@@ -395,6 +408,16 @@ module.exports = {
     } catch (error) {
       console.error('Error al cambiar contraseña:', error);
       return res.status(500).json({ error: 'Error al actualizar contraseña' });
+    }
+  },
+  logout: async (req, res) => {
+    try {
+      res.clearCookie('sara_token', { path: '/' });
+      res.clearCookie('portal_token', { path: '/' });
+      return res.json({ message: 'Sesión cerrada exitosamente' });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      return res.status(500).json({ error: 'Error al cerrar sesión' });
     }
   }
 };

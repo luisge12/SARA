@@ -56,8 +56,29 @@ export function Login() {
 
   // Si ya existe una sesión activa, redirigir automáticamente al panel correspondiente
   useEffect(() => {
+    // Si viene redirigido por sesión expirada
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expired')) {
+      setErrorMsg('Su sesión ha expirado por seguridad (límite de 24 horas). Por favor inicie sesión nuevamente.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('session_expires_at');
+      return;
+    }
+
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
+    const expiresAt = localStorage.getItem('session_expires_at');
+
+    // Verificar si el tiempo límite de 24h ya pasó
+    if (expiresAt && Date.now() > Number(expiresAt)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('session_expires_at');
+      setErrorMsg('Su sesión ha expirado por seguridad (límite de 24 horas). Por favor inicie sesión nuevamente.');
+      return;
+    }
+
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -70,6 +91,7 @@ export function Login() {
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('session_expires_at');
       }
     }
   }, [navigate]);
@@ -88,7 +110,9 @@ export function Login() {
         return;
       }
       
-      // Guardar token y datos de usuario en localStorage
+      // Guardar sesión y fijar expiración estricta a 24 horas exactas
+      const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem('session_expires_at', expiresAt);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       

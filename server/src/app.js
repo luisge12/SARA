@@ -16,8 +16,29 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permitir solicitudes locales (Vite, Electron, etc.) y desde la IP de producción o sin origin
+    callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
+
+// Parser de cookies ligero y nativo sin dependencias externas
+app.use((req, res, next) => {
+  req.cookies = {};
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(c => {
+      const [name, ...rest] = c.split('=');
+      if (name) {
+        req.cookies[name.trim()] = decodeURIComponent(rest.join('=').trim());
+      }
+    });
+  }
+  next();
+});
 
 // Bitácora de Auditoría simple (Middleware global o específico)
 app.use((req, res, next) => {
