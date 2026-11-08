@@ -94,12 +94,15 @@ export function Sidebar() {
             to="/login"
             className="sidebar-link logout"
             title={isCollapsed && !isMobileOpen ? "Cerrar Sesión" : ""}
-            onClick={() => {
-              api.post('/api/users/logout').catch(() => {});
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              localStorage.removeItem('session_expires_at');
+            onClick={async (e) => {
+              e.preventDefault();
+              try {
+                await api.post('/api/users/logout');
+              } catch (_) {}
+              localStorage.clear();
+              sessionStorage.clear();
               setIsMobileOpen(false);
+              window.location.href = '/login';
             }}
           >
             <LogOut size={20} className="sidebar-icon" />

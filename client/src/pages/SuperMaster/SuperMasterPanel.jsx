@@ -5,6 +5,7 @@ import {
   Users, UserPlus, Building, AlertCircle
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../../services/api';
 import licenseService from '../../services/licenseService';
 import '../SaraWebPortal/SaraWebPortal.css';
 
@@ -91,12 +92,16 @@ export default function SuperMasterPanel() {
   }, [isSuperMaster]);
 
   // Manejador de Logout
-  const handleLogout = () => {
-    api.post('/api/users/logout').catch(() => {});
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('session_expires_at');
-    navigate('/login', { replace: true });
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/users/logout');
+    } catch (e) {
+      console.warn('Aviso en logout:', e);
+    } finally {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/login';
+    }
   };
 
   // Generar Clave de Licencia
