@@ -350,61 +350,6 @@ function Modulo_CitasMedicas() {
           </div>
         </header>
 
-        {/* Resumen KPI de Citas */}
-        <div className="kpi-grid" style={{ marginBottom: '1.5rem' }}>
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <div>
-                <p className="kpi-label">Citas para Hoy</p>
-                <h3 className="kpi-value">{loading ? '...' : todayCount}</h3>
-                <p className="kpi-trend positive"><Clock size={14} /> Agenda del día</p>
-              </div>
-              <div className="kpi-icon-wrapper accent-light">
-                <Calendar size={24} className="kpi-icon" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <div>
-                <p className="kpi-label">Citas Confirmadas</p>
-                <h3 className="kpi-value">{loading ? '...' : confirmedCount}</h3>
-                <p className="kpi-trend positive"><CheckCircle size={14} /> Asistencia en espera</p>
-              </div>
-              <div className="kpi-icon-wrapper primary-light">
-                <CheckCircle size={24} className="kpi-icon" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <div>
-                <p className="kpi-label">Completadas</p>
-                <h3 className="kpi-value">{loading ? '...' : completedCount}</h3>
-                <p className="kpi-trend neutral"><Activity size={14} /> Atendidas con éxito</p>
-              </div>
-              <div className="kpi-icon-wrapper alert-light">
-                <Activity size={24} className="kpi-icon" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card" style={{ borderColor: 'var(--color-accent)' }}>
-            <div className="kpi-content">
-              <div>
-                <p className="kpi-label">Solicitudes Web</p>
-                <h3 className="kpi-value">{loading ? '...' : solicitadasCount}</h3>
-                <p className="kpi-trend positive"><AlertCircle size={14} /> Por agendar</p>
-              </div>
-              <div className="kpi-icon-wrapper accent-light">
-                <CalendarPlus size={24} className="kpi-icon" />
-              </div>
-            </div>
-          </Card>
-        </div>
-
         {/* Barra de Filtros y Búsqueda */}
         <Card className="glass-panel" style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
