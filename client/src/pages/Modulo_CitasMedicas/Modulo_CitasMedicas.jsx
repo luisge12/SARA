@@ -1051,10 +1051,12 @@ function Modulo_CitasMedicas() {
                               borderRadius: '8px',
                               backgroundColor: 
                                 apt.status === 'Confirmada' ? 'rgba(16, 185, 129, 0.15)' :
+                                apt.status === 'En Sala de Espera' ? 'rgba(59, 130, 246, 0.15)' :
                                 apt.status === 'Completada' ? 'rgba(42, 183, 202, 0.15)' :
                                 apt.status === 'Cancelada' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                               color: 
                                 apt.status === 'Confirmada' ? 'var(--color-success)' :
+                                apt.status === 'En Sala de Espera' ? '#2563eb' :
                                 apt.status === 'Completada' ? 'var(--color-accent)' :
                                 apt.status === 'Cancelada' ? 'var(--color-alert)' : '#d97706',
                               border: '1px solid currentColor'
@@ -1062,6 +1064,7 @@ function Modulo_CitasMedicas() {
                           >
                             <option value="Solicitada">Solicitada</option>
                             <option value="Confirmada">Confirmada</option>
+                            <option value="En Sala de Espera">En Sala de Espera</option>
                             <option value="Pendiente">Pendiente</option>
                             <option value="Completada">Completada</option>
                             <option value="Cancelada">Cancelada</option>

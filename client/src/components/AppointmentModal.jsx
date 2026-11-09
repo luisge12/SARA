@@ -347,6 +347,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                     style={{ height: '42px', padding: '0.5rem 1rem', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
                   >
                     <option value="Confirmada">Confirmada</option>
+                    <option value="En Sala de Espera">En Sala de Espera</option>
                     <option value="Pendiente">Pendiente</option>
                     <option value="Completada">Completada</option>
                     <option value="Cancelada">Cancelada</option>
