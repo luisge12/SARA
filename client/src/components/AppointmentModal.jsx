@@ -115,6 +115,12 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
       return;
     }
 
+    const parsedDate = new Date(appointmentDate);
+    if (isNaN(parsedDate.getTime())) {
+      setErrorMsg('La fecha y hora seleccionada no es válida.');
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -128,7 +134,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
         patientId: parseInt(patientId, 10),
         doctorId: doctorId ? parseInt(doctorId, 10) : null,
         sedeAtencion,
-        appointmentDate: new Date(appointmentDate).toISOString(),
+        appointmentDate: parsedDate.toISOString(),
         duration: parseInt(duration, 10),
         reason,
         status,

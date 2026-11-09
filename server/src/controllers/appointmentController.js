@@ -53,9 +53,9 @@ module.exports = {
       }
 
       // Validar existencia del paciente
-      const patient = await User.findOne({ where: { id: patientId, role: 'Paciente' } });
+      const patient = await User.findByPk(patientId);
       if (!patient) {
-        return res.status(404).json({ error: 'El paciente seleccionado no existe.' });
+        return res.status(404).json({ error: 'El paciente seleccionado no existe en el sistema.' });
       }
 
       const tot = parseFloat(totalAmount || 0);
@@ -106,7 +106,7 @@ module.exports = {
       });
     } catch (error) {
       console.error('Error al crear cita:', error);
-      return res.status(500).json({ error: 'Error al agendar la cita médica' });
+      return res.status(500).json({ error: error.message || 'Error al agendar la cita médica' });
     }
   },
 

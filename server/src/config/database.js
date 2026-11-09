@@ -202,6 +202,58 @@ const initDatabase = async () => {
       if (!existingConsCols.includes('custom_template_data')) {
         await sequelize.query(`ALTER TABLE consultations ADD COLUMN IF NOT EXISTS custom_template_data JSONB;`);
       }
+
+      // Asegurar tabla y columnas en appointments
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS appointments (
+          id SERIAL PRIMARY KEY,
+          patient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          doctor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          sede_atencion VARCHAR(100) DEFAULT 'CENTRAL',
+          appointment_date TIMESTAMP WITH TIME ZONE,
+          priority VARCHAR(50) DEFAULT 'Normal',
+          duration INTEGER DEFAULT 30,
+          reason TEXT,
+          status VARCHAR(50) DEFAULT 'Confirmada',
+          notes TEXT,
+          total_amount DECIMAL(10, 2) DEFAULT 0.00,
+          paid_amount DECIMAL(10, 2) DEFAULT 0.00,
+          pending_amount DECIMAL(10, 2) DEFAULT 0.00,
+          payment_method VARCHAR(50) DEFAULT 'Efectivo (USD)',
+          payment_status VARCHAR(50) DEFAULT 'Pendiente',
+          created_by_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      const [aptCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'appointments';
+      `);
+      const existingAptCols = (aptCols || []).map(c => c.column_name.toLowerCase());
+      const neededAptCols = [
+        { name: 'patient_id', type: 'INTEGER' },
+        { name: 'doctor_id', type: 'INTEGER' },
+        { name: 'sede_atencion', type: "VARCHAR(100) DEFAULT 'CENTRAL'" },
+        { name: 'appointment_date', type: 'TIMESTAMP WITH TIME ZONE' },
+        { name: 'priority', type: "VARCHAR(50) DEFAULT 'Normal'" },
+        { name: 'duration', type: 'INTEGER DEFAULT 30' },
+        { name: 'reason', type: 'TEXT' },
+        { name: 'status', type: "VARCHAR(50) DEFAULT 'Confirmada'" },
+        { name: 'notes', type: 'TEXT' },
+        { name: 'total_amount', type: 'DECIMAL(10, 2) DEFAULT 0.00' },
+        { name: 'paid_amount', type: 'DECIMAL(10, 2) DEFAULT 0.00' },
+        { name: 'pending_amount', type: 'DECIMAL(10, 2) DEFAULT 0.00' },
+        { name: 'payment_method', type: "VARCHAR(50) DEFAULT 'Efectivo (USD)'" },
+        { name: 'payment_status', type: "VARCHAR(50) DEFAULT 'Pendiente'" },
+        { name: 'created_by_id', type: 'INTEGER' }
+      ];
+
+      for (const col of neededAptCols) {
+        if (!existingAptCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
     } catch (err) {
       console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }
