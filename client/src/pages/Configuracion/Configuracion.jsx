@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Modulo2_GestionAdministrativa from '../Modulo2_GestionAdministrativa/Modulo2_GestionAdministrativa';
 import LicenseManager from '../../components/License/LicenseManager';
-import { Users, Settings, Building2, CheckCircle, Upload, Trash2, Eye, ShieldCheck } from 'lucide-react';
+import { Users, Settings, Building2, CheckCircle, Upload, Trash2, Eye, ShieldCheck, MapPin, Plus } from 'lucide-react';
 import { getClinicSettings, saveClinicSettings } from '../../services/clinicSettings';
 import './Configuracion.css';
 
@@ -14,6 +14,7 @@ export default function Configuracion() {
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [settings, setSettings] = useState(getClinicSettings());
+  const [newSedeInput, setNewSedeInput] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
@@ -23,6 +24,28 @@ export default function Configuracion() {
   const handleInputChange = (field, value) => {
     setSettings(prev => ({ ...prev, [field]: value }));
     setSavedSuccess(false);
+  };
+
+  const handleAddSede = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newSedeInput.trim();
+    if (!trimmed) return;
+    const currentSedes = Array.isArray(settings.sedes) ? settings.sedes : ['CENTRAL'];
+    if (currentSedes.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
+      alert('Esta sede ya existe en la lista.');
+      return;
+    }
+    handleInputChange('sedes', [...currentSedes, trimmed]);
+    setNewSedeInput('');
+  };
+
+  const handleRemoveSede = (sedeToRemove) => {
+    const currentSedes = Array.isArray(settings.sedes) ? settings.sedes : ['CENTRAL'];
+    if (currentSedes.length <= 1) {
+      alert('Debe existir al menos una sede de atención configurada.');
+      return;
+    }
+    handleInputChange('sedes', currentSedes.filter(s => s !== sedeToRemove));
   };
 
   const handleLogoUpload = (e) => {
@@ -229,6 +252,83 @@ export default function Configuracion() {
                       <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#475569' }}>
                         {settings.primaryColor || '#22505d'}
                       </span>
+                    </div>
+                  </div>
+
+                  {/* Gestión de Sedes y Sucursales */}
+                  <div className="setting-group" style={{ gridColumn: '1 / -1', marginTop: '0.5rem', padding: '1.25rem', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.95rem', fontWeight: '700', color: '#1e293b' }}>
+                      <MapPin size={18} color="var(--color-primary)" /> Sedes y Sucursales de Atención
+                    </label>
+                    <p style={{ margin: '0.2rem 0 0.8rem 0', fontSize: '0.82rem', color: '#64748b' }}>
+                      Configure las sedes donde opera la clínica. Estas opciones se mostrarán automáticamente en citas, caja, pacientes y reportes.
+                    </p>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem', minHeight: '36px', alignItems: 'center' }}>
+                      {(Array.isArray(settings.sedes) && settings.sedes.length > 0 ? settings.sedes : ['CENTRAL']).map((sede, idx) => (
+                        <div 
+                          key={idx}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.45rem 0.85rem',
+                            backgroundColor: '#fff',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            fontWeight: '600',
+                            fontSize: '0.88rem',
+                            color: '#1e293b',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                          }}
+                        >
+                          <MapPin size={14} color="#64748b" />
+                          <span>{sede}</span>
+                          {(settings.sedes || []).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSede(sede)}
+                              title={`Eliminar sede ${sede}`}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                color: '#ef4444'
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', maxWidth: '440px' }}>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="Nombre de nueva sede (ej. Sede Norte)"
+                        value={newSedeInput}
+                        onChange={(e) => setNewSedeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddSede();
+                          }
+                        }}
+                        style={{ height: '38px', padding: '0.4rem 0.8rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSede}
+                        className="btn-secondary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap', height: '38px', padding: '0.4rem 0.9rem' }}
+                      >
+                        <Plus size={16} /> Agregar Sede
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { AppointmentModal } from '../../components/AppointmentModal';
+import { getClinicSedes } from '../../services/clinicSettings';
 import api from '../../services/api';
 import { 
   Calendar, CalendarPlus, CheckCircle, Clock, XCircle, Filter, Search, 
@@ -20,6 +21,7 @@ const getLocalDateString = (d = new Date()) => {
 
 function Modulo_CitasMedicas() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const clinicSedes = getClinicSedes();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -482,10 +484,9 @@ function Modulo_CitasMedicas() {
                   style={{ height: '42px', padding: '0.4rem 0.8rem', width: '100%' }}
                 >
                   <option value="Todas">Todas las Sedes</option>
-                  <option value="CENTRAL">CENTRAL</option>
-                  <option value="GMSP">GMSP</option>
-                  <option value="CCMLA">CCMLA</option>
-                  <option value="PLA">PLA</option>
+                  {clinicSedes.map(sede => (
+                    <option key={sede} value={sede}>{sede}</option>
+                  ))}
                 </select>
               </div>
 

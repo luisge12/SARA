@@ -9,6 +9,7 @@ import {
   Clock, X, CalendarPlus, FileSpreadsheet, ShieldAlert
 } from 'lucide-react';
 import { AppointmentModal } from '../components/AppointmentModal';
+import { getClinicSedes } from '../services/clinicSettings';
 import api from '../services/api';
 import './Dashboard.css';
 
@@ -20,6 +21,7 @@ export function Dashboard() {
   // Roles autorizados para ver datos de pacientes: Master, Administrador, Médico, Recepcionista
   const userRole = (user.role || '').toUpperCase();
   const canViewPatients = ['MASTER', 'ADMINISTRADOR', 'MEDICO', 'MÉDICO', 'RECEPCIONISTA'].includes(userRole);
+  const clinicSedes = getClinicSedes();
 
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -419,10 +421,9 @@ export function Dashboard() {
                   style={{ height: '40px', padding: '0.4rem 0.8rem' }}
                 >
                   <option value="Todas">Todas las Sedes</option>
-                  <option value="CENTRAL">CENTRAL</option>
-                  <option value="GMSP">GMSP</option>
-                  <option value="CCMLA">CCMLA</option>
-                  <option value="PLA">PLA</option>
+                  {clinicSedes.map(sede => (
+                    <option key={sede} value={sede}>{sede}</option>
+                  ))}
                 </select>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { Input } from './Input';
 import { Button } from './Button';
 import api from '../services/api';
 import { Calendar, X, CheckCircle, Clock, Trash2 } from 'lucide-react';
+import { getClinicSedes } from '../services/clinicSettings';
 
 export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, appointmentToEdit = null, initialDate = null, initialDoctorName = null }) {
   const [patients, setPatients] = useState([]);
@@ -11,9 +12,11 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   // Form State
+  const clinicSedes = getClinicSedes();
   const [patientId, setPatientId] = useState(appointmentToEdit ? (appointmentToEdit.patientId || appointmentToEdit.patient?.id || '') : (initialPatientId || ''));
   const [doctorId, setDoctorId] = useState(appointmentToEdit ? (appointmentToEdit.doctorId || appointmentToEdit.doctor?.id || '') : '');
-  const [sedeAtencion, setSedeAtencion] = useState(appointmentToEdit ? (appointmentToEdit.sedeAtencion || 'CENTRAL') : 'CENTRAL');
+  const [sedeAtencion, setSedeAtencion] = useState(appointmentToEdit ? (appointmentToEdit.sedeAtencion || clinicSedes[0] || 'CENTRAL') : (clinicSedes[0] || 'CENTRAL'));
+  const availableSedes = Array.from(new Set([...clinicSedes, ...(sedeAtencion ? [sedeAtencion] : [])]));
   const [appointmentDate, setAppointmentDate] = useState('');
   const [reason, setReason] = useState(appointmentToEdit ? (appointmentToEdit.reason || '') : '');
   const [duration, setDuration] = useState(appointmentToEdit ? (appointmentToEdit.duration || 30) : 30);
@@ -318,10 +321,9 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                     onChange={(e) => setSedeAtencion(e.target.value)}
                     style={{ height: '42px', padding: '0.5rem 1rem', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
                   >
-                    <option value="CENTRAL">CENTRAL</option>
-                    <option value="GMSP">GMSP</option>
-                    <option value="CCMLA">CCMLA</option>
-                    <option value="PLA">PLA</option>
+                    {availableSedes.map(sede => (
+                      <option key={sede} value={sede}>{sede}</option>
+                    ))}
                   </select>
                 </div>
               </div>

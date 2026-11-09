@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import api from '../../services/api';
 import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer } from 'lucide-react';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
+import { getClinicSedes } from '../../services/clinicSettings';
 
 function Modulo3_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -14,9 +15,11 @@ function Modulo3_GestionAdministrativa() {
   const isRecepcionista = currentUser.role === 'Recepcionista';
 
   // Form states
+  const clinicSedes = getClinicSedes();
   const [patientId, setPatientId] = useState('');
   const [doctorId, setDoctorId] = useState('');
-  const [sedeAtencion, setSedeAtencion] = useState('CENTRAL');
+  const [sedeAtencion, setSedeAtencion] = useState(clinicSedes[0] || 'CENTRAL');
+  const availableSedes = Array.from(new Set([...clinicSedes, ...(sedeAtencion ? [sedeAtencion] : [])]));
   const [serviceType, setServiceType] = useState('Servicios prestados en consultorio');
   const [totalAmountUSD, setTotalAmountUSD] = useState('');
   const [exchangeRate, setExchangeRate] = useState('');
@@ -225,10 +228,9 @@ function Modulo3_GestionAdministrativa() {
                 <div className="input-group">
                   <label className="input-label">Sede</label>
                   <select className="input-field" value={sedeAtencion} onChange={(e) => setSedeAtencion(e.target.value)}>
-                    <option value="CENTRAL">CENTRAL</option>
-                    <option value="GMSP">GMSP</option>
-                    <option value="CCMLA">CCMLA</option>
-                    <option value="PLA">PLA</option>
+                    {availableSedes.map(sede => (
+                      <option key={sede} value={sede}>{sede}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="input-group">

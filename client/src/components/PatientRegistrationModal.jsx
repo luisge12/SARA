@@ -4,13 +4,16 @@ import { Input } from './Input';
 import { Button } from './Button';
 import { PatientCameraCaptureModal } from './PatientCameraCaptureModal';
 import api from '../services/api';
+import { getClinicSedes } from '../services/clinicSettings';
 
 export function PatientRegistrationModal({ onClose, onSuccess, initialData = null }) {
+  const clinicSedes = getClinicSedes();
   const [username, setUsername] = useState(initialData?.username || '');
   const [password, setPassword] = useState('');
   const [name, setName] = useState(initialData?.name || '');
   const [identificationNumber, setIdentificationNumber] = useState(initialData?.identificationNumber || '');
-  const [sedeAtencion, setSedeAtencion] = useState(initialData?.sedeAtencion || 'CENTRAL');
+  const [sedeAtencion, setSedeAtencion] = useState(initialData?.sedeAtencion || clinicSedes[0] || 'CENTRAL');
+  const availableSedes = Array.from(new Set([...clinicSedes, ...(sedeAtencion ? [sedeAtencion] : [])]));
   
   const profile = initialData?.profile || initialData?.patientProfile || {};
   const [gender, setGender] = useState(profile.gender || 'Masculino');
@@ -171,10 +174,9 @@ export function PatientRegistrationModal({ onClose, onSuccess, initialData = nul
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <label style={{ fontSize: '0.875rem', fontWeight: '500' }}>Sede de Atención</label>
               <select value={sedeAtencion} onChange={(e) => setSedeAtencion(e.target.value)} style={{ padding: '0.625rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                <option value="CENTRAL">CENTRAL</option>
-                <option value="GMSP">GMSP</option>
-                <option value="CCMLA">CCMLA</option>
-                <option value="PLA">PLA</option>
+                {availableSedes.map(sede => (
+                  <option key={sede} value={sede}>{sede}</option>
+                ))}
               </select>
             </div>
           </div>

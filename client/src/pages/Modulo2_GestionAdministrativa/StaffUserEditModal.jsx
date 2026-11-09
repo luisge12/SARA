@@ -5,14 +5,17 @@ import { Button } from '../../components/Button';
 import api from '../../services/api';
 import { User, X, Check, Key, Shield, Building2, Stethoscope, Briefcase } from 'lucide-react';
 import { COMMON_SPECIALTIES } from '../../data/clinicalTemplates';
+import { getClinicSedes } from '../../services/clinicSettings';
 
 export function StaffUserEditModal({ user, onClose, onSaveSuccess }) {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isMaster = currentUser.role === 'Master' || currentUser.role === 'SuperMaster';
+  const clinicSedes = getClinicSedes();
 
   const [name, setName] = useState(user.name || '');
   const [role, setRole] = useState(user.role || 'Médico');
-  const [sedeAtencion, setSedeAtencion] = useState(user.sedeAtencion || 'CENTRAL');
+  const [sedeAtencion, setSedeAtencion] = useState(user.sedeAtencion || clinicSedes[0] || 'CENTRAL');
+  const availableSedes = Array.from(new Set([...clinicSedes, ...(sedeAtencion ? [sedeAtencion] : [])]));
   const [identificationNumber, setIdentificationNumber] = useState(user.identificationNumber || '');
   const [email, setEmail] = useState(user.email || '');
   const [phone, setPhone] = useState(user.phone || '');
@@ -204,10 +207,9 @@ export function StaffUserEditModal({ user, onClose, onSaveSuccess }) {
                 onChange={(e) => setSedeAtencion(e.target.value)}
                 style={{ height: '42px', padding: '0.5rem 1rem' }}
               >
-                <option value="CENTRAL">CENTRAL</option>
-                <option value="GMSP">GMSP</option>
-                <option value="CCMLA">CCMLA</option>
-                <option value="PLA">PLA</option>
+                {availableSedes.map(sede => (
+                  <option key={sede} value={sede}>{sede}</option>
+                ))}
               </select>
             </div>
           </div>

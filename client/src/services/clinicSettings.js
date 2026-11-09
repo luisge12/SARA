@@ -7,19 +7,32 @@ export const DEFAULT_CLINIC_SETTINGS = {
   phone: '+58 (0212) 555-0199',
   address: 'Caracas, Venezuela',
   logoUrl: '',
-  primaryColor: '#22505d'
+  primaryColor: '#22505d',
+  sedes: ['CENTRAL']
 };
 
 export const getClinicSettings = () => {
   try {
     const saved = localStorage.getItem('sara_clinic_settings');
     if (saved) {
-      return { ...DEFAULT_CLINIC_SETTINGS, ...JSON.parse(saved) };
+      const parsed = JSON.parse(saved);
+      const sedes = Array.isArray(parsed.sedes) && parsed.sedes.length > 0 
+        ? parsed.sedes 
+        : DEFAULT_CLINIC_SETTINGS.sedes;
+      return { ...DEFAULT_CLINIC_SETTINGS, ...parsed, sedes };
     }
   } catch (e) {
     console.warn('Error al leer configuración de clínica de localStorage:', e);
   }
   return DEFAULT_CLINIC_SETTINGS;
+};
+
+export const getClinicSedes = () => {
+  const settings = getClinicSettings();
+  if (Array.isArray(settings.sedes) && settings.sedes.length > 0) {
+    return settings.sedes;
+  }
+  return ['CENTRAL'];
 };
 
 export const saveClinicSettings = (settings) => {

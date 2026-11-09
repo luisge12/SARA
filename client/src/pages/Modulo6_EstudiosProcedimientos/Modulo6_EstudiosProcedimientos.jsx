@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { hasAccess } from '../../components/ProtectedRoute';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
+import { getClinicSedes } from '../../services/clinicSettings';
 import { CustomFormTemplateManager } from '../../components/CustomFormTemplates/CustomFormTemplateManager';
 import { DynamicFormRenderer } from '../../components/CustomFormTemplates/DynamicFormRenderer';
 
@@ -18,6 +19,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const isAuthorized = hasAccess(user.role, ['MEDICO', 'ADMINISTRADOR', 'MASTER', 'RECEPCIONISTA']);
 
   const isModalMode = typeof isOpen === 'boolean';
+  const clinicSedes = getClinicSedes();
 
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState(propPatientId || '');
@@ -516,10 +518,9 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                     value={formData.sede} 
                     onChange={(e) => setFormData({ ...formData, sede: e.target.value })}
                   >
-                    <option value="CENTRAL">CENTRAL</option>
-                    <option value="GMSP">GMSP</option>
-                    <option value="CCMLA">CCMLA</option>
-                    <option value="PLA">PLA</option>
+                    {Array.from(new Set([...clinicSedes, ...(formData.sede ? [formData.sede] : [])])).map(sede => (
+                      <option key={sede} value={sede}>{sede}</option>
+                    ))}
                   </select>
                 </div>
 

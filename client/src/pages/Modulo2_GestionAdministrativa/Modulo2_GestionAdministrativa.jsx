@@ -10,6 +10,7 @@ import { PatientProfileEditor } from './PatientProfileEditor';
 import { AppointmentModal } from '../../components/AppointmentModal';
 import { AuditLogModal } from '../Modulo4_DatosClinicos/AuditLogModal';
 import { COMMON_SPECIALTIES } from '../../data/clinicalTemplates';
+import { getClinicSedes } from '../../services/clinicSettings';
 
 function Modulo2_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -39,7 +40,9 @@ function Modulo2_GestionAdministrativa() {
   const [identificationNumber, setIdentificationNumber] = useState('');
   const [mppsNumber, setMppsNumber] = useState('');
   const [medicalCollegeNumber, setMedicalCollegeNumber] = useState('');
-  const [sedeAtencion, setSedeAtencion] = useState('CENTRAL');
+  const clinicSedes = getClinicSedes();
+  const [sedeAtencion, setSedeAtencion] = useState(clinicSedes[0] || 'CENTRAL');
+  const availableSedes = Array.from(new Set([...clinicSedes, ...(sedeAtencion ? [sedeAtencion] : [])]));
   const [specialty, setSpecialty] = useState('Coloproctología');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -506,10 +509,9 @@ function Modulo2_GestionAdministrativa() {
                     onChange={(e) => setSedeAtencion(e.target.value)}
                     style={{ height: '39px', padding: '0.5rem 1rem' }}
                   >
-                    <option value="CENTRAL">CENTRAL</option>
-                    <option value="GMSP">GMSP</option>
-                    <option value="CCMLA">CCMLA</option>
-                    <option value="PLA">PLA</option>
+                    {availableSedes.map(sede => (
+                      <option key={sede} value={sede}>{sede}</option>
+                    ))}
                   </select>
                 </div>
               </div>
