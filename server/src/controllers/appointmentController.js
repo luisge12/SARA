@@ -69,9 +69,27 @@ module.exports = {
         else computedPayStatus = 'Pendiente';
       }
 
+      // Validar que el usuario creador exista en la base de datos para no violar la foreign key
+      let validCreatedById = null;
+      if (req.user && req.user.id) {
+        const creator = await User.findByPk(req.user.id);
+        if (creator) {
+          validCreatedById = creator.id;
+        }
+      }
+
+      // Validar que el doctor exista si fue asignado
+      let validDoctorId = null;
+      if (doctorId) {
+        const doc = await User.findByPk(doctorId);
+        if (doc) {
+          validDoctorId = doc.id;
+        }
+      }
+
       const newAppointment = await Appointment.create({
         patientId,
-        doctorId: doctorId || null,
+        doctorId: validDoctorId,
         sedeAtencion: sedeAtencion || patient.sedeAtencion || 'CENTRAL',
         appointmentDate,
         reason: reason || 'Consulta General',
@@ -83,7 +101,7 @@ module.exports = {
         pendingAmount: pending,
         paymentMethod: paymentMethod || 'Efectivo (USD)',
         paymentStatus: computedPayStatus,
-        createdById: req.user ? req.user.id : null
+        createdById: validCreatedById
       });
 
       // Actualizar la fecha de próxima cita en el PatientProfile si aplica
@@ -124,8 +142,18 @@ module.exports = {
         return res.status(404).json({ error: 'Cita no encontrada.' });
       }
 
-      if (patientId) appointment.patientId = patientId;
-      if (doctorId !== undefined) appointment.doctorId = doctorId;
+      if (patientId) {
+        const patientExists = await User.findByPk(patientId);
+        if (patientExists) appointment.patientId = patientId;
+      }
+      if (doctorId !== undefined) {
+        if (doctorId) {
+          const docExists = await User.findByPk(doctorId);
+          appointment.doctorId = docExists ? docExists.id : null;
+        } else {
+          appointment.doctorId = null;
+        }
+      }
       if (sedeAtencion) appointment.sedeAtencion = sedeAtencion;
       if (appointmentDate) appointment.appointmentDate = appointmentDate;
       if (reason) appointment.reason = reason;
