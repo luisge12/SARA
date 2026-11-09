@@ -21,6 +21,14 @@ export default function Configuracion() {
     setSettings(getClinicSettings());
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
+
   const handleInputChange = (field, value) => {
     setSettings(prev => ({ ...prev, [field]: value }));
     setSavedSuccess(false);

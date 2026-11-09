@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { hasAccess } from './ProtectedRoute';
 import api from '../services/api';
-import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, Calendar, FileText, Users, Download } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Wallet, Activity, BarChart3, LogOut, ChevronLeft, ChevronRight, Menu, X, Calendar, FileText, Users, Download, Settings } from 'lucide-react';
 import './Sidebar.css';
 
 export function Sidebar() {
@@ -21,7 +21,7 @@ export function Sidebar() {
     { name: 'Estudios y Procedimientos', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Estadísticas', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
-    { name: 'Licencia y Configuración', path: '/configuracion?tab=licencia', icon: ShieldCheck, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
+    { name: 'Configuración de Clínica', path: '/configuracion?tab=clinica', icon: Settings, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
     { name: 'Descargas & Web SARA', path: '/descargas', icon: Download, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
   ];
 
