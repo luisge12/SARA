@@ -899,7 +899,18 @@ function Modulo_CitasMedicas() {
 
         {viewMode === 'list' ? (
           /* Listado Principal de Citas Médicas */
-          <Card title={`Listado de Citas Médicas (${filteredAppointments.length})`} action={<Calendar size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
+          <Card 
+            title={`Listado de Citas Médicas (${filteredAppointments.length})`} 
+            action={
+              <Button 
+                onClick={() => { setSelectedPatientId(null); setAppointmentToEdit(null); setNewAppointmentPrefill({ date: null, doctorName: null }); setShowModal(true); }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', padding: '0.45rem 1rem', fontSize: '0.88rem', fontWeight: '600' }}
+              >
+                <CalendarPlus size={16} /> Nueva Cita
+              </Button>
+            } 
+            className="glass-panel"
+          >
             {loading ? (
               <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
                 Cargando agenda de citas médicas...
@@ -908,9 +919,14 @@ function Modulo_CitasMedicas() {
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
                 <Calendar size={42} style={{ marginBottom: '0.75rem', opacity: 0.5 }} />
                 <p style={{ fontSize: '1rem', fontWeight: '500' }}>No se encontraron citas médicas con los filtros seleccionados.</p>
-                <Button onClick={() => { setSelectedSede('Todas'); setSelectedStatus('Todas'); setSearchTerm(''); setActiveSearchTerm(''); }} variant="outline" style={{ marginTop: '1rem' }}>
-                  Limpiar Filtros
-                </Button>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  <Button onClick={() => { setSelectedSede('Todas'); setSelectedStatus('Todas'); setSearchTerm(''); setActiveSearchTerm(''); }} variant="outline">
+                    Limpiar Filtros
+                  </Button>
+                  <Button onClick={() => { setSelectedPatientId(null); setAppointmentToEdit(null); setNewAppointmentPrefill({ date: null, doctorName: null }); setShowModal(true); }}>
+                    <CalendarPlus size={16} style={{ marginRight: '0.4rem' }} /> Agendar Cita
+                  </Button>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
