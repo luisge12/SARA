@@ -65,13 +65,22 @@ module.exports = {
         return res.status(400).json({ error: 'El usuario y la contraseña son requeridos.' });
       }
 
+      const cleanUsername = username.trim();
       let user;
       try {
-        user = await User.findOne({ where: { username } });
+        user = await User.findOne({
+          where: User.sequelize.where(
+            User.sequelize.fn('LOWER', User.sequelize.col('username')),
+            cleanUsername.toLowerCase()
+          )
+        });
+        if (!user) {
+          user = await User.findOne({ where: { username: cleanUsername } });
+        }
       } catch (dbErr) {
-        // Si la base de datos estaba en reposo (Neon serverless auto-suspend), reintentar una vez tras reconectar
+        // Reintentar si hubo desconexión puntual
         console.warn('Aviso: reconectando consulta tras suspensión de base de datos...', dbErr.message);
-        user = await User.findOne({ where: { username } });
+        user = await User.findOne({ where: { username: cleanUsername } });
       }
 
       if (!user) {
