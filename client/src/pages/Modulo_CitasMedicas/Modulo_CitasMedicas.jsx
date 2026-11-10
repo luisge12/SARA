@@ -1288,21 +1288,13 @@ function Modulo_CitasMedicas() {
               // Categorías de roles únicas para el filtro rápido
               const availableRoleCategories = ['Todos', ...Array.from(new Set(candidateMetadata.map(c => c.role))).filter(Boolean)];
 
-              // Determinar columnas efectivas visibles
+              // Determinar columnas efectivas visibles: Mostrar siempre todos los médicos disponibles
               let effectiveDoctors = [];
               if (selectedDoctorNames && Array.isArray(selectedDoctorNames) && selectedDoctorNames.length > 0) {
                 effectiveDoctors = selectedDoctorNames.filter(name => allCandidateNames.includes(name));
-                if (effectiveDoctors.length === 0) {
-                  effectiveDoctors = allCandidateNames.slice(0, 4);
-                }
-              } else {
-                // Modo inteligente automático
-                const withActivity = candidateMetadata.filter(c => c.hasActivityToday).map(c => c.name);
-                if (withActivity.length > 0) {
-                  effectiveDoctors = withActivity;
-                } else {
-                  effectiveDoctors = allCandidateNames.slice(0, 4);
-                }
+              }
+              if (effectiveDoctors.length === 0) {
+                effectiveDoctors = allCandidateNames;
               }
               if (effectiveDoctors.length === 0) {
                 effectiveDoctors = ['General'];
