@@ -47,7 +47,8 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
         const allUsers = res.data;
 
         const patientList = allUsers.filter(u => u.role === 'Paciente');
-        const doctorList = allUsers.filter(u => u.role === 'Médico' || u.role === 'Master' || u.role === 'Administrador');
+        const medicos = allUsers.filter(u => u.role === 'Médico' || u.role === 'Medico');
+        const doctorList = medicos.length > 0 ? medicos : allUsers.filter(u => u.role === 'Master' || u.role === 'Administrador');
 
         setPatients(patientList);
         setDoctors(doctorList);

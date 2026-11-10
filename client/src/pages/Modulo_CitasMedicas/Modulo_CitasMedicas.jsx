@@ -122,7 +122,10 @@ function Modulo_CitasMedicas() {
     const fetchUsers = async () => {
       try {
         const res = await api.get('/api/users');
-        const docs = res.data.filter(u => u.role !== 'Paciente');
+        let docs = res.data.filter(u => u.role === 'Médico' || u.role === 'Medico');
+        if (docs.length === 0) {
+          docs = res.data.filter(u => u.role === 'Master');
+        }
         setAvailableDoctors(docs);
       } catch (err) {
         console.warn('No se pudieron obtener médicos para la lista de bloqueo:', err);

@@ -181,7 +181,8 @@ function Modulo3_GestionAdministrativa() {
 
       const allUsers = usersRes.data;
       setPatients(allUsers.filter(u => u.role === 'Paciente'));
-      setDoctors(allUsers.filter(u => u.role === 'Médico' || u.role === 'Master'));
+      const medicos = allUsers.filter(u => u.role === 'Médico' || u.role === 'Medico');
+      setDoctors(medicos.length > 0 ? medicos : allUsers.filter(u => u.role === 'Master'));
       setTransactions(transRes.data);
       setSummary(summaryRes.data);
       
