@@ -6,13 +6,15 @@ import { Button } from '../../components/Button';
 import api from '../../services/api';
 import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer } from 'lucide-react';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
-import { getClinicSedes } from '../../services/clinicSettings';
+import { getClinicSettings, getClinicSedes } from '../../services/clinicSettings';
 
 function Modulo3_GestionAdministrativa() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const hasAccess = ['Master', 'Administrador', 'Recepcionista'].includes(currentUser.role);
   const isMaster = currentUser.role === 'Master';
   const isRecepcionista = currentUser.role === 'Recepcionista';
+  const clinicSettings = getClinicSettings();
+  const clinicName = clinicSettings.name || 'Clínica';
 
   // Form states
   const clinicSedes = getClinicSedes();
@@ -306,7 +308,7 @@ function Modulo3_GestionAdministrativa() {
               <p style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--color-primary)' }}>Distribución y Costos</p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>
-                <Input label="% Retención UNIMECO" type="number" value={unimecoPercentage} onChange={(e) => setUnimecoPercentage(e.target.value)} disabled={!isMaster} />
+                <Input label={`% Retención ${clinicName}`} type="number" value={unimecoPercentage} onChange={(e) => setUnimecoPercentage(e.target.value)} disabled={!isMaster} />
                 <Input label="% Honorarios Médico" type="number" value={doctorPercentage} onChange={(e) => setDoctorPercentage(e.target.value)} disabled={!isMaster} />
               </div>
 
@@ -317,7 +319,7 @@ function Modulo3_GestionAdministrativa() {
 
               <div style={{ padding: '1rem', background: 'var(--color-secondary-bg)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                  <span>Bruto Clínica (UNIMECO):</span>
+                  <span>Bruto Clínica ({clinicName}):</span>
                   <strong>${unimecoAmount.toFixed(2)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
@@ -346,40 +348,98 @@ function Modulo3_GestionAdministrativa() {
               <div style={{ overflowX: 'auto', maxHeight: '600px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                      <th style={{ padding: '0.5rem' }}>ID</th>
-                      <th style={{ padding: '0.5rem' }}>Fecha</th>
-                      <th style={{ padding: '0.5rem' }}>Paciente</th>
-                      <th style={{ padding: '0.5rem' }}>Médico</th>
-                      <th style={{ padding: '0.5rem' }}>Total USD</th>
-                      <th style={{ padding: '0.5rem' }}>UNIMECO</th>
-                      <th style={{ padding: '0.5rem' }}>Neto</th>
-                      <th style={{ padding: '0.5rem', textAlign: 'center' }}>Recibo</th>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>ID</th>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Fecha</th>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Paciente</th>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Médico Tratante</th>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Total Cobrado</th>
+                      <th style={{ padding: '0.6rem 0.5rem', color: '#2563eb' }}>Honorarios Médico</th>
+                      <th style={{ padding: '0.6rem 0.5rem', color: '#059669' }}>Neto {clinicName}</th>
+                      <th style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}>Comprobante</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {transactions.map(t => (
-                      <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>#{t.id}</td>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>{t.patient?.name}</td>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>{t.doctor?.name}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', fontWeight: 'bold' }}>${t.totalAmountUSD}</td>
-                        <td style={{ padding: '0.75rem 0.5rem' }}>${t.unimecoAmount}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', color: t.netAmount > 0 ? 'var(--color-success)' : 'inherit' }}>${t.netAmount}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setSelectedTransactionForPrint(t)}
-                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                            title="Imprimir Comprobante Oficial"
-                          >
-                            <Printer size={13} /> Recibo
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                    {transactions.map(t => {
+                      const totalUSD = parseFloat(t.totalAmountUSD) || 0;
+                      const docAmt = parseFloat(t.doctorAmount) || 0;
+                      const netAmt = parseFloat(t.netAmount) || 0;
+                      const costs = (parseFloat(t.operativeCosts) || 0) + (parseFloat(t.incentives) || 0);
+                      const docPerc = t.doctorPercentage || 70;
+                      const clinPerc = t.unimecoPercentage || 30;
+
+                      return (
+                        <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>#{t.id}</td>
+                          <td style={{ padding: '0.75rem 0.5rem', whiteSpace: 'nowrap' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
+                          <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{t.patient?.name || t.patient?.username || 'Paciente'}</td>
+                          <td style={{ padding: '0.75rem 0.5rem' }}>Dr(a). {t.doctor?.name || t.doctor?.username || 'Médico'}</td>
+                          
+                          {/* Total Cobrado */}
+                          <td style={{ padding: '0.75rem 0.5rem' }}>
+                            <div style={{ fontWeight: '700', color: 'var(--color-text-main)', fontSize: '0.92rem' }}>${totalUSD.toFixed(2)}</div>
+                            {t.totalAmountLocal && (
+                              <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                                Bs. {parseFloat(t.totalAmountLocal).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Cuánto le queda al Médico */}
+                          <td style={{ padding: '0.75rem 0.5rem' }}>
+                            <div style={{ 
+                              display: 'inline-flex', 
+                              flexDirection: 'column',
+                              backgroundColor: 'rgba(37, 99, 235, 0.08)', 
+                              border: '1px solid rgba(37, 99, 235, 0.25)', 
+                              borderRadius: '6px', 
+                              padding: '0.3rem 0.55rem',
+                              minWidth: '110px'
+                            }}>
+                              <span style={{ fontWeight: '800', color: '#1d4ed8', fontSize: '0.92rem' }}>
+                                ${docAmt.toFixed(2)}
+                              </span>
+                              <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: '500' }}>
+                                Al Médico ({docPerc}%)
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Cuánto le queda a la Clínica */}
+                          <td style={{ padding: '0.75rem 0.5rem' }}>
+                            <div style={{ 
+                              display: 'inline-flex', 
+                              flexDirection: 'column',
+                              backgroundColor: netAmt >= 0 ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)', 
+                              border: `1px solid ${netAmt >= 0 ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`, 
+                              borderRadius: '6px', 
+                              padding: '0.3rem 0.55rem',
+                              minWidth: '110px'
+                            }}>
+                              <span style={{ fontWeight: '800', color: netAmt >= 0 ? '#047857' : '#b91c1c', fontSize: '0.92rem' }}>
+                                ${netAmt.toFixed(2)}
+                              </span>
+                              <span style={{ fontSize: '0.7rem', color: netAmt >= 0 ? '#059669' : '#dc2626', fontWeight: '500' }}>
+                                A la Clínica ({clinPerc}% {costs > 0 ? `- $${costs.toFixed(2)}` : ''})
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Comprobante / Recibo */}
+                          <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setSelectedTransactionForPrint(t)}
+                              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                              title="Imprimir Comprobante Oficial"
+                            >
+                              <Printer size={13} /> Recibo
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -403,7 +463,7 @@ function Modulo3_GestionAdministrativa() {
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-alert)' }}>${summary.totalCostsUSD.toFixed(2)}</div>
             </Card>
             <Card className="glass-panel" style={{ padding: '1.25rem' }}>
-              <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>Utilidad Neta (UNIMECO)</div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>Utilidad Neta ({clinicName})</div>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-success)' }}>${summary.netUnimecoUSD.toFixed(2)}</div>
             </Card>
           </div>
