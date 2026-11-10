@@ -37,6 +37,13 @@ function Modulo3_GestionAdministrativa() {
   const [operativeCosts, setOperativeCosts] = useState('0');
   const [incentives, setIncentives] = useState('0');
 
+  const formatDoctorName = (name) => {
+    if (!name) return 'Médico';
+    const clean = String(name).trim();
+    if (/^(dr\.|dra\.|dr|dra)\b/i.test(clean)) return clean;
+    return `Dr(a). ${clean}`;
+  };
+
   // Helper seguro para parsear números con coma o punto
   const parseNum = (val, def = 0) => {
     if (val === undefined || val === null || val === '') return def;
@@ -686,7 +693,7 @@ function Modulo3_GestionAdministrativa() {
                 >
                   <option value="Todos">Todos los Médicos ({doctors.length})</option>
                   {doctors.map(d => (
-                    <option key={d.id} value={d.id}>Dr(a). {d.name} ({d.username})</option>
+                    <option key={d.id} value={d.id}>{formatDoctorName(d.name)} ({d.username})</option>
                   ))}
                 </select>
               </div>
@@ -827,7 +834,7 @@ function Modulo3_GestionAdministrativa() {
                     {doctorSummaries.map(doc => (
                       <tr key={doc.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                         <td style={{ padding: '0.75rem 0.5rem', fontWeight: '700', color: 'var(--color-text-main)' }}>
-                          Dr(a). {doc.name}
+                          {formatDoctorName(doc.name)}
                         </td>
                         <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
                           <span style={{ backgroundColor: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: '700', color: '#475569' }}>
@@ -883,7 +890,7 @@ function Modulo3_GestionAdministrativa() {
                           <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>#{t.id}</td>
                           <td style={{ padding: '0.75rem 0.5rem', whiteSpace: 'nowrap' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
                           <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{t.patient?.name || t.patient?.username || 'Paciente'}</td>
-                          <td style={{ padding: '0.75rem 0.5rem' }}>Dr(a). {doctorName}</td>
+                          <td style={{ padding: '0.75rem 0.5rem' }}>{formatDoctorName(doctorName)}</td>
                           
                           {/* Total Cobrado */}
                           <td style={{ padding: '0.75rem 0.5rem' }}>
