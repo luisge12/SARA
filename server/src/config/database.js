@@ -376,48 +376,34 @@ const initDatabase = async () => {
       console.log('Usuario Master de Clínica (UNIMECO) creado exitosamente.');
     }
 
-    // Semillar usuario Super Master independiente con clave 1234
-    const superMasterExists = await User.findOne({ where: { username: 'supermaster' } });
-    if (!superMasterExists) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('1234', salt);
+    // Eliminar el usuario supermaster anterior si existe
+    await User.destroy({ where: { username: 'supermaster' } }).catch(() => {});
+
+    // Semillar y asegurar a luisge como el único SuperMaster con clave 1234
+    const luisgeExists = await User.findOne({ where: { username: 'luisge' } });
+    const salt1234 = await bcrypt.genSalt(10);
+    const passHash1234 = await bcrypt.hash('1234', salt1234);
+
+    if (!luisgeExists) {
       await User.create({
-        username: 'supermaster',
-        passwordHash: passwordHash,
+        username: 'luisge',
+        passwordHash: passHash1234,
         role: 'SuperMaster',
-        name: 'Super Master SARA',
+        name: 'Luis G. (Super Master SARA)',
         sedeAtencion: 'CENTRAL',
         clinicId: null
       });
-      console.log('Usuario Super Master (supermaster) creado exitosamente.');
-    }
-
-    // Semillar o asegurar paciente luisge con clave 1234
-    const luisgeExists = await User.findOne({ where: { username: 'luisge' } });
-    if (!luisgeExists) {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('1234', salt);
-      const newPatient = await User.create({
-        username: 'luisge',
-        passwordHash: passwordHash,
-        role: 'Paciente',
-        name: 'Luis González',
-        sedeAtencion: 'CENTRAL',
-        clinicId: 1
-      });
-      await PatientProfile.findOrCreate({
-        where: { userId: newPatient.id },
-        defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
-      });
-      console.log('Paciente (luisge) creado exitosamente.');
+      console.log('Usuario Super Master (luisge) creado exitosamente.');
     } else {
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash('1234', salt);
-      await luisgeExists.update({ passwordHash, role: 'Paciente', name: 'Luis González', clinicId: 1 });
-      await PatientProfile.findOrCreate({
-        where: { userId: luisgeExists.id },
-        defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
+      await luisgeExists.update({
+        passwordHash: passHash1234,
+        role: 'SuperMaster',
+        name: 'Luis G. (Super Master SARA)',
+        clinicId: null
       });
+      // Eliminar perfil de paciente si existía para luisge
+      await PatientProfile.destroy({ where: { userId: luisgeExists.id } }).catch(() => {});
+      console.log('Usuario luisge configurado como Super Master.');
     }
 
     // Semillar y asegurar usuario "master" con clave "1234"
