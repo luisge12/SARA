@@ -365,15 +365,16 @@ function Modulo3_GestionAdministrativa() {
                       const docAmt = parseFloat(t.doctorAmount) || 0;
                       const netAmt = parseFloat(t.netAmount) || 0;
                       const costs = (parseFloat(t.operativeCosts) || 0) + (parseFloat(t.incentives) || 0);
-                      const docPerc = t.doctorPercentage || 70;
-                      const clinPerc = t.unimecoPercentage || 30;
+                      const docPerc = Number(parseFloat(t.doctorPercentage || 70).toFixed(2));
+                      const clinPerc = Number(parseFloat(t.unimecoPercentage || 30).toFixed(2));
+                      const doctorName = t.doctor?.name || t.doctor?.username || 'Médico';
 
                       return (
                         <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                           <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>#{t.id}</td>
                           <td style={{ padding: '0.75rem 0.5rem', whiteSpace: 'nowrap' }}>{new Date(t.createdAt).toLocaleDateString()}</td>
                           <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600', color: 'var(--color-text-main)' }}>{t.patient?.name || t.patient?.username || 'Paciente'}</td>
-                          <td style={{ padding: '0.75rem 0.5rem' }}>Dr(a). {t.doctor?.name || t.doctor?.username || 'Médico'}</td>
+                          <td style={{ padding: '0.75rem 0.5rem' }}>Dr(a). {doctorName}</td>
                           
                           {/* Total Cobrado */}
                           <td style={{ padding: '0.75rem 0.5rem' }}>
@@ -399,8 +400,8 @@ function Modulo3_GestionAdministrativa() {
                               <span style={{ fontWeight: '800', color: '#1d4ed8', fontSize: '0.92rem' }}>
                                 ${docAmt.toFixed(2)}
                               </span>
-                              <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: '500' }}>
-                                Al Médico ({docPerc}%)
+                              <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: '600' }}>
+                                A {doctorName} ({docPerc}%)
                               </span>
                             </div>
                           </td>
@@ -419,8 +420,8 @@ function Modulo3_GestionAdministrativa() {
                               <span style={{ fontWeight: '800', color: netAmt >= 0 ? '#047857' : '#b91c1c', fontSize: '0.92rem' }}>
                                 ${netAmt.toFixed(2)}
                               </span>
-                              <span style={{ fontSize: '0.7rem', color: netAmt >= 0 ? '#059669' : '#dc2626', fontWeight: '500' }}>
-                                A la Clínica ({clinPerc}% {costs > 0 ? `- $${costs.toFixed(2)}` : ''})
+                              <span style={{ fontSize: '0.7rem', color: netAmt >= 0 ? '#059669' : '#dc2626', fontWeight: '600' }}>
+                                A {clinicName} ({clinPerc}%{costs > 0 ? ` - $${costs.toFixed(2)}` : ''})
                               </span>
                             </div>
                           </td>
