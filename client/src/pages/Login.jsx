@@ -104,6 +104,19 @@ export function Login() {
       localStorage.setItem('session_expires_at', expiresAt);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+
+      // Sincronizar el nombre de la clínica activa desde la licencia/backend
+      if (license && license.clinicName) {
+        try {
+          const currentSettings = JSON.parse(localStorage.getItem('sara_clinic_settings') || '{}');
+          localStorage.setItem('sara_clinic_settings', JSON.stringify({
+            ...currentSettings,
+            name: license.clinicName
+          }));
+        } catch (e) {
+          console.warn('Error al sincronizar configuración de clínica en login:', e);
+        }
+      }
       
       // Redirigir según el rol
       const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';

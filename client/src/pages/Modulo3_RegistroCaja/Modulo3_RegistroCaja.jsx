@@ -13,8 +13,15 @@ function Modulo3_GestionAdministrativa() {
   const hasAccess = ['Master', 'Administrador', 'Recepcionista'].includes(currentUser.role);
   const isMaster = currentUser.role === 'Master';
   const isRecepcionista = currentUser.role === 'Recepcionista';
-  const clinicSettings = getClinicSettings();
-  const clinicName = clinicSettings.name || 'Clínica';
+  const [clinicName, setClinicName] = useState(() => getClinicSettings().name || 'Clínica');
+
+  useEffect(() => {
+    const handleSettingsUpdate = () => {
+      setClinicName(getClinicSettings().name || 'Clínica');
+    };
+    window.addEventListener('clinicSettingsChanged', handleSettingsUpdate);
+    return () => window.removeEventListener('clinicSettingsChanged', handleSettingsUpdate);
+  }, []);
 
   // Form states
   const clinicSedes = getClinicSedes();
