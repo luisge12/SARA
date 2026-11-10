@@ -47,6 +47,9 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     }
   };
 
+  // Lista de médicos disponibles para asignar
+  const [doctors, setDoctors] = useState([]);
+
   // Lista de estudios y procedimientos
   const [studies, setStudies] = useState([]);
 
@@ -54,6 +57,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
   const [formData, setFormData] = useState({
     patientId: propPatientId || '',
     studyType: '',
+    doctorId: user.role === 'Médico' ? user.id : '',
     doctorName: user.name || '',
     sede: user.sedeAtencion || 'CENTRAL',
     date: new Date().toISOString().split('T')[0],
@@ -64,10 +68,23 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     status: 'Completado'
   });
 
+  const fetchDoctors = async () => {
+    try {
+      const res = await api.get('/api/users');
+      const allUsers = Array.isArray(res.data) ? res.data : [];
+      const docList = allUsers.filter(u => u.role === 'Médico' || u.role === 'Medico');
+      const finalDocs = docList.length > 0 ? docList : allUsers.filter(u => u.role === 'Master');
+      setDoctors(finalDocs);
+    } catch (e) {
+      console.error('Error al cargar médicos en estudios:', e);
+    }
+  };
+
   useEffect(() => {
     fetchPatients();
     fetchStudies();
     fetchStudyTemplates();
+    fetchDoctors();
   }, []);
 
   const fetchPatients = async () => {
@@ -101,10 +118,12 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     setEditingStudyId(null);
     setSelectedStudyTemplate(null);
     setCustomStudyValues({});
+    const defaultDoc = user.role === 'Médico' ? user : (doctors[0] || null);
     setFormData({
       patientId: propPatientId || '',
       studyType: '',
-      doctorName: user.name || '',
+      doctorId: defaultDoc ? defaultDoc.id : '',
+      doctorName: defaultDoc ? (defaultDoc.name || defaultDoc.username) : '',
       sede: user.sedeAtencion || 'CENTRAL',
       date: new Date().toISOString().split('T')[0],
       findings: '',
@@ -125,10 +144,13 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
       setSelectedStudyTemplate(null);
       setCustomStudyValues({});
     }
+    const docId = study.doctorId || study.doctor?.id || '';
+    const docName = study.doctor?.name || study.doctor?.username || study.metadata?.doctorName || user.name || '';
     setFormData({
       patientId: study.patientId || study.patient?.id || '',
       studyType: study.studyType || '',
-      doctorName: study.doctor?.name || user.name || '',
+      doctorId: docId,
+      doctorName: docName,
       sede: study.sede || user.sedeAtencion || 'CENTRAL',
       date: study.date ? String(study.date).split('T')[0] : new Date().toISOString().split('T')[0],
       findings: study.findings || '',
@@ -165,6 +187,8 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
       setSavingStudy(true);
       const payload = {
         patientId: parseInt(formData.patientId),
+        doctorId: formData.doctorId ? parseInt(formData.doctorId) : null,
+        doctorName: formData.doctorName,
         studyType: formData.studyType,
         sede: formData.sede,
         date: formData.date,
@@ -176,6 +200,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         attachments: [],
         metadata: {
           ...(editingStudyId ? (studies.find(s => s.id === editingStudyId)?.metadata || {}) : {}),
+          doctorName: formData.doctorName,
           customForm: selectedStudyTemplate ? {
             templateId: selectedStudyTemplate.id,
             templateTitle: selectedStudyTemplate.title,
@@ -526,15 +551,33 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
 
                 <div>
                   <label style={{ display: 'block', fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-                    Médico Responsable
+                    Médico Responsable *
                   </label>
-                  <input 
-                    type="text" 
+                  <select 
                     className="input-field" 
-                    value={formData.doctorName} 
-                    onChange={(e) => setFormData({ ...formData, doctorName: e.target.value })} 
-                    placeholder="Nombre del especialista" 
-                  />
+                    value={formData.doctorId || ''} 
+                    onChange={(e) => {
+                      const selId = e.target.value;
+                      const selDoc = doctors.find(d => String(d.id) === String(selId));
+                      setFormData({ 
+                        ...formData, 
+                        doctorId: selId, 
+                        doctorName: selDoc ? (selDoc.name || selDoc.username) : '' 
+                      });
+                    }}
+                    required
+                    style={{ height: '38px', width: '100%', fontWeight: '600' }}
+                  >
+                    <option value="">-- Seleccionar Médico Responsable --</option>
+                    {doctors.map(doc => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.name || doc.username} {doc.specialty ? `(${doc.specialty})` : `(${doc.role})`}
+                      </option>
+                    ))}
+                    {formData.doctorName && !doctors.some(d => String(d.id) === String(formData.doctorId)) && (
+                      <option value={formData.doctorId || ''}>{formData.doctorName}</option>
+                    )}
+                  </select>
                 </div>
               </div>
 

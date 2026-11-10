@@ -59,7 +59,7 @@ module.exports = {
           {
             model: User,
             as: 'doctor',
-            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber']
+            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber', 'specialty']
           }
         ]
       });
@@ -92,7 +92,7 @@ module.exports = {
           {
             model: User,
             as: 'doctor',
-            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber']
+            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber', 'specialty']
           }
         ],
         order: [['date', 'DESC'], ['id', 'DESC']]
@@ -121,7 +121,7 @@ module.exports = {
           {
             model: User,
             as: 'doctor',
-            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber']
+            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber', 'specialty']
           }
         ],
         order: [['date', 'DESC'], ['id', 'DESC']]
@@ -188,7 +188,7 @@ module.exports = {
           {
             model: User,
             as: 'doctor',
-            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber']
+            attributes: ['id', 'name', 'username', 'mppsNumber', 'medicalCollegeNumber', 'specialty']
           }
         ]
       });
