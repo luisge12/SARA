@@ -4,7 +4,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer } from 'lucide-react';
+import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer, Filter, Calendar, User, Users } from 'lucide-react';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 import { getClinicSettings, getClinicSedes } from '../../services/clinicSettings';
 
@@ -58,6 +58,88 @@ function Modulo3_GestionAdministrativa() {
   const [selectedTransactionForPrint, setSelectedTransactionForPrint] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Filtros de Historial (Médico y Período)
+  const [filterDoctorId, setFilterDoctorId] = useState('Todos');
+  const [filterPeriod, setFilterPeriod] = useState('este_mes');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+  const [activeViewTab, setActiveViewTab] = useState('detallado');
+
+  const getPeriodBounds = (period) => {
+    const now = new Date();
+    let start = null;
+    let end = null;
+
+    if (period === 'esta_semana') {
+      const day = now.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1) - day;
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday, 0, 0, 0, 0);
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+    } else if (period === 'semana_anterior') {
+      const day = now.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1) - day - 7;
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday, 0, 0, 0, 0);
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+    } else if (period === 'este_mes') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else if (period === 'mes_anterior') {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    } else if (period === 'personalizado') {
+      if (filterStartDate) start = new Date(filterStartDate + 'T00:00:00');
+      if (filterEndDate) end = new Date(filterEndDate + 'T23:59:59.999');
+    }
+    return { start, end };
+  };
+
+  const filteredTransactions = transactions.filter(t => {
+    if (filterDoctorId !== 'Todos' && String(t.doctorId) !== String(filterDoctorId)) {
+      return false;
+    }
+    if (filterPeriod !== 'todos') {
+      const { start, end } = getPeriodBounds(filterPeriod);
+      const tDate = new Date(t.createdAt);
+      if (start && tDate < start) return false;
+      if (end && tDate > end) return false;
+    }
+    return true;
+  });
+
+  const filteredTotals = filteredTransactions.reduce((acc, t) => {
+    acc.grossUSD += parseFloat(t.totalAmountUSD) || 0;
+    acc.doctorUSD += parseFloat(t.doctorAmount) || 0;
+    acc.clinicNetUSD += parseFloat(t.netAmount) || 0;
+    acc.costsUSD += (parseFloat(t.operativeCosts) || 0) + (parseFloat(t.incentives) || 0);
+    acc.totalLocal += parseFloat(t.totalAmountLocal) || 0;
+    acc.count += 1;
+    return acc;
+  }, { grossUSD: 0, doctorUSD: 0, clinicNetUSD: 0, costsUSD: 0, totalLocal: 0, count: 0 });
+
+  const doctorSummaries = Object.values(filteredTransactions.reduce((acc, t) => {
+    const docId = t.doctorId || 'unassigned';
+    const docName = t.doctor?.name || t.doctor?.username || 'Médico Sin Asignar';
+    if (!acc[docId]) {
+      acc[docId] = {
+        id: docId,
+        name: docName,
+        count: 0,
+        grossUSD: 0,
+        doctorUSD: 0,
+        clinicNetUSD: 0
+      };
+    }
+    acc[docId].count += 1;
+    acc[docId].grossUSD += parseFloat(t.totalAmountUSD) || 0;
+    acc[docId].doctorUSD += parseFloat(t.doctorAmount) || 0;
+    acc[docId].clinicNetUSD += parseFloat(t.netAmount) || 0;
+    return acc;
+  }, {}));
 
   const fetchBCVRate = async (force = false) => {
     try {
@@ -178,16 +260,16 @@ function Modulo3_GestionAdministrativa() {
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "ID,Fecha,Sede,Paciente,Medico,Servicio,Total USD,Tasa,Total Local,UNIMECO USD,Medico USD,Costos USD,Neto UNIMECO USD\n";
     
-    transactions.forEach(t => {
+    filteredTransactions.forEach(t => {
       const date = new Date(t.createdAt).toLocaleDateString();
-      const row = `${t.id},${date},${t.sedeAtencion},${t.patient?.name},${t.doctor?.name},${t.serviceType},${t.totalAmountUSD},${t.exchangeRate},${t.totalAmountLocal},${t.unimecoAmount},${t.doctorAmount},${t.operativeCosts},${t.netAmount}`;
+      const row = `${t.id},${date},${t.sedeAtencion},${t.patient?.name || t.patient?.username || ''},${t.doctor?.name || t.doctor?.username || ''},${t.serviceType},${t.totalAmountUSD},${t.exchangeRate},${t.totalAmountLocal},${t.unimecoAmount},${t.doctorAmount},${t.operativeCosts},${t.netAmount}`;
       csvContent += row + "\n";
     });
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "reporte_flujo_caja.csv");
+    link.setAttribute("download", `reporte_caja_${filterPeriod}_${filterDoctorId !== 'Todos' ? 'medico_' + filterDoctorId : 'todos'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -339,12 +421,197 @@ function Modulo3_GestionAdministrativa() {
           </Card>
 
           {/* PANEL DE REPORTES DE CAJA */}
-          <Card title="Historial de Transacciones" action={<FileText size={20} style={{ color: 'var(--color-primary)' }} />} className="glass-panel">
+          <Card 
+            title="Historial y Liquidación de Caja" 
+            action={
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Button variant="outline" size="sm" onClick={handleExportCSV} style={{ display: 'inline-flex', gap: '0.35rem', alignItems: 'center', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+                  <Download size={14} /> Exportar CSV
+                </Button>
+              </div>
+            } 
+            className="glass-panel"
+          >
+            {/* Barra de Filtros de Período y Médico */}
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1rem', padding: '0.75rem 1rem', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: '1 1 200px' }}>
+                <User size={16} color="var(--color-primary)" />
+                <select 
+                  className="input-field" 
+                  value={filterDoctorId} 
+                  onChange={(e) => setFilterDoctorId(e.target.value)}
+                  style={{ height: '38px', padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+                >
+                  <option value="Todos">Todos los Médicos ({doctors.length})</option>
+                  {doctors.map(d => (
+                    <option key={d.id} value={d.id}>Dr(a). {d.name} ({d.username})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: '1 1 180px' }}>
+                <Calendar size={16} color="var(--color-primary)" />
+                <select 
+                  className="input-field" 
+                  value={filterPeriod} 
+                  onChange={(e) => setFilterPeriod(e.target.value)}
+                  style={{ height: '38px', padding: '0.35rem 0.75rem', fontSize: '0.85rem' }}
+                >
+                  <option value="este_mes">Este Mes en Curso</option>
+                  <option value="esta_semana">Esta Semana (Lun-Dom)</option>
+                  <option value="semana_anterior">Semana Anterior</option>
+                  <option value="mes_anterior">Mes Anterior</option>
+                  <option value="todos">Todo el Historial</option>
+                  <option value="personalizado">Rango Personalizado...</option>
+                </select>
+              </div>
+
+              {filterPeriod === 'personalizado' && (
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={filterStartDate} 
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    style={{ height: '38px', padding: '0.35rem 0.5rem', fontSize: '0.82rem' }}
+                    title="Fecha Desde"
+                  />
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>a</span>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={filterEndDate} 
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    style={{ height: '38px', padding: '0.35rem 0.5rem', fontSize: '0.82rem' }}
+                    title="Fecha Hasta"
+                  />
+                </div>
+              )}
+
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.4rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveViewTab('detallado')}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    backgroundColor: activeViewTab === 'detallado' ? 'var(--color-primary)' : '#e2e8f0',
+                    color: activeViewTab === 'detallado' ? 'white' : '#475569',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Detalle ({filteredTransactions.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveViewTab('liquidacion')}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    backgroundColor: activeViewTab === 'liquidacion' ? 'var(--color-primary)' : '#e2e8f0',
+                    color: activeViewTab === 'liquidacion' ? 'white' : '#475569',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Resumen por Médico ({doctorSummaries.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Tarjetas de Totales Dinámicos del Filtro */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ padding: '0.85rem', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', fontWeight: '700', textTransform: 'uppercase' }}>TOTAL COBRADO</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a' }}>${filteredTotals.grossUSD.toFixed(2)}</span>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                  {filteredTotals.count} consulta{filteredTotals.count !== 1 ? 's' : ''} {filteredTotals.totalLocal > 0 ? `• Bs. ${filteredTotals.totalLocal.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
+                </span>
+              </div>
+
+              <div style={{ padding: '0.85rem', borderRadius: '8px', backgroundColor: 'rgba(37, 99, 235, 0.08)', border: '1px solid rgba(37, 99, 235, 0.25)' }}>
+                <span style={{ fontSize: '0.72rem', color: '#1d4ed8', display: 'block', fontWeight: '700', textTransform: 'uppercase' }}>
+                  {filterDoctorId !== 'Todos' 
+                    ? `A PAGAR AL DR(A). ${(doctors.find(d => String(d.id) === String(filterDoctorId))?.name || 'MÉDICO').toUpperCase()}` 
+                    : 'HONORARIOS MÉDICOS TOTALES'}
+                </span>
+                <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1d4ed8' }}>${filteredTotals.doctorUSD.toFixed(2)}</span>
+                <span style={{ fontSize: '0.72rem', color: '#2563eb', display: 'block', marginTop: '2px' }}>Liquidación calculada</span>
+              </div>
+
+              <div style={{ padding: '0.85rem', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+                <span style={{ fontSize: '0.72rem', color: '#047857', display: 'block', fontWeight: '700', textTransform: 'uppercase' }}>NETO {clinicName.toUpperCase()}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#047857' }}>${filteredTotals.clinicNetUSD.toFixed(2)}</span>
+                <span style={{ fontSize: '0.72rem', color: '#059669', display: 'block', marginTop: '2px' }}>
+                  {filteredTotals.costsUSD > 0 ? `Deducidos $${filteredTotals.costsUSD.toFixed(2)} en costos` : 'Sin costos descontados'}
+                </span>
+              </div>
+            </div>
+
             {loading ? (
               <div style={{ textAlign: 'center', padding: '2rem' }}>Cargando datos financieros...</div>
-            ) : transactions.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>No hay pagos registrados.</div>
+            ) : filteredTransactions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
+                <p style={{ fontSize: '1rem', fontWeight: '500' }}>No se encontraron transacciones en este período o para el médico seleccionado.</p>
+                <button
+                  type="button"
+                  onClick={() => { setFilterDoctorId('Todos'); setFilterPeriod('todos'); }}
+                  style={{ marginTop: '0.5rem', padding: '0.4rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}
+                >
+                  Ver Todo el Historial
+                </button>
+              </div>
+            ) : activeViewTab === 'liquidacion' ? (
+              /* TABLA RESUMEN DE LIQUIDACIÓN AGRUPADA POR MÉDICO */
+              <div style={{ overflowX: 'auto', maxHeight: '600px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Médico Tratante</th>
+                      <th style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}>Nº Consultas</th>
+                      <th style={{ padding: '0.6rem 0.5rem' }}>Total Facturado</th>
+                      <th style={{ padding: '0.6rem 0.5rem', color: '#2563eb' }}>Honorarios a Pagar al Médico</th>
+                      <th style={{ padding: '0.6rem 0.5rem', color: '#059669' }}>Retención para {clinicName}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {doctorSummaries.map(doc => (
+                      <tr key={doc.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.75rem 0.5rem', fontWeight: '700', color: 'var(--color-text-main)' }}>
+                          Dr(a). {doc.name}
+                        </td>
+                        <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                          <span style={{ backgroundColor: '#f1f5f9', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: '700', color: '#475569' }}>
+                            {doc.count}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 0.5rem', fontWeight: '600' }}>
+                          ${doc.grossUSD.toFixed(2)}
+                        </td>
+                        <td style={{ padding: '0.75rem 0.5rem' }}>
+                          <span style={{ fontWeight: '800', color: '#1d4ed8', fontSize: '0.95rem', backgroundColor: 'rgba(37, 99, 235, 0.1)', padding: '0.3rem 0.65rem', borderRadius: '6px' }}>
+                            ${doc.doctorUSD.toFixed(2)}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 0.5rem' }}>
+                          <span style={{ fontWeight: '700', color: '#047857' }}>
+                            ${doc.clinicNetUSD.toFixed(2)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
+              /* TABLA DETALLADA DE TRANSACCIONES */
               <div style={{ overflowX: 'auto', maxHeight: '600px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <thead>
@@ -360,7 +627,7 @@ function Modulo3_GestionAdministrativa() {
                     </tr>
                   </thead>
                   <tbody>
-                    {transactions.map(t => {
+                    {filteredTransactions.map(t => {
                       const totalUSD = parseFloat(t.totalAmountUSD) || 0;
                       const docAmt = parseFloat(t.doctorAmount) || 0;
                       const netAmt = parseFloat(t.netAmount) || 0;
