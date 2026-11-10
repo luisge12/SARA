@@ -188,7 +188,7 @@ function Modulo3_GestionAdministrativa() {
       
     } catch (err) {
       console.error('Error al cargar datos financieros:', err);
-      setErrorMsg('Error al cargar datos. Verifique su conexión.');
+      setErrorMsg(err.response?.data?.error || 'Error al cargar datos financieros.');
     } finally {
       setLoading(false);
     }

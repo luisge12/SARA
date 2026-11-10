@@ -199,8 +199,17 @@ const initDatabase = async () => {
         SELECT column_name FROM information_schema.columns WHERE table_name = 'consultations';
       `);
       const existingConsCols = (consCols || []).map(c => c.column_name.toLowerCase());
-      if (!existingConsCols.includes('custom_template_data')) {
-        await sequelize.query(`ALTER TABLE consultations ADD COLUMN IF NOT EXISTS custom_template_data JSONB;`);
+      const neededConsCols = [
+        { name: 'clinical_summary', type: 'TEXT' },
+        { name: 'consultation_flow', type: "VARCHAR(50) DEFAULT 'PRIMERA_VEZ'" },
+        { name: 'reason_general', type: 'VARCHAR(150)' },
+        { name: 'reason_specific', type: 'VARCHAR(255)' },
+        { name: 'custom_template_data', type: 'JSONB' }
+      ];
+      for (const col of neededConsCols) {
+        if (!existingConsCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE consultations ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
       }
 
       // Asegurar tabla y columnas en appointments
