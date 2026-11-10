@@ -376,22 +376,46 @@ const initDatabase = async () => {
       console.log('Usuario Master de Clínica (UNIMECO) creado exitosamente.');
     }
 
-    // Semillar usuario Super Master luisge con clave 1234
+    // Semillar usuario Super Master independiente con clave 1234
+    const superMasterExists = await User.findOne({ where: { username: 'supermaster' } });
+    if (!superMasterExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await User.create({
+        username: 'supermaster',
+        passwordHash: passwordHash,
+        role: 'SuperMaster',
+        name: 'Super Master SARA',
+        sedeAtencion: 'CENTRAL',
+        clinicId: null
+      });
+      console.log('Usuario Super Master (supermaster) creado exitosamente.');
+    }
+
+    // Semillar o asegurar paciente luisge con clave 1234
     const luisgeExists = await User.findOne({ where: { username: 'luisge' } });
     if (!luisgeExists) {
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash('1234', salt);
-      await User.create({
+      const newPatient = await User.create({
         username: 'luisge',
         passwordHash: passwordHash,
-        role: 'SuperMaster',
-        name: 'Luis G. (Super Master SARA)',
+        role: 'Paciente',
+        name: 'Luis González',
         sedeAtencion: 'CENTRAL',
-        clinicId: null
+        clinicId: 1
       });
-      console.log('Usuario Super Master (luisge) creado exitosamente.');
-    } else if (luisgeExists.clinicId !== null) {
-      await User.update({ clinicId: null }, { where: { username: 'luisge' } });
+      await PatientProfile.findOrCreate({
+        where: { userId: newPatient.id },
+        defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
+      });
+      console.log('Paciente (luisge) creado exitosamente.');
+    } else if (luisgeExists.role === 'SuperMaster') {
+      await luisgeExists.update({ role: 'Paciente', name: 'Luis González', clinicId: 1 });
+      await PatientProfile.findOrCreate({
+        where: { userId: luisgeExists.id },
+        defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
+      });
     }
 
     // Semillar y asegurar usuario "master" con clave "1234"
