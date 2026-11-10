@@ -103,7 +103,6 @@ function Modulo_CitasMedicas() {
   });
   const [showRoleSettings, setShowRoleSettings] = useState(false);
   const [filterRoleCategory, setFilterRoleCategory] = useState('Todos');
-  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
 
   const handleUpdateSelectedDoctors = (newList) => {
     setSelectedDoctorNames(newList);
@@ -1149,68 +1148,11 @@ function Modulo_CitasMedicas() {
             )}
           </Card>
         ) : (
-          /* VISTA CALENDARIO OPEN DENTAL STYLE */
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', width: '100%', minWidth: 0 }}>
-            
-            {/* Panel Izquierdo: Sala de Espera y Solicitudes Web */}
-            {showLeftSidebar && (
-              <div style={{ width: '260px', minWidth: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
-              {/* MINI CALENDARIO / SELECTOR DE FECHA */}
-              <Card className="glass-panel" style={{ padding: '1rem', borderTop: '4px solid var(--color-primary)' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', textTransform: 'capitalize' }}>
-                  <CalendarIcon size={18} /> {new Date(calendarDate + 'T00:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <input 
-                    type="date" 
-                    className="input-field"
-                    value={calendarDate}
-                    onChange={(e) => setCalendarDate(e.target.value)}
-                    style={{ width: '100%', padding: '0.5rem', fontWeight: 'bold', color: 'var(--color-primary)' }}
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginTop: '0.5rem' }}>
-                    <button 
-                      onClick={() => {
-                        const d = new Date(calendarDate + 'T00:00:00');
-                        d.setDate(d.getDate() - 1);
-                        setCalendarDate(getLocalDateString(d));
-                      }}
-                      style={{ flex: 1, padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--color-bg-main)', cursor: 'pointer', display: 'flex', justifyContent: 'center' }}
-                    >
-                      <ChevronLeft size={16} /> Ayer
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setCalendarDate(getLocalDateString());
-                      }}
-                      style={{ flex: 1, padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--color-bg-main)', cursor: 'pointer', fontWeight: 'bold' }}
-                    >
-                      Hoy
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const d = new Date(calendarDate + 'T00:00:00');
-                        d.setDate(d.getDate() + 1);
-                        setCalendarDate(getLocalDateString(d));
-                      }}
-                      style={{ flex: 1, padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '4px', background: 'var(--color-bg-main)', cursor: 'pointer', display: 'flex', justifyContent: 'center' }}
-                    >
-                      Mñn <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Panel Derecho: Calendario Grid */}
+          /* VISTA CALENDARIO */
           <Card 
             id="calendar-grid-section" 
             className="glass-panel" 
             style={{ 
-              flex: '1 1 0%', 
-              minWidth: 0, 
               width: '100%', 
               overflowX: 'hidden', 
               padding: '1.25rem' 
@@ -1347,31 +1289,51 @@ function Modulo_CitasMedicas() {
                           HISTÓRICO
                         </span>
                       )}
+
+                      {/* Controles integrados de navegación de fecha */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginLeft: '0.35rem' }}>
+                        <button
+                          onClick={() => {
+                            const d = new Date(calendarDate + 'T00:00:00');
+                            d.setDate(d.getDate() - 1);
+                            setCalendarDate(getLocalDateString(d));
+                          }}
+                          style={{ padding: '0.3rem 0.55rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'var(--color-bg-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-text-main)' }}
+                          title="Día anterior"
+                        >
+                          <ChevronLeft size={15} /> Ayer
+                        </button>
+                        <button
+                          onClick={() => setCalendarDate(getLocalDateString())}
+                          style={{ padding: '0.3rem 0.65rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: isToday ? 'var(--color-primary)' : 'var(--color-bg-main)', color: isToday ? 'white' : 'var(--color-text-main)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}
+                          title="Ir al día de hoy"
+                        >
+                          Hoy
+                        </button>
+                        <button
+                          onClick={() => {
+                            const d = new Date(calendarDate + 'T00:00:00');
+                            d.setDate(d.getDate() + 1);
+                            setCalendarDate(getLocalDateString(d));
+                          }}
+                          style={{ padding: '0.3rem 0.55rem', border: '1px solid var(--border-color)', borderRadius: '6px', background: 'var(--color-bg-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-text-main)' }}
+                          title="Día siguiente"
+                        >
+                          Mañana <ChevronRight size={15} />
+                        </button>
+                        <input
+                          type="date"
+                          className="input-field"
+                          value={calendarDate}
+                          onChange={(e) => setCalendarDate(e.target.value)}
+                          style={{ height: '32px', padding: '0.2rem 0.5rem', fontWeight: 'bold', fontSize: '0.82rem', marginLeft: '0.25rem' }}
+                          title="Seleccionar fecha"
+                        />
+                      </div>
                     </div>
 
-                    {/* Botones de Acción: Barra Lateral, Roles/Columnas, Ajustar Horas y Bloquear */}
+                    {/* Botones de Acción: Roles/Columnas, Ajustar Horas y Bloquear */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      {/* Botón para alternar visibilidad de panel lateral */}
-                      <button
-                        onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.35rem',
-                          padding: '0.45rem 0.75rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-color)',
-                          backgroundColor: 'var(--color-bg-main)',
-                          color: 'var(--color-text-muted)',
-                          cursor: 'pointer',
-                          fontSize: '0.82rem',
-                          fontWeight: '600',
-                          transition: 'all 0.2s ease'
-                        }}
-                        title={showLeftSidebar ? "Ocultar panel lateral para ampliar el calendario al ancho completo" : "Mostrar panel lateral"}
-                      >
-                        {showLeftSidebar ? '◀ Ocultar Barra' : '▶ Ver Barra'}
-                      </button>
 
                       {/* Botón para Ajustar Roles / Columnas */}
                       <button
@@ -2103,8 +2065,6 @@ function Modulo_CitasMedicas() {
               );
             })()}
           </Card>
-
-          </div>
         )}
 
       </div>
