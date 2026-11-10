@@ -338,13 +338,6 @@ export function CustomFormTemplateManager({
           >
             <Plus size={16} /> Diseñar Nueva Plantilla
           </button>
-          <button
-            type="button"
-            className={`cft-tab-btn ${activeTab === 'import' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('import'); setImportError(''); }}
-          >
-            <Upload size={16} /> Subir / Importar Plantilla (JSON)
-          </button>
         </div>
 
         {/* Cuerpo */}
@@ -382,20 +375,14 @@ export function CustomFormTemplateManager({
                   <FileText size={42} color="#94a3b8" style={{ marginBottom: '0.5rem', opacity: 0.7 }} />
                   <h4 style={{ margin: '0.5rem 0', color: '#334155' }}>No tienes plantillas personalizadas aún</h4>
                   <p style={{ color: '#64748b', fontSize: '0.88rem', maxWidth: '400px', margin: '0 auto 1.25rem auto' }}>
-                    Crea tu primer formulario dinámico con el diseñador visual o sube una plantilla en formato JSON.
+                    Crea tu primer formulario dinámico con el diseñador visual interactivo.
                   </p>
                   <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                     <button
                       onClick={handleStartNew}
-                      style={{ padding: '0.5rem 1rem', background: '#0284c7', color: '#fff', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                      style={{ padding: '0.5rem 1rem', background: '#0284c7', color: '#fff', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                     >
-                      Crear con Diseñador Visual
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('import')}
-                      style={{ padding: '0.5rem 1rem', background: '#fff', color: '#0284c7', borderRadius: '8px', border: '1px solid #0284c7', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      Subir Archivo JSON
+                      <Plus size={16} /> Crear con Diseñador Visual
                     </button>
                   </div>
                 </div>
@@ -807,100 +794,6 @@ export function CustomFormTemplateManager({
             </form>
           )}
 
-          {/* VISTA 3: SUBIR / IMPORTAR PLANTILLA (JSON) */}
-          {activeTab === 'import' && (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div>
-                  <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.1rem' }}>Subir Plantilla desde Archivo</h3>
-                  <p style={{ margin: '0.2rem 0 0 0', color: '#64748b', fontSize: '0.85rem' }}>
-                    Sube un archivo <code>.json</code> o pega la definición estructurada para generar el formulario automáticamente.
-                  </p>
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleDownloadSample}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '0.4rem',
-                      padding: '0.5rem 0.85rem', borderRadius: '8px', background: '#fff',
-                      color: '#0284c7', border: '1px solid #0284c7', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer'
-                    }}
-                  >
-                    <Download size={15} /> Descargar Plantilla de Ejemplo (JSON)
-                  </button>
-                </div>
-              </div>
-
-              {/* Zona de Drop / Selección de Archivo */}
-              <div
-                className="cft-dropzone"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload size={38} color="#0284c7" style={{ marginBottom: '0.5rem' }} />
-                <h4 style={{ margin: '0 0 0.35rem 0', color: '#1e293b' }}>
-                  Haga clic para seleccionar o arrastre un archivo .JSON
-                </h4>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
-                  El archivo se leerá automáticamente y generará los campos en tu cuenta.
-                </p>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  accept=".json,application/json"
-                  style={{ display: 'none' }}
-                  onChange={handleFileUpload}
-                />
-              </div>
-
-              {/* Editor / Pegado de JSON */}
-              <div style={{ marginTop: '1.25rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.4rem' }}>
-                  O pega aquí directamente el contenido JSON de la plantilla:
-                </label>
-                <textarea
-                  rows={8}
-                  value={importJsonText}
-                  onChange={(e) => setImportJsonText(e.target.value)}
-                  placeholder='{\n  "title": "Evaluación Cardíaca",\n  "fields": [\n    { "id": "ritmo", "label": "Ritmo Cardíaco", "type": "text", "required": true }\n  ]\n}'
-                  style={{
-                    width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1',
-                    fontFamily: 'monospace', fontSize: '0.85rem', boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              {importError && (
-                <div style={{
-                  padding: '0.75rem 1rem', background: '#fee2e2', border: '1px solid #fca5a5',
-                  color: '#991b1b', borderRadius: '8px', marginTop: '0.75rem', fontSize: '0.88rem', fontWeight: 600
-                }}>
-                  {importError}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('list')}
-                  style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleProcessImport}
-                  disabled={saving || !importJsonText.trim()}
-                  style={{
-                    padding: '0.6rem 1.5rem', borderRadius: '8px', border: 'none',
-                    background: '#0284c7', color: '#fff', fontWeight: 700, cursor: 'pointer'
-                  }}
-                >
-                  {saving ? 'Importando...' : 'Importar y Crear Formulario'}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
