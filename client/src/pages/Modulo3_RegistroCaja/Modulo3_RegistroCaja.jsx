@@ -45,12 +45,35 @@ function Modulo3_GestionAdministrativa() {
     return isNaN(num) ? def : num;
   };
 
+  // Sincronización automática de porcentajes para que la suma siempre sea 100%
+  const handleClinicPercentageChange = (val) => {
+    setUnimecoPercentage(val);
+    if (val === '') return;
+    const num = parseNum(val, null);
+    if (num !== null && !isNaN(num)) {
+      const complement = Math.max(0, Math.min(100, 100 - num));
+      setDoctorPercentage(String(Number(complement.toFixed(2))));
+    }
+  };
+
+  const handleDoctorPercentageChange = (val) => {
+    setDoctorPercentage(val);
+    if (val === '') return;
+    const num = parseNum(val, null);
+    if (num !== null && !isNaN(num)) {
+      const complement = Math.max(0, Math.min(100, 100 - num));
+      setUnimecoPercentage(String(Number(complement.toFixed(2))));
+    }
+  };
+
   // Computed states
   const totalLocal = parseNum(totalAmountUSD) * parseNum(exchangeRate);
   const grossUSD = parseNum(totalAmountUSD);
   const unimecoAmount = grossUSD * (parseNum(unimecoPercentage) / 100);
   const doctorAmount = grossUSD * (parseNum(doctorPercentage) / 100);
   const netUnimecoAmount = unimecoAmount - parseNum(operativeCosts) - parseNum(incentives);
+  const totalDistributionPerc = parseNum(unimecoPercentage) + parseNum(doctorPercentage);
+  const isDistributionValid = Math.abs(totalDistributionPerc - 100) <= 0.05;
 
   // Data states
   const [patients, setPatients] = useState([]);
@@ -250,6 +273,10 @@ function Modulo3_GestionAdministrativa() {
     }
     if (grossUSD <= 0) {
       setErrorMsg('El monto total debe ser mayor a 0 USD.');
+      return;
+    }
+    if (!isDistributionValid) {
+      setErrorMsg(`La suma de retención de la clínica (${unimecoPercentage}%) y honorarios del médico (${doctorPercentage}%) debe ser exactamente 100% (suma actual: ${totalDistributionPerc.toFixed(1)}%).`);
       return;
     }
 
@@ -572,8 +599,41 @@ function Modulo3_GestionAdministrativa() {
               <p style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--color-primary)' }}>Distribución y Costos</p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>
-                <Input label={`% Retención ${clinicName}`} type="number" value={unimecoPercentage} onChange={(e) => setUnimecoPercentage(e.target.value)} disabled={!isMaster} />
-                <Input label="% Honorarios Médico" type="number" value={doctorPercentage} onChange={(e) => setDoctorPercentage(e.target.value)} disabled={!isMaster} />
+                <Input 
+                  label={`% Retención ${clinicName}`} 
+                  type="number" 
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={unimecoPercentage} 
+                  onChange={(e) => handleClinicPercentageChange(e.target.value)} 
+                  disabled={!isMaster} 
+                />
+                <Input 
+                  label="% Honorarios Médico" 
+                  type="number" 
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={doctorPercentage} 
+                  onChange={(e) => handleDoctorPercentageChange(e.target.value)} 
+                  disabled={!isMaster} 
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', marginTop: '-0.35rem' }}>
+                <span style={{ color: isDistributionValid ? '#059669' : '#dc2626', fontWeight: '600' }}>
+                  {isDistributionValid ? '✓ Total distribución: 100%' : `⚠️ La suma debe ser exactamente 100% (Actual: ${totalDistributionPerc.toFixed(1)}%)`}
+                </span>
+                {!isDistributionValid && (
+                  <button 
+                    type="button" 
+                    onClick={() => { setUnimecoPercentage('30'); setDoctorPercentage('70'); }}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.75rem', fontWeight: '600' }}
+                  >
+                    Restablecer (30% / 70%)
+                  </button>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', alignItems: 'flex-end' }}>

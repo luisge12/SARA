@@ -143,6 +143,13 @@ module.exports = {
       const numTotalLocal = totalAmountLocal ? parseSafe(totalAmountLocal, 0) : (numTotalUSD * numExchangeRate);
       const numUnimecoPerc = parseSafe(unimecoPercentage, 30);
       const numDoctorPerc = parseSafe(doctorPercentage, 70);
+      
+      // Validar que la suma de porcentajes sea exactamente 100%
+      const sumPerc = numUnimecoPerc + numDoctorPerc;
+      if (Math.abs(sumPerc - 100) > 0.05) {
+        return res.status(400).json({ error: `La suma de retención de la clínica (${numUnimecoPerc}%) y honorarios del médico (${numDoctorPerc}%) debe ser exactamente 100% (suma actual: ${sumPerc}%).` });
+      }
+
       const numUnimecoAmt = unimecoAmount !== undefined ? parseSafe(unimecoAmount, 0) : (numTotalUSD * (numUnimecoPerc / 100));
       const numDoctorAmt = doctorAmount !== undefined ? parseSafe(doctorAmount, 0) : (numTotalUSD * (numDoctorPerc / 100));
       const numOperativeCosts = parseSafe(operativeCosts, 0);
