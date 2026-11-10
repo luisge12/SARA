@@ -38,6 +38,16 @@ module.exports = {
         }
       }
 
+      // Si el ID del token no existe en la base de datos actual, usar como fallback un Master/Admin o el médico
+      if (!validCreatedById) {
+        const fallbackUser = await User.findOne({ where: { role: 'Master' } }) 
+          || await User.findOne({ where: { role: 'Administrador' } }) 
+          || await User.findByPk(doctorId);
+        if (fallbackUser) {
+          validCreatedById = fallbackUser.id;
+        }
+      }
+
       // Parsear números de forma segura (soportando comas y puntos)
       const parseSafe = (val, def = 0) => {
         if (val === undefined || val === null || val === '') return def;

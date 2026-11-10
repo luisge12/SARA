@@ -306,6 +306,13 @@ const initDatabase = async () => {
           await sequelize.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
         }
       }
+
+      // Asegurar que created_by_id permita nulos en transactions
+      try {
+        await sequelize.query(`ALTER TABLE transactions ALTER COLUMN created_by_id DROP NOT NULL;`);
+      } catch (alterErr) {
+        // Ignorar si ya era nullable
+      }
     } catch (err) {
       console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }
