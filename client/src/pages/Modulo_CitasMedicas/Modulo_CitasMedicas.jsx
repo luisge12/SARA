@@ -267,7 +267,9 @@ function Modulo_CitasMedicas() {
       notesText.includes(query) ||
       statusText.includes(query);
 
-    const matchesSede = selectedSede === 'Todas' || apt.sedeAtencion === selectedSede;
+    const aptSede = (apt.sedeAtencion || apt.sede_atencion || apt.sede || '').trim().toLowerCase();
+    const targetSede = selectedSede ? selectedSede.trim().toLowerCase() : 'todas';
+    const matchesSede = targetSede === 'todas' || aptSede === targetSede;
     const matchesStatus = selectedStatus === 'Todas' || apt.status === selectedStatus;
 
     return matchesSearch && matchesSede && matchesStatus;
@@ -275,7 +277,9 @@ function Modulo_CitasMedicas() {
 
   // Filtrado dinámico de citas para la vista de lista
   const filteredAppointments = appointments.filter(apt => {
-    const matchesSede = selectedSede === 'Todas' || apt.sedeAtencion === selectedSede;
+    const aptSede = (apt.sedeAtencion || apt.sede_atencion || apt.sede || '').trim().toLowerCase();
+    const targetSede = selectedSede ? selectedSede.trim().toLowerCase() : 'todas';
+    const matchesSede = targetSede === 'todas' || aptSede === targetSede;
     const matchesStatus = selectedStatus === 'Todas' || apt.status === selectedStatus;
     const query = (activeSearchTerm || searchTerm).toLowerCase().trim();
 
@@ -484,7 +488,10 @@ function Modulo_CitasMedicas() {
                   style={{ height: '42px', padding: '0.4rem 0.8rem', width: '100%' }}
                 >
                   <option value="Todas">Todas las Sedes</option>
-                  {clinicSedes.map(sede => (
+                  {Array.from(new Set([
+                    ...clinicSedes,
+                    ...appointments.map(a => a.sedeAtencion || a.sede_atencion || a.sede).filter(Boolean)
+                  ])).map(sede => (
                     <option key={sede} value={sede}>{sede}</option>
                   ))}
                 </select>
@@ -1191,7 +1198,29 @@ function Modulo_CitasMedicas() {
             }}
           >
             {(() => {
-              const dayAppointments = appointments.filter(a => a.appointmentDate && a.appointmentDate.startsWith(calendarDate) && a.status !== 'Cancelada');
+              const dayAppointments = appointments.filter(a => {
+                const matchesDate = a.appointmentDate && a.appointmentDate.startsWith(calendarDate);
+                const notCancelled = a.status !== 'Cancelada';
+                
+                const aptSede = (a.sedeAtencion || a.sede_atencion || a.sede || '').trim().toLowerCase();
+                const targetSede = selectedSede ? selectedSede.trim().toLowerCase() : 'todas';
+                const matchesSede = targetSede === 'todas' || aptSede === targetSede;
+                
+                const matchesStatus = selectedStatus === 'Todas' || a.status === selectedStatus;
+                
+                const query = (activeSearchTerm || searchTerm).toLowerCase().trim();
+                let matchesSearch = true;
+                if (query) {
+                  const patientName = (a.patient?.name || a.patient?.username || '').toLowerCase();
+                  const patientCedula = (a.patient?.identificationNumber || '').toLowerCase();
+                  const doctorName = (a.doctor?.name || a.doctor?.username || '').toLowerCase();
+                  const reasonText = (a.reason || '').toLowerCase();
+                  const sedeText = (a.sedeAtencion || a.sede || '').toLowerCase();
+                  matchesSearch = patientName.includes(query) || patientCedula.includes(query) || doctorName.includes(query) || reasonText.includes(query) || sedeText.includes(query);
+                }
+
+                return matchesDate && notCancelled && matchesSede && matchesStatus && matchesSearch;
+              });
               const dayBlockedSlots = blockedSlots.filter(b => b.date === calendarDate);
 
               // Doctores presentes en citas, bloqueos o doctores disponibles del staff
