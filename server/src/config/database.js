@@ -394,8 +394,25 @@ const initDatabase = async () => {
       await User.update({ clinicId: null }, { where: { username: 'luisge' } });
     }
 
-    // Eliminar el usuario de prueba genérico "master" para que solo exista el Master oficial UNIMECO
-    await User.destroy({ where: { username: 'master' } }).catch(() => {});
+    // Semillar y asegurar usuario "master" con clave "1234"
+    const masterExists = await User.findOne({ where: { username: 'master' } });
+    if (!masterExists) {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await User.create({
+        username: 'master',
+        passwordHash: passwordHash,
+        role: 'Master',
+        name: 'Administrador Principal (Master)',
+        sedeAtencion: 'CENTRAL',
+        clinicId: 1
+      });
+      console.log('Usuario Master (master) creado exitosamente con clave 1234.');
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await masterExists.update({ passwordHash, role: 'Master' });
+    }
 
     // Asegurar que cualquier usuario existente (excepto SuperMaster) esté vinculado a la clínica 1 (UNIMECO)
     await User.update({ clinicId: 1 }, { 
