@@ -94,6 +94,16 @@ const Transaction = sequelize.define('Transaction', {
       key: 'id'
     },
     field: 'created_by_id'
+  },
+  appointmentId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'appointment_id'
+  },
+  studyId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'study_id'
   }
 }, {
   tableName: 'transactions',

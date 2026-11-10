@@ -19,6 +19,9 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status,
+        totalAmount,
+        paidAmount,
+        paymentStatus,
         metadata,
         attachments
       } = req.body;
@@ -43,6 +46,9 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status: status || 'Completado',
+        totalAmount: totalAmount ? parseFloat(totalAmount) : 0.00,
+        paidAmount: paidAmount ? parseFloat(paidAmount) : 0.00,
+        paymentStatus: paymentStatus || 'Pendiente',
         metadata: metadata || {},
         attachments: attachments || []
       });
@@ -151,6 +157,9 @@ module.exports = {
         diagnosticImpression,
         recommendations,
         status,
+        totalAmount,
+        paidAmount,
+        paymentStatus,
         metadata,
         attachments
       } = req.body;
@@ -172,6 +181,9 @@ module.exports = {
       if (diagnosticImpression !== undefined) study.diagnosticImpression = diagnosticImpression;
       if (recommendations !== undefined) study.recommendations = recommendations;
       if (status) study.status = status;
+      if (totalAmount !== undefined) study.totalAmount = parseFloat(totalAmount) || 0;
+      if (paidAmount !== undefined) study.paidAmount = parseFloat(paidAmount) || 0;
+      if (paymentStatus) study.paymentStatus = paymentStatus;
       if (metadata !== undefined) study.metadata = metadata;
       if (attachments !== undefined) study.attachments = attachments;
 

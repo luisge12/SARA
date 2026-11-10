@@ -185,7 +185,10 @@ const initDatabase = async () => {
       const neededStudyCols = [
         { name: 'category', type: "VARCHAR(100) DEFAULT 'General'" },
         { name: 'technique_or_region', type: 'VARCHAR(255)' },
-        { name: 'metadata', type: "JSONB DEFAULT '{}'" }
+        { name: 'metadata', type: "JSONB DEFAULT '{}'" },
+        { name: 'total_amount', type: 'DECIMAL(10, 2) DEFAULT 0.00' },
+        { name: 'paid_amount', type: 'DECIMAL(10, 2) DEFAULT 0.00' },
+        { name: 'payment_status', type: "VARCHAR(50) DEFAULT 'Pendiente'" }
       ];
 
       for (const col of neededStudyCols) {
@@ -307,7 +310,9 @@ const initDatabase = async () => {
         { name: 'operative_costs', type: 'DECIMAL(10, 2) DEFAULT 0' },
         { name: 'incentives', type: 'DECIMAL(10, 2) DEFAULT 0' },
         { name: 'net_amount', type: 'DECIMAL(10, 2)' },
-        { name: 'created_by_id', type: 'INTEGER' }
+        { name: 'created_by_id', type: 'INTEGER' },
+        { name: 'appointment_id', type: 'INTEGER' },
+        { name: 'study_id', type: 'INTEGER' }
       ];
 
       for (const col of neededTransCols) {

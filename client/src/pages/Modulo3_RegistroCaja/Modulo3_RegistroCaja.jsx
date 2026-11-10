@@ -4,7 +4,7 @@ import { Card } from '../../components/Card';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import api from '../../services/api';
-import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer, Filter, Calendar, User, Users } from 'lucide-react';
+import { Wallet, Receipt, Calculator, Download, DollarSign, TrendingUp, HeartPulse, FileText, RefreshCw, Printer, Filter, Calendar, User, Users, Clock, CheckCircle, CreditCard, AlertCircle } from 'lucide-react';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 import { getClinicSettings, getClinicSedes } from '../../services/clinicSettings';
 
@@ -50,6 +50,8 @@ function Modulo3_GestionAdministrativa() {
   const [doctors, setDoctors] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [pendingReceivables, setPendingReceivables] = useState([]);
+  const [activePendingItem, setActivePendingItem] = useState(null);
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -173,10 +175,14 @@ function Modulo3_GestionAdministrativa() {
     try {
       setLoading(true);
       
-      const [usersRes, transRes, summaryRes] = await Promise.all([
+      const [usersRes, transRes, summaryRes, pendingRes] = await Promise.all([
         api.get('/api/users'),
         api.get('/api/billing/transactions'),
-        api.get('/api/billing/summary')
+        api.get('/api/billing/summary'),
+        api.get('/api/billing/pending-receivables').catch(err => {
+          console.warn('Aviso al obtener pendientes por cobrar:', err);
+          return { data: [] };
+        })
       ]);
 
       const allUsers = usersRes.data;
@@ -185,12 +191,33 @@ function Modulo3_GestionAdministrativa() {
       setDoctors(medicos.length > 0 ? medicos : allUsers.filter(u => u.role === 'Master'));
       setTransactions(transRes.data);
       setSummary(summaryRes.data);
+      setPendingReceivables(Array.isArray(pendingRes.data) ? pendingRes.data : []);
       
     } catch (err) {
       console.error('Error al cargar datos financieros:', err);
       setErrorMsg(err.response?.data?.error || 'Error al cargar datos financieros.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectPendingItem = (item) => {
+    setActivePendingItem(item);
+    if (item.patientId) setPatientId(String(item.patientId));
+    if (item.doctorId) setDoctorId(String(item.doctorId));
+    if (item.sedeAtencion) setSedeAtencion(item.sedeAtencion);
+    setServiceType(item.concept || (item.itemType === 'CITA' ? 'Consulta Médica' : 'Estudio / Procedimiento'));
+    if (item.pendingAmount > 0) {
+      setTotalAmountUSD(item.pendingAmount.toString());
+    } else if (item.totalAmount > 0) {
+      setTotalAmountUSD(item.totalAmount.toString());
+    } else {
+      setTotalAmountUSD('');
+    }
+
+    const formElement = document.getElementById('registro-caja-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -235,11 +262,13 @@ function Modulo3_GestionAdministrativa() {
         doctorAmount,
         operativeCosts: parseNum(operativeCosts),
         incentives: parseNum(incentives),
-        netAmount: netUnimecoAmount
+        netAmount: netUnimecoAmount,
+        appointmentId: activePendingItem?.appointmentId || null,
+        studyId: activePendingItem?.studyId || null
       };
 
       await api.post('/api/billing/transactions', payload);
-      setSuccessMsg('Pago registrado y distribuido exitosamente.');
+      setSuccessMsg(`Pago registrado y distribuido exitosamente${activePendingItem ? ` (procesado para ${activePendingItem.itemType === 'CITA' ? 'la cita médica' : 'el estudio'})` : ''}.`);
       
       // Reset form
       setPatientId('');
@@ -247,6 +276,7 @@ function Modulo3_GestionAdministrativa() {
       setTotalAmountUSD('');
       setOperativeCosts('0');
       setIncentives('0');
+      setActivePendingItem(null);
 
       fetchInitialData();
     } catch (err) {
@@ -311,11 +341,155 @@ function Modulo3_GestionAdministrativa() {
           </div>
         )}
 
+        {/* SECCIÓN: SERVICIOS Y CITAS PENDIENTES POR COBRAR */}
+        <Card 
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Clock size={20} style={{ color: '#d97706' }} />
+              <span>Servicios y Citas por Cobrar</span>
+              <span style={{ 
+                fontSize: '0.75rem', 
+                backgroundColor: pendingReceivables.length > 0 ? '#fef3c7' : '#f1f5f9', 
+                color: pendingReceivables.length > 0 ? '#b45309' : '#64748b', 
+                padding: '0.2rem 0.6rem', 
+                borderRadius: '9999px', 
+                fontWeight: '700' 
+              }}>
+                {pendingReceivables.length} {pendingReceivables.length === 1 ? 'pendiente' : 'pendientes'}
+              </span>
+            </div>
+          }
+          className="glass-panel"
+        >
+          {pendingReceivables.length === 0 ? (
+            <div style={{ padding: '1.25rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+              <CheckCircle size={28} style={{ color: '#10b981', margin: '0 auto 0.4rem auto' }} />
+              <p style={{ fontWeight: '500', fontSize: '0.92rem' }}>¡Todo al día! No hay citas médicas ni estudios pendientes por cobrar en caja.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table" style={{ width: '100%', fontSize: '0.88rem' }}>
+                <thead>
+                  <tr>
+                    <th>Origen</th>
+                    <th>Fecha</th>
+                    <th>Paciente</th>
+                    <th>Médico Tratante</th>
+                    <th>Detalle / Concepto</th>
+                    <th>Sede</th>
+                    <th style={{ textAlign: 'right' }}>Monto a Cobrar</th>
+                    <th style={{ textAlign: 'center' }}>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingReceivables.map(item => {
+                    const isSelected = activePendingItem?.id === item.id;
+                    const dateFormatted = item.date ? (
+                      String(item.date).includes('T') ? new Date(item.date).toLocaleDateString('es-VE') : item.date
+                    ) : 'S/F';
+
+                    return (
+                      <tr 
+                        key={item.id} 
+                        style={{ 
+                          backgroundColor: isSelected ? 'rgba(34, 80, 93, 0.08)' : 'transparent',
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <td>
+                          {item.itemType === 'CITA' ? (
+                            <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700' }}>
+                              📅 Cita
+                            </span>
+                          ) : (
+                            <span style={{ backgroundColor: '#f3e8ff', color: '#7e22ce', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700' }}>
+                              🔬 Estudio
+                            </span>
+                          )}
+                        </td>
+                        <td>{dateFormatted}</td>
+                        <td>
+                          <strong>{item.patientName}</strong>
+                          {item.patientIdDoc && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                              CI: {item.patientIdDoc}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          {item.doctorName}
+                          {item.doctorSpecialty && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                              {item.doctorSpecialty}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={item.concept}>
+                          {item.concept}
+                        </td>
+                        <td>
+                          <span className="badge">{item.sedeAtencion}</span>
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: '700', color: item.totalAmount > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+                          {item.totalAmount > 0 ? `$${item.totalAmount.toFixed(2)}` : 'Por definir'}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleSelectPendingItem(item)}
+                            style={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '0.35rem', 
+                              padding: '0.3rem 0.75rem', 
+                              fontSize: '0.8rem',
+                              backgroundColor: isSelected ? '#047857' : 'var(--color-primary)'
+                            }}
+                          >
+                            <CreditCard size={14} /> {isSelected ? 'En Proceso' : 'Cobrar'}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+
         <div className="responsive-grid-1-2">
           
           {/* PANEL DE REGISTRO DE INGRESOS */}
           <Card title="Control de Ingresos" action={<Wallet size={20} style={{ color: 'var(--color-accent)' }} />} className="glass-panel">
-            <form onSubmit={handleRegisterPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form id="registro-caja-form" onSubmit={handleRegisterPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              {activePendingItem && (
+                <div style={{ 
+                  padding: '0.75rem 1rem', 
+                  borderRadius: '8px', 
+                  backgroundColor: '#ecfdf5', 
+                  border: '1px solid #a7f3d0',
+                  color: '#065f46',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ fontSize: '0.85rem' }}>
+                    <strong>Procesando cobro:</strong> {activePendingItem.itemType === 'CITA' ? 'Cita de' : 'Estudio de'} {activePendingItem.patientName}
+                    <div style={{ fontSize: '0.78rem', color: '#047857' }}>
+                      Al confirmar el pago, se marcará automáticamente como Pagado.
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setActivePendingItem(null)}
+                    style={{ background: 'none', border: 'none', color: '#047857', cursor: 'pointer', fontWeight: '600', fontSize: '0.8rem' }}
+                  >
+                    ✕ Desvincular
+                  </button>
+                </div>
+              )}
               
               <div className="input-group">
                 <label className="input-label">Paciente *</label>

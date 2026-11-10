@@ -8,6 +8,7 @@ const { verifyToken, checkRole } = require('../middlewares/authMiddleware');
 const allowedRoles = ['Master', 'Administrador', 'Recepcionista'];
 
 router.get('/bcv-rate', billingController.getBcvExchangeRate);
+router.get('/pending-receivables', verifyToken, checkRole(allowedRoles), billingController.getPendingReceivables);
 router.post('/transactions', verifyToken, checkRole(allowedRoles), billingController.registerPayment);
 router.get('/transactions', verifyToken, checkRole(allowedRoles), billingController.getTransactions);
 router.get('/summary', verifyToken, checkRole(allowedRoles), billingController.getAnnualSummary);

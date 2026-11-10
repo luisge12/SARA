@@ -61,6 +61,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
     doctorName: user.name || '',
     sede: user.sedeAtencion || 'CENTRAL',
     date: new Date().toISOString().split('T')[0],
+    totalAmount: '',
     findings: '',
     biopsySample: '',
     diagnosticImpression: '',
@@ -126,6 +127,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
       doctorName: defaultDoc ? (defaultDoc.name || defaultDoc.username) : '',
       sede: user.sedeAtencion || 'CENTRAL',
       date: new Date().toISOString().split('T')[0],
+      totalAmount: '',
       findings: '',
       biopsySample: '',
       diagnosticImpression: '',
@@ -153,6 +155,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
       doctorName: docName,
       sede: study.sede || user.sedeAtencion || 'CENTRAL',
       date: study.date ? String(study.date).split('T')[0] : new Date().toISOString().split('T')[0],
+      totalAmount: study.totalAmount || '',
       findings: study.findings || '',
       biopsySample: study.biopsySample || '',
       diagnosticImpression: study.diagnosticImpression || '',
@@ -197,6 +200,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         diagnosticImpression: formData.diagnosticImpression,
         recommendations: formData.recommendations,
         status: formData.status,
+        totalAmount: formData.totalAmount ? parseFloat(formData.totalAmount) : 0,
         attachments: [],
         metadata: {
           ...(editingStudyId ? (studies.find(s => s.id === editingStudyId)?.metadata || {}) : {}),
@@ -363,16 +367,27 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
               >
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                    <span style={{ 
-                      backgroundColor: 'rgba(34, 80, 93, 0.1)', 
-                      color: 'var(--color-primary)', 
-                      padding: '0.2rem 0.6rem', 
-                      borderRadius: '12px', 
-                      fontWeight: '700',
-                      fontSize: '0.75rem'
-                    }}>
-                      {study.studyType}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <span style={{ 
+                        backgroundColor: 'rgba(34, 80, 93, 0.1)', 
+                        color: 'var(--color-primary)', 
+                        padding: '0.2rem 0.6rem', 
+                        borderRadius: '12px', 
+                        fontWeight: '700',
+                        fontSize: '0.75rem'
+                      }}>
+                        {study.studyType}
+                      </span>
+                      {study.paymentStatus === 'Pagado' ? (
+                        <span style={{ fontSize: '0.72rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: '600' }}>
+                          ✓ Pagado {parseFloat(study.totalAmount) > 0 ? `($${parseFloat(study.totalAmount).toFixed(2)})` : ''}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#b45309', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: '600' }}>
+                          ⏳ Pendiente en Caja {parseFloat(study.totalAmount) > 0 ? `($${parseFloat(study.totalAmount).toFixed(2)})` : ''}
+                        </span>
+                      )}
+                    </div>
                     <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                       Fecha: {study.date} | Sede: {study.sede}
                     </span>
@@ -578,6 +593,22 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                       <option value={formData.doctorId || ''}>{formData.doctorName}</option>
                     )}
                   </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
+                    Costo Estimado ($ USD) <span style={{ fontWeight: 'normal', color: 'var(--color-text-muted)' }}>(Opcional)</span>
+                  </label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00 (Cobrar en Caja)"
+                    className="input-field" 
+                    value={formData.totalAmount} 
+                    onChange={(e) => setFormData({ ...formData, totalAmount: e.target.value })} 
+                    style={{ height: '38px', width: '100%' }}
+                  />
                 </div>
               </div>
 

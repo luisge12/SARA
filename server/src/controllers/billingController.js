@@ -1,9 +1,90 @@
 // Controlador de Gestión Administrativa (Finanzas) para SARA
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
+const Appointment = require('../models/Appointment');
+const Study = require('../models/Study');
 const { Op } = require('sequelize');
 
 module.exports = {
+  // Obtener cuentas pendientes por cobrar (Citas y Estudios médicos no pagados)
+  getPendingReceivables: async (req, res) => {
+    try {
+      // 1. Citas pendientes o parciales (no canceladas)
+      const appointments = await Appointment.findAll({
+        where: {
+          paymentStatus: { [Op.in]: ['Pendiente', 'Parcial'] },
+          status: { [Op.ne]: 'Cancelada' }
+        },
+        include: [
+          { model: User, as: 'patient', attributes: ['id', 'name', 'username', 'identificationNumber'] },
+          { model: User, as: 'doctor', attributes: ['id', 'name', 'username', 'specialty', 'sedeAtencion'] }
+        ],
+        order: [['appointmentDate', 'DESC']]
+      });
+
+      // 2. Estudios / Procedimientos pendientes
+      const studies = await Study.findAll({
+        where: {
+          [Op.or]: [
+            { paymentStatus: { [Op.in]: ['Pendiente', 'Parcial'] } },
+            { paymentStatus: null }
+          ]
+        },
+        include: [
+          { model: User, as: 'patient', attributes: ['id', 'name', 'username', 'identificationNumber'] },
+          { model: User, as: 'doctor', attributes: ['id', 'name', 'username', 'specialty'] }
+        ],
+        order: [['date', 'DESC'], ['id', 'DESC']]
+      });
+
+      const formattedApts = appointments.map(apt => ({
+        id: `cita-${apt.id}`,
+        itemType: 'CITA',
+        appointmentId: apt.id,
+        studyId: null,
+        patientId: apt.patientId,
+        patientName: apt.patient?.name || apt.patient?.username || 'Paciente Sin Nombre',
+        patientIdDoc: apt.patient?.identificationNumber || '',
+        doctorId: apt.doctorId,
+        doctorName: apt.doctor?.name || apt.doctor?.username || 'Médico No Asignado',
+        doctorSpecialty: apt.doctor?.specialty || '',
+        sedeAtencion: apt.sedeAtencion || 'CENTRAL',
+        date: apt.appointmentDate,
+        concept: `Cita Médica / Consulta: ${apt.reason || 'Consulta General'}`,
+        totalAmount: parseFloat(apt.totalAmount) || 0,
+        paidAmount: parseFloat(apt.paidAmount) || 0,
+        pendingAmount: Math.max(0, (parseFloat(apt.totalAmount) || 0) - (parseFloat(apt.paidAmount) || 0)),
+        paymentStatus: apt.paymentStatus || 'Pendiente'
+      }));
+
+      const formattedStudies = studies.map(st => ({
+        id: `estudio-${st.id}`,
+        itemType: 'ESTUDIO',
+        appointmentId: null,
+        studyId: st.id,
+        patientId: st.patientId,
+        patientName: st.patient?.name || st.patient?.username || 'Paciente Sin Nombre',
+        patientIdDoc: st.patient?.identificationNumber || '',
+        doctorId: st.doctorId,
+        doctorName: st.doctor?.name || st.doctor?.username || 'Médico No Asignado',
+        doctorSpecialty: st.doctor?.specialty || '',
+        sedeAtencion: st.sede || 'CENTRAL',
+        date: st.date,
+        concept: `Estudio / Procedimiento: ${st.studyType}`,
+        totalAmount: parseFloat(st.totalAmount) || 0,
+        paidAmount: parseFloat(st.paidAmount) || 0,
+        pendingAmount: Math.max(0, (parseFloat(st.totalAmount) || 0) - (parseFloat(st.paidAmount) || 0)),
+        paymentStatus: st.paymentStatus || 'Pendiente'
+      }));
+
+      const allPending = [...formattedApts, ...formattedStudies];
+      return res.json(allPending);
+    } catch (error) {
+      console.error('Error al obtener cuentas por cobrar:', error);
+      return res.status(500).json({ error: 'Error al obtener cuentas por cobrar pendientes' });
+    }
+  },
+
   registerPayment: async (req, res) => {
     try {
       const {
@@ -11,7 +92,8 @@ module.exports = {
         totalAmountUSD, exchangeRate, totalAmountLocal,
         unimecoPercentage, doctorPercentage,
         unimecoAmount, doctorAmount,
-        operativeCosts, incentives, netAmount
+        operativeCosts, incentives, netAmount,
+        appointmentId, studyId
       } = req.body;
       
       if (!patientId || !doctorId || !sedeAtencion || !serviceType || totalAmountUSD === undefined) {
@@ -82,8 +164,52 @@ module.exports = {
         operativeCosts: numOperativeCosts,
         incentives: numIncentives,
         netAmount: numNetAmount,
-        createdById: validCreatedById
+        createdById: validCreatedById,
+        appointmentId: appointmentId ? parseInt(appointmentId) : null,
+        studyId: studyId ? parseInt(studyId) : null
       });
+
+      // Si el pago proviene de una cita médica, actualizar su estado de pago
+      if (appointmentId) {
+        try {
+          const apt = await Appointment.findByPk(appointmentId);
+          if (apt) {
+            const currentPaid = parseFloat(apt.paidAmount) || 0;
+            const newPaid = currentPaid + numTotalUSD;
+            const aptTotal = parseFloat(apt.totalAmount) || 0;
+            const finalTotal = aptTotal > 0 ? aptTotal : newPaid;
+            const pending = Math.max(0, finalTotal - newPaid);
+
+            apt.totalAmount = finalTotal;
+            apt.paidAmount = newPaid;
+            apt.pendingAmount = pending;
+            apt.paymentStatus = pending <= 0 ? 'Pagado' : 'Parcial';
+            await apt.save();
+          }
+        } catch (aptErr) {
+          console.warn('Aviso al actualizar cita tras pago:', aptErr.message);
+        }
+      }
+
+      // Si el pago proviene de un estudio médico, actualizar su estado de pago
+      if (studyId) {
+        try {
+          const st = await Study.findByPk(studyId);
+          if (st) {
+            const currentPaid = parseFloat(st.paidAmount) || 0;
+            const newPaid = currentPaid + numTotalUSD;
+            const studyTotal = parseFloat(st.totalAmount) || 0;
+            const finalTotal = studyTotal > 0 ? studyTotal : newPaid;
+
+            st.totalAmount = finalTotal;
+            st.paidAmount = newPaid;
+            st.paymentStatus = 'Pagado';
+            await st.save();
+          }
+        } catch (stErr) {
+          console.warn('Aviso al actualizar estudio tras pago:', stErr.message);
+        }
+      }
 
       return res.status(201).json({ message: 'Pago registrado exitosamente', transaction });
     } catch (error) {

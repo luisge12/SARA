@@ -65,6 +65,21 @@ const Study = sequelize.define('Study', {
     type: DataTypes.STRING(50),
     defaultValue: 'Completado'
   },
+  totalAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0.00,
+    field: 'total_amount'
+  },
+  paidAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0.00,
+    field: 'paid_amount'
+  },
+  paymentStatus: {
+    type: DataTypes.STRING(50),
+    defaultValue: 'Pendiente',
+    field: 'payment_status'
+  },
   metadata: {
     type: DataTypes.JSONB,
     defaultValue: {}
