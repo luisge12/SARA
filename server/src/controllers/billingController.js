@@ -17,29 +17,68 @@ module.exports = {
       if (!patientId || !doctorId || !sedeAtencion || !serviceType || totalAmountUSD === undefined) {
         return res.status(400).json({ error: 'Faltan campos requeridos para registrar el pago' });
       }
+
+      // Validar paciente y médico
+      const patient = await User.findByPk(patientId);
+      if (!patient) {
+        return res.status(400).json({ error: 'El paciente seleccionado no existe' });
+      }
+
+      const doctor = await User.findByPk(doctorId);
+      if (!doctor) {
+        return res.status(400).json({ error: 'El médico seleccionado no existe' });
+      }
+
+      // Validar createdById de forma segura sin romper FK
+      let validCreatedById = null;
+      if (req.user && req.user.id) {
+        const creator = await User.findByPk(req.user.id);
+        if (creator) {
+          validCreatedById = creator.id;
+        }
+      }
+
+      // Parsear números de forma segura (soportando comas y puntos)
+      const parseSafe = (val, def = 0) => {
+        if (val === undefined || val === null || val === '') return def;
+        const str = String(val).replace(',', '.');
+        const num = parseFloat(str);
+        return isNaN(num) ? def : num;
+      };
+
+      const numTotalUSD = parseSafe(totalAmountUSD, 0);
+      const numExchangeRate = parseSafe(exchangeRate, 0);
+      const numTotalLocal = totalAmountLocal ? parseSafe(totalAmountLocal, 0) : (numTotalUSD * numExchangeRate);
+      const numUnimecoPerc = parseSafe(unimecoPercentage, 30);
+      const numDoctorPerc = parseSafe(doctorPercentage, 70);
+      const numUnimecoAmt = unimecoAmount !== undefined ? parseSafe(unimecoAmount, 0) : (numTotalUSD * (numUnimecoPerc / 100));
+      const numDoctorAmt = doctorAmount !== undefined ? parseSafe(doctorAmount, 0) : (numTotalUSD * (numDoctorPerc / 100));
+      const numOperativeCosts = parseSafe(operativeCosts, 0);
+      const numIncentives = parseSafe(incentives, 0);
+      const numNetAmount = netAmount !== undefined ? parseSafe(netAmount, 0) : (numUnimecoAmt - numOperativeCosts - numIncentives);
       
       const transaction = await Transaction.create({
-        patientId,
-        doctorId,
+        patientId: patient.id,
+        doctorId: doctor.id,
         sedeAtencion,
         serviceType,
-        totalAmountUSD,
-        exchangeRate,
-        totalAmountLocal,
-        unimecoPercentage,
-        doctorPercentage,
-        unimecoAmount,
-        doctorAmount,
-        operativeCosts,
-        incentives,
-        netAmount,
-        createdById: req.user.id
+        totalAmountUSD: numTotalUSD,
+        exchangeRate: numExchangeRate,
+        totalAmountLocal: numTotalLocal,
+        unimecoPercentage: numUnimecoPerc,
+        doctorPercentage: numDoctorPerc,
+        unimecoAmount: numUnimecoAmt,
+        doctorAmount: numDoctorAmt,
+        operativeCosts: numOperativeCosts,
+        incentives: numIncentives,
+        netAmount: numNetAmount,
+        createdById: validCreatedById
       });
 
       return res.status(201).json({ message: 'Pago registrado exitosamente', transaction });
     } catch (error) {
       console.error('Error al registrar pago:', error);
-      return res.status(500).json({ error: 'Error interno del servidor al registrar pago' });
+      return res.status(500).json({ error: error.message || 'Error interno del servidor al registrar pago' });
     }
   },
 
@@ -57,9 +96,9 @@ module.exports = {
         include: [
           { model: User, as: 'patient', attributes: ['id', 'name', 'username', 'identificationNumber'] },
           { model: User, as: 'doctor', attributes: ['id', 'name', 'username'] },
-          { model: User, as: 'creator', attributes: ['id', 'name', 'username'] }
+          { model: User, as: 'creator', attributes: ['id', 'name', 'username'], required: false }
         ],
-        order: [['created_at', 'DESC']]
+        order: [['id', 'DESC']]
       });
       return res.json(transactions);
     } catch (error) {
@@ -77,7 +116,7 @@ module.exports = {
       
       const transactions = await Transaction.findAll({
         where: {
-          created_at: {
+          createdAt: {
             [Op.between]: [startOfYear, endOfYear]
           }
         }

@@ -28,12 +28,20 @@ function Modulo3_GestionAdministrativa() {
   const [operativeCosts, setOperativeCosts] = useState('0');
   const [incentives, setIncentives] = useState('0');
 
+  // Helper seguro para parsear números con coma o punto
+  const parseNum = (val, def = 0) => {
+    if (val === undefined || val === null || val === '') return def;
+    const str = String(val).replace(',', '.');
+    const num = parseFloat(str);
+    return isNaN(num) ? def : num;
+  };
+
   // Computed states
-  const totalLocal = (parseFloat(totalAmountUSD) || 0) * (parseFloat(exchangeRate) || 0);
-  const grossUSD = parseFloat(totalAmountUSD) || 0;
-  const unimecoAmount = grossUSD * ((parseFloat(unimecoPercentage) || 0) / 100);
-  const doctorAmount = grossUSD * ((parseFloat(doctorPercentage) || 0) / 100);
-  const netUnimecoAmount = unimecoAmount - (parseFloat(operativeCosts) || 0) - (parseFloat(incentives) || 0);
+  const totalLocal = parseNum(totalAmountUSD) * parseNum(exchangeRate);
+  const grossUSD = parseNum(totalAmountUSD);
+  const unimecoAmount = grossUSD * (parseNum(unimecoPercentage) / 100);
+  const doctorAmount = grossUSD * (parseNum(doctorPercentage) / 100);
+  const netUnimecoAmount = unimecoAmount - parseNum(operativeCosts) - parseNum(incentives);
 
   // Data states
   const [patients, setPatients] = useState([]);
@@ -42,6 +50,7 @@ function Modulo3_GestionAdministrativa() {
   const [summary, setSummary] = useState(null);
   
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [loadingRate, setLoadingRate] = useState(false);
   const [bcvDateInfo, setBcvDateInfo] = useState('');
   const [selectedTransactionForPrint, setSelectedTransactionForPrint] = useState(null);
@@ -112,32 +121,45 @@ function Modulo3_GestionAdministrativa() {
     setErrorMsg('');
     setSuccessMsg('');
 
+    if (!patientId) {
+      setErrorMsg('Por favor seleccione un paciente.');
+      return;
+    }
+    if (!doctorId) {
+      setErrorMsg('Por favor seleccione un médico tratante.');
+      return;
+    }
+    if (grossUSD <= 0) {
+      setErrorMsg('El monto total debe ser mayor a 0 USD.');
+      return;
+    }
+
     try {
+      setSubmitting(true);
       const payload = {
         patientId,
         doctorId,
         sedeAtencion,
         serviceType,
         totalAmountUSD: grossUSD,
-        exchangeRate: parseFloat(exchangeRate) || 0,
+        exchangeRate: parseNum(exchangeRate),
         totalAmountLocal: totalLocal,
-        unimecoPercentage: parseFloat(unimecoPercentage) || 0,
-        doctorPercentage: parseFloat(doctorPercentage) || 0,
+        unimecoPercentage: parseNum(unimecoPercentage),
+        doctorPercentage: parseNum(doctorPercentage),
         unimecoAmount,
         doctorAmount,
-        operativeCosts: parseFloat(operativeCosts) || 0,
-        incentives: parseFloat(incentives) || 0,
+        operativeCosts: parseNum(operativeCosts),
+        incentives: parseNum(incentives),
         netAmount: netUnimecoAmount
       };
 
       await api.post('/api/billing/transactions', payload);
-      setSuccessMsg('Pago registrado exitosamente.');
+      setSuccessMsg('Pago registrado y distribuido exitosamente.');
       
       // Reset form
       setPatientId('');
       setDoctorId('');
       setTotalAmountUSD('');
-      setExchangeRate('');
       setOperativeCosts('0');
       setIncentives('0');
 
@@ -145,6 +167,8 @@ function Modulo3_GestionAdministrativa() {
     } catch (err) {
       console.error('Error:', err);
       setErrorMsg(err.response?.data?.error || 'Error al procesar el pago.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -265,12 +289,11 @@ function Modulo3_GestionAdministrativa() {
                   </label>
                   <input 
                     className="input-field" 
-                    type="number" 
-                    step="0.01" 
+                    type="text" 
+                    inputMode="decimal" 
+                    placeholder="0.00"
                     value={exchangeRate} 
                     onChange={(e) => setExchangeRate(e.target.value)} 
-                    onKeyDown={(e) => (e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.preventDefault()}
-                    onWheel={(e) => e.target.blur()}
                     required 
                   />
                 </div>
@@ -307,8 +330,8 @@ function Modulo3_GestionAdministrativa() {
                 </div>
               </div>
 
-              <Button type="submit" fullWidth style={{ marginTop: '0.5rem' }}>
-                Registrar Pago y Distribuir
+              <Button type="submit" fullWidth disabled={submitting} style={{ marginTop: '0.5rem' }}>
+                {submitting ? 'Procesando Pago...' : 'Registrar Pago y Distribuir'}
               </Button>
             </form>
           </Card>

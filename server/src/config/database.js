@@ -254,6 +254,58 @@ const initDatabase = async () => {
           await sequelize.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
         }
       }
+
+      // Asegurar tabla y columnas en transactions
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS transactions (
+          id SERIAL PRIMARY KEY,
+          patient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          doctor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          sede_atencion VARCHAR(100) NOT NULL DEFAULT 'CENTRAL',
+          service_type VARCHAR(150) NOT NULL,
+          total_amount_usd DECIMAL(10, 2) NOT NULL,
+          exchange_rate DECIMAL(12, 4) NOT NULL,
+          total_amount_local DECIMAL(16, 2) NOT NULL,
+          unimeco_percentage DECIMAL(5, 2) NOT NULL,
+          doctor_percentage DECIMAL(5, 2) NOT NULL,
+          unimeco_amount DECIMAL(10, 2) NOT NULL,
+          doctor_amount DECIMAL(10, 2) NOT NULL,
+          operative_costs DECIMAL(10, 2) DEFAULT 0,
+          incentives DECIMAL(10, 2) DEFAULT 0,
+          net_amount DECIMAL(10, 2) NOT NULL,
+          created_by_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+      const [transCols] = await sequelize.query(`
+        SELECT column_name FROM information_schema.columns WHERE table_name = 'transactions';
+      `);
+      const existingTransCols = (transCols || []).map(c => c.column_name.toLowerCase());
+      const neededTransCols = [
+        { name: 'patient_id', type: 'INTEGER' },
+        { name: 'doctor_id', type: 'INTEGER' },
+        { name: 'sede_atencion', type: "VARCHAR(100) DEFAULT 'CENTRAL'" },
+        { name: 'service_type', type: 'VARCHAR(150)' },
+        { name: 'total_amount_usd', type: 'DECIMAL(10, 2)' },
+        { name: 'exchange_rate', type: 'DECIMAL(12, 4)' },
+        { name: 'total_amount_local', type: 'DECIMAL(16, 2)' },
+        { name: 'unimeco_percentage', type: 'DECIMAL(5, 2)' },
+        { name: 'doctor_percentage', type: 'DECIMAL(5, 2)' },
+        { name: 'unimeco_amount', type: 'DECIMAL(10, 2)' },
+        { name: 'doctor_amount', type: 'DECIMAL(10, 2)' },
+        { name: 'operative_costs', type: 'DECIMAL(10, 2) DEFAULT 0' },
+        { name: 'incentives', type: 'DECIMAL(10, 2) DEFAULT 0' },
+        { name: 'net_amount', type: 'DECIMAL(10, 2)' },
+        { name: 'created_by_id', type: 'INTEGER' }
+      ];
+
+      for (const col of neededTransCols) {
+        if (!existingTransCols.includes(col.name.toLowerCase())) {
+          await sequelize.query(`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS ${col.name} ${col.type};`);
+        }
+      }
     } catch (err) {
       console.warn('Aviso comprobación de columnas de base de datos:', err.message);
     }

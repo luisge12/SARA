@@ -42,12 +42,12 @@ const Transaction = sequelize.define('Transaction', {
     field: 'total_amount_usd'
   },
   exchangeRate: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(12, 4),
     allowNull: false,
     field: 'exchange_rate'
   },
   totalAmountLocal: {
-    type: DataTypes.DECIMAL(12, 2),
+    type: DataTypes.DECIMAL(16, 2),
     allowNull: false,
     field: 'total_amount_local'
   },
@@ -88,7 +88,7 @@ const Transaction = sequelize.define('Transaction', {
   },
   createdById: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: User,
       key: 'id'
