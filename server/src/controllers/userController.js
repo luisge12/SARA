@@ -78,6 +78,10 @@ module.exports = {
         return res.status(404).json({ error: 'El usuario ingresado no existe en el sistema.' });
       }
 
+      if (!user.passwordHash) {
+        return res.status(401).json({ error: 'El usuario no tiene una contraseña asignada válida.' });
+      }
+
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) {
         return res.status(401).json({ error: 'La contraseña ingresada es incorrecta. Verifique sus datos.' });

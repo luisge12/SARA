@@ -1,5 +1,5 @@
 // Configuración de la Base de Datos PostgreSQL con Sequelize para SARA
-const { Sequelize } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 
 // Leer variables de entorno
 const dbHost = process.env.DB_HOST;
@@ -410,8 +410,10 @@ const initDatabase = async () => {
         defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
       });
       console.log('Paciente (luisge) creado exitosamente.');
-    } else if (luisgeExists.role === 'SuperMaster') {
-      await luisgeExists.update({ role: 'Paciente', name: 'Luis González', clinicId: 1 });
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash('1234', salt);
+      await luisgeExists.update({ passwordHash, role: 'Paciente', name: 'Luis González', clinicId: 1 });
       await PatientProfile.findOrCreate({
         where: { userId: luisgeExists.id },
         defaults: { gender: 'Masculino', phone: '+58 412 1234567' }
