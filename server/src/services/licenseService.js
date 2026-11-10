@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 const Clinic = require('../models/Clinic');
 const LicenseKey = require('../models/LicenseKey');
 
@@ -383,7 +384,29 @@ class LicenseService {
    * Crear nueva clínica institucional
    */
   static async createClinic({ name, rif, planType = 'MONTHLY', initialDays = 30, maxDoctors = 10 }) {
-    if (!name) throw new Error('El nombre de la clínica es requerido');
+    if (!name || !name.trim()) throw new Error('El nombre de la clínica es requerido');
+    if (!rif || !rif.trim()) throw new Error('El RIF de la clínica es obligatorio');
+
+    const cleanRif = rif.trim().toUpperCase();
+    const rawRif = cleanRif.replace(/[-\s]/g, '');
+
+    // Validar unicidad del RIF
+    const existingRif = await Clinic.findOne({
+      where: {
+        [Op.or]: [
+          Clinic.sequelize.where(Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), cleanRif),
+          Clinic.sequelize.where(
+            Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), '-', ''), ' ', ''),
+            rawRif
+          )
+        ]
+      }
+    });
+
+    if (existingRif) {
+      throw new Error(`El RIF "${cleanRif}" ya está registrado en el sistema para la clínica "${existingRif.name}" (ID: ${existingRif.id}).`);
+    }
+
     const now = new Date();
     let expiresAt;
     if (planType === 'ANNUAL') {
@@ -396,8 +419,8 @@ class LicenseService {
     }
 
     const clinic = await Clinic.create({
-      name,
-      rif: rif || null,
+      name: name.trim(),
+      rif: cleanRif,
       planType,
       licenseStatus: 'ACTIVE',
       expiresAt,
@@ -414,8 +437,31 @@ class LicenseService {
     const clinic = await Clinic.findByPk(id);
     if (!clinic) throw new Error('Clínica no encontrada');
 
-    if (data.name !== undefined) clinic.name = data.name;
-    if (data.rif !== undefined) clinic.rif = data.rif;
+    if (data.name !== undefined && data.name) clinic.name = data.name.trim();
+
+    if (data.rif !== undefined && data.rif && data.rif.trim()) {
+      const cleanRif = data.rif.trim().toUpperCase();
+      const rawRif = cleanRif.replace(/[-\s]/g, '');
+
+      const existingRif = await Clinic.findOne({
+        where: {
+          id: { [Op.ne]: id },
+          [Op.or]: [
+            Clinic.sequelize.where(Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), cleanRif),
+            Clinic.sequelize.where(
+              Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), '-', ''), ' ', ''),
+              rawRif
+            )
+          ]
+        }
+      });
+
+      if (existingRif) {
+        throw new Error(`El RIF "${cleanRif}" ya está en uso por la clínica "${existingRif.name}" (ID: ${existingRif.id}).`);
+      }
+      clinic.rif = cleanRif;
+    }
+
     if (data.planType !== undefined) clinic.planType = data.planType;
     if (data.maxDoctors !== undefined) clinic.maxDoctors = parseInt(data.maxDoctors) || clinic.maxDoctors;
     if (data.licenseStatus !== undefined) clinic.licenseStatus = data.licenseStatus;

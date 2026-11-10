@@ -236,6 +236,32 @@ module.exports = {
         return res.status(400).json({ error: 'El nombre de usuario y la contraseña son requeridos.' });
       }
 
+      if (!clinicRif || !clinicRif.trim()) {
+        return res.status(400).json({ error: 'El RIF de la clínica es obligatorio para registrar la institución.' });
+      }
+
+      const cleanRif = clinicRif.trim().toUpperCase();
+      const rawRif = cleanRif.replace(/[-\s]/g, '');
+
+      // Validar si el RIF ya existe en la base de datos para rebotar la creación
+      const existingClinicByRif = await Clinic.findOne({
+        where: {
+          [Op.or]: [
+            Clinic.sequelize.where(Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), cleanRif),
+            Clinic.sequelize.where(
+              Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('REPLACE', Clinic.sequelize.fn('UPPER', Clinic.sequelize.col('rif')), '-', ''), ' ', ''),
+              rawRif
+            )
+          ]
+        }
+      });
+
+      if (existingClinicByRif) {
+        return res.status(400).json({
+          error: `El RIF "${cleanRif}" ya está registrado en la base de datos para la clínica "${existingClinicByRif.name}" (ID: ${existingClinicByRif.id}). Operación rechazada para evitar clínicas o Masters duplicados.`
+        });
+      }
+
       const existingUser = await User.findOne({ where: { username: username.trim() } });
       if (existingUser) {
         return res.status(400).json({ error: `El nombre de usuario "${username}" ya está registrado en el sistema.` });
@@ -262,18 +288,19 @@ module.exports = {
 
           targetClinic = await Clinic.create({
             name: cleanClinicName,
-            rif: clinicRif ? clinicRif.trim() : null,
+            rif: cleanRif,
             planType: 'MONTHLY',
             licenseStatus: 'ACTIVE',
             expiresAt: initialExpiration,
             activeLicenseKey: `SARA-NEW-${Date.now().toString(36).toUpperCase()}`,
             maxDoctors: 15
           });
-          console.log(`[SuperMaster] Nueva clínica creada: "${targetClinic.name}" (ID: ${targetClinic.id})`);
-        } else if (clinicRif && clinicRif.trim() && !targetClinic.rif) {
-          // Si existía pero no tenía RIF, actualizamos su RIF
-          targetClinic.rif = clinicRif.trim();
-          await targetClinic.save();
+          console.log(`[SuperMaster] Nueva clínica creada: "${targetClinic.name}" (ID: ${targetClinic.id}) con RIF ${cleanRif}`);
+        } else {
+          // Si el nombre ya existía con otro RIF, rebotar para no asociar dos clínicas con datos contradictorios
+          return res.status(400).json({
+            error: `Ya existe una clínica con el nombre "${targetClinic.name}" (ID: ${targetClinic.id}). Debe usar un nombre institucional y RIF únicos.`
+          });
         }
       } else if (clinicId) {
         targetClinic = await Clinic.findByPk(parseInt(clinicId));

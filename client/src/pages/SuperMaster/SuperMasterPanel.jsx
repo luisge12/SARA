@@ -136,6 +136,14 @@ export default function SuperMasterPanel() {
   // Crear Usuario Master y Clínica
   const handleCreateMaster = async (e) => {
     e.preventDefault();
+    if (!newClinicRif.trim()) {
+      setMasterMsg({
+        type: 'error',
+        text: 'El RIF de la clínica es obligatorio para registrar la institución.'
+      });
+      return;
+    }
+
     setMasterMsg({ type: '', text: '', data: null });
     setCreatingMaster(true);
 
@@ -771,13 +779,14 @@ export default function SuperMasterPanel() {
                   {/* RIF de la Clínica */}
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--portal-text-muted)', marginBottom: '0.4rem', fontWeight: 600 }}>
-                      RIF de la Clínica (Opcional):
+                      RIF de la Clínica (Obligatorio y Único):
                     </label>
                     <input 
                       type="text"
                       placeholder="ej: J-12345678-9"
                       value={newClinicRif}
-                      onChange={(e) => setNewClinicRif(e.target.value)}
+                      onChange={(e) => setNewClinicRif(e.target.value.toUpperCase())}
+                      required
                       style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--portal-border)', background: '#090e17', color: '#fff' }}
                     />
                   </div>
