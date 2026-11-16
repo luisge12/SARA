@@ -92,7 +92,7 @@ export function Login() {
     
     try {
       const response = await api.post('/api/users/login', { username, password });
-      const { token, user } = response.data;
+      const { token, user, license } = response.data;
       
       // Bloqueo de Pacientes en la App Principal (Clínica)
       if (user.role === 'Paciente') {
@@ -128,7 +128,11 @@ export function Login() {
       }
     } catch (err) {
       console.error('Error de login:', err);
-      const errMsg = err.response?.data?.error || 'Error de conexión con el servidor backend';
+      const errMsg = err.response?.data?.error 
+        || err.response?.data?.message 
+        || (typeof err.response?.data === 'string' ? err.response.data : null)
+        || err.message 
+        || 'Error de conexión con el servidor backend';
       setErrorMsg(errMsg);
     }
   };
