@@ -1,7 +1,22 @@
 import axios from 'axios';
 
+export const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    // Si estamos en entorno local de desarrollo (localhost o 127.0.0.1)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:4000';
+    }
+    // En producción (Contabo VPS, dominio o IP remota), usar el mismo origin (ej. http://213.199.33.120)
+    return window.location.origin;
+  }
+  return 'http://localhost:4000';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
+  baseURL: getBaseURL(),
   withCredentials: true // Permite enviar y recibir Cookies HttpOnly seguras
 });
 
@@ -65,7 +80,7 @@ api.interceptors.response.use(
 export default api;
 
 export const portalApi = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
+  baseURL: getBaseURL(),
   withCredentials: true
 });
 
