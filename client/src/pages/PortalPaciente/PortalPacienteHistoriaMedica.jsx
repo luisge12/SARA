@@ -338,37 +338,30 @@ export function PortalPacienteHistoriaMedica() {
           backgroundColor: 'rgba(42, 183, 202, 0.08)',
           border: '1px solid var(--color-primary)',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '1rem 1.25rem',
           marginBottom: '1.5rem',
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
+          gap: '0.85rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', maxWidth: '750px' }}>
-            <Activity size={28} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong style={{ color: 'var(--color-primary)', fontSize: '1.05rem', display: 'block', marginBottom: '0.2rem' }}>
-                Completa tu Historia Clínica y Anamnesis
-              </strong>
-              <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.88rem', lineHeight: '1.4' }}>
-                Completa tus antecedentes médicos familiares, hábitos, patologías, alergias, cirugías y motivo de consulta. Toda la información que ingreses aquí será consultada directamente por tu médico tratante en la clínica.
-              </p>
-            </div>
+          <Activity size={24} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+          <div>
+            <strong style={{ color: 'var(--color-primary)', fontSize: '0.95rem', display: 'block', marginBottom: '0.15rem' }}>
+              Completa tu Historia Clínica y Anamnesis
+            </strong>
+            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.85rem', lineHeight: '1.4' }}>
+              Completa tus antecedentes familiares, hábitos, patologías, alergias, cirugías y motivo de consulta usando el botón <strong>"Llenar / Modificar Historia"</strong>. Toda la información será consultada directamente por tu médico tratante en la clínica.
+            </p>
           </div>
-          <Button variant="primary" onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Edit3 size={16} /> Llenar / Modificar Historia
-          </Button>
         </div>
       )}
 
       <div className="historia-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>Historia Médica del Paciente</h1>
-          <p>Consulta tus datos clínicos y actualiza tus antecedentes para tu próxima consulta médica.</p>
+          <p>Consulta tus datos clínicos y mantén actualizados tus antecedentes para tus consultas médicas.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
           {isEditing ? (
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>Cancelar</Button>
@@ -379,7 +372,7 @@ export function PortalPacienteHistoriaMedica() {
           ) : (
             <>
               <Button variant="primary" onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Edit3 size={16} /> Actualizar mi Historia
+                <Edit3 size={16} /> Llenar / Modificar Historia
               </Button>
               <Button 
                 variant="outline" 
