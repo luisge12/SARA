@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Lock, User, AlertCircle } from 'lucide-react';
+import { Activity, Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { portalApi } from '../../services/api';
 
 const MedicalCrossBg = () => (
@@ -23,6 +23,7 @@ const CornerCircles = () => (
 export function PortalPacienteLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
@@ -91,17 +92,41 @@ export function PortalPacienteLogin() {
           </div>
           
           <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+            <div style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', pointerEvents: 'none' }}>
               <Lock size={18} />
             </div>
             <input 
-              type="password" 
+              type={showPassword ? "text" : "password"} 
               placeholder="Contraseña" 
               value={password} 
               onChange={e => { setPassword(e.target.value); setErrorMsg(''); }} 
               required 
-              style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 3rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' }}
+              style={{ width: '100%', padding: '0.75rem 2.8rem 0.75rem 3rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--color-bg-card)', color: 'var(--color-text-main)' }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(prev => !prev)}
+              tabIndex={-1}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+              title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: '0.75rem',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                padding: '0.25rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: showPassword ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                borderRadius: '6px'
+              }}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
           
           <button type="submit" style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', fontSize: '1rem' }}>

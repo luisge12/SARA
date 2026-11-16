@@ -35,6 +35,10 @@
   padding-left: 2.5rem;
 }
 
+.input-field.has-right-element {
+  padding-right: 2.75rem;
+}
+
 .input-icon {
   position: absolute;
   left: 0.75rem;
@@ -42,6 +46,15 @@
   display: flex;
   align-items: center;
   pointer-events: none;
+}
+
+.input-right-element {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .input-field:focus {

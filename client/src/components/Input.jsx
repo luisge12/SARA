@@ -5,6 +5,7 @@ export const Input = React.forwardRef(({
   label, 
   error, 
   icon,
+  rightElement,
   className = '', 
   type,
   onKeyDown,
@@ -35,9 +36,10 @@ export const Input = React.forwardRef(({
           type={type}
           onKeyDown={handleKeyDown}
           onWheel={handleWheel}
-          className={`input-field ${icon ? 'has-icon' : ''} ${error ? 'input-error' : ''}`} 
+          className={`input-field ${icon ? 'has-icon' : ''} ${rightElement ? 'has-right-element' : ''} ${error ? 'input-error' : ''}`} 
           {...props} 
         />
+        {rightElement && <span className="input-right-element">{rightElement}</span>}
       </div>
       {error && <span className="input-error-msg">{error}</span>}
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, User, AlertTriangle, ExternalLink, X, AlertCircle } from 'lucide-react';
+import { Lock, User, AlertTriangle, ExternalLink, X, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import api from '../services/api';
@@ -44,6 +44,7 @@ export function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [showPatientModal, setShowPatientModal] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
@@ -195,9 +196,40 @@ export function Login() {
           
           <Input 
             label="Contraseña"
-            type="password" 
+            type={showPassword ? 'text' : 'password'} 
             placeholder="••••••••" 
             icon={<Lock size={18} />}
+            rightElement={
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '0.25rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: showPassword ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                  borderRadius: '6px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary)';
+                  e.currentTarget.style.backgroundColor = 'rgba(42, 183, 202, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = showPassword ? 'var(--color-primary)' : 'var(--color-text-muted)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
             value={password}
             onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
             required
