@@ -463,7 +463,7 @@ export function PortalPacienteHistoriaMedica() {
               {/* ANTECEDENTES HEREDOFAMILIARES */}
               <div className="hm-form-group">
                 <h3>ANTECEDENTES HEREDOFAMILIARES</h3>
-                <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '-0.25rem', marginBottom: '0.85rem' }}>
+                <p style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 500, marginTop: '-0.25rem', marginBottom: '0.85rem' }}>
                   ¿Algún familiar directo (padres, abuelos o hermanos) padece o ha padecido alguna de estas condiciones?
                 </p>
 
