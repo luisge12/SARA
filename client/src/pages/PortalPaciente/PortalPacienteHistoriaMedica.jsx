@@ -630,36 +630,6 @@ export function PortalPacienteHistoriaMedica() {
                 </div>
               </div>
 
-              {/* INTERROGATORIO POR APARATOS Y SISTEMAS */}
-              <div className="hm-form-group">
-                <h3>INTERROGATORIO POR APARATOS Y SISTEMAS</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                  {[
-                    { id: 'respiratorio', label: 'Aparato Respiratorio' },
-                    { id: 'digestivo', label: 'Aparato Digestivo' },
-                    { id: 'cardiovascular', label: 'Aparato Cardiovascular' },
-                    { id: 'renal', label: 'Aparato Renal y Urinario' },
-                    { id: 'genital', label: 'Aparato Genital' },
-                    { id: 'endocrino', label: 'Sistema Endocrino' },
-                    { id: 'hematopoyetico', label: 'Sistema Hematopoyético y Linfático' },
-                    { id: 'piel', label: 'Piel y Anexos' },
-                    { id: 'musculo', label: 'Músculo Esquelético' },
-                    { id: 'nervioso', label: 'Sistema Nervioso' },
-                    { id: 'sentidos', label: 'Órganos de los Sentidos' },
-                    { id: 'generales', label: 'Síntomas Generales' }
-                  ].map(sys => (
-                    <div key={sys.id} className="hm-data-item">
-                      <label>{sys.label}</label>
-                      {isEditing ? (
-                        <input type="text" className="hm-input" value={formData.aparatosSistemas[sys.id]} onChange={e => handleNestedChange('aparatosSistemas', null, sys.id, e.target.value)} />
-                      ) : (
-                        <p>{formData.aparatosSistemas?.[sys.id] || '-'}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {isEditing && (
                 <div style={{
                   display: 'flex',

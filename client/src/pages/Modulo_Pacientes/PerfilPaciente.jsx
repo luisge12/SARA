@@ -672,22 +672,6 @@ export default function PerfilPaciente() {
                         </div>
                       </div>
 
-                      {/* Interrogatorio por aparatos y sistemas */}
-                      {profile.customFields?.aparatosSistemas && (
-                        <div>
-                          <span className="ficha-item-label">Interrogatorio por Aparatos y Sistemas (Síntomas Reportados)</span>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
-                            {Object.entries(profile.customFields.aparatosSistemas).map(([sys, val]) => val ? (
-                              <div key={sys} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>
-                                <strong style={{ textTransform: 'capitalize', color: '#0369a1' }}>{sys}:</strong> <span style={{ color: '#1e293b' }}>{val}</span>
-                              </div>
-                            ) : null)}
-                            {Object.values(profile.customFields.aparatosSistemas).every(v => !v) && (
-                              <span style={{ color: '#64748b' }}>Sin síntomas particulares reportados por aparatos.</span>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
