@@ -4,15 +4,10 @@ export const getBaseURL = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  if (typeof window !== 'undefined') {
-    // Si estamos en entorno local de desarrollo (localhost o 127.0.0.1)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:4000';
-    }
-    // En producción (Contabo VPS, dominio o IP remota), usar el mismo origin (ej. http://213.199.33.120)
-    return window.location.origin;
-  }
-  return 'http://localhost:4000';
+  // En desarrollo, Vite (vite.config.js proxy) reenvía las rutas /api automáticamente a :4000.
+  // En producción (Contabo VPS / dominio), Nginx reenvía las rutas /api automáticamente a :4000.
+  // Usar ruta relativa '' garantiza cero fallos de CORS, resolución IPv6 vs IPv4 o puertos bloqueados.
+  return '';
 };
 
 const api = axios.create({
