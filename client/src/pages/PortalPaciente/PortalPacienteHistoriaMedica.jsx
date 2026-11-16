@@ -506,20 +506,81 @@ export function PortalPacienteHistoriaMedica() {
               <div className="hm-form-group">
                 <h3>ANTECEDENTES PERSONALES NO PATOLOGICOS</h3>
                 <h4>1) Hábitos Tóxicos:</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                  {['alcohol', 'tabaco', 'drogas'].map(hab => (
-                    <div key={hab} className="hm-data-item">
-                      <label style={{ textTransform: 'capitalize' }}>{hab}</label>
-                      {isEditing ? <input type="text" className="hm-input" value={formData.noPatologicos.toxicos[hab]} onChange={e => handleNestedChange('noPatologicos', 'toxicos', hab, e.target.value)} /> : <p>{formData.noPatologicos?.toxicos?.[hab] || '-'}</p>}
-                    </div>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                  {[
+                    { id: 'alcohol', label: 'Consume Alcohol' },
+                    { id: 'tabaco', label: 'Fuma Tabaco / Cigarrillo' },
+                    { id: 'drogas', label: 'Uso de Drogas / Sustancias' }
+                  ].map(hab => {
+                    const currentVal = formData.noPatologicos?.toxicos?.[hab.id] || '';
+                    const isYes = currentVal.toLowerCase().startsWith('sí') || currentVal.toLowerCase().startsWith('si') || currentVal.toLowerCase() === 'true';
+
+                    return (
+                      <div key={hab.id} className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>{hab.label}</label>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.35rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleNestedChange('noPatologicos', 'toxicos', hab.id, 'No')}
+                                className={`hm-checkbox-label ${!isYes ? 'is-checked' : ''}`}
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.45rem', fontSize: '0.85rem' }}
+                              >
+                                No
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleNestedChange('noPatologicos', 'toxicos', hab.id, 'Sí')}
+                                className={`hm-checkbox-label ${isYes ? 'is-checked' : ''}`}
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.45rem', fontSize: '0.85rem' }}
+                              >
+                                Sí
+                              </button>
+                            </div>
+                            {isYes && (
+                              <input 
+                                type="text" 
+                                placeholder={hab.id === 'tabaco' ? '¿Cuántos al día?' : 'Detalle o frecuencia...'} 
+                                className="hm-input" 
+                                value={currentVal.startsWith('Sí: ') ? currentVal.replace('Sí: ', '') : (currentVal === 'Sí' ? '' : currentVal)}
+                                onChange={e => handleNestedChange('noPatologicos', 'toxicos', hab.id, e.target.value ? `Sí: ${e.target.value}` : 'Sí')}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{ margin: '0.25rem 0', fontWeight: 600, color: isYes ? '#dc2626' : '#16a34a', fontSize: '0.9rem' }}>
+                            {currentVal || 'No reportado'}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <h4>2) Fisiológicos:</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                  {['alimentacion', 'dipsia', 'diuresis', 'catarsis', 'somnia', 'otros'].map(fis => (
-                    <div key={fis} className="hm-data-item">
-                      <label style={{ textTransform: 'capitalize' }}>{fis}</label>
-                      {isEditing ? <input type="text" className="hm-input" value={formData.noPatologicos.fisiologicos[fis]} onChange={e => handleNestedChange('noPatologicos', 'fisiologicos', fis, e.target.value)} /> : <p>{formData.noPatologicos?.fisiologicos?.[fis] || '-'}</p>}
+
+                <h4>2) Hábitos Fisiológicos y Diarios:</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                  {[
+                    { id: 'alimentacion', label: 'Alimentación / Comidas', placeholder: 'Ej: 3 comidas al día, balanceada' },
+                    { id: 'dipsia', label: 'Consumo de Agua (Sed)', placeholder: 'Ej: Normal, aprox. 2 litros al día' },
+                    { id: 'diuresis', label: 'Hábito al Orinar', placeholder: 'Ej: Normal, 4 a 5 veces al día' },
+                    { id: 'catarsis', label: 'Evacuación Intestinal', placeholder: 'Ej: Normal, 1 vez al día' },
+                    { id: 'somnia', label: 'Horas / Calidad de Sueño', placeholder: 'Ej: 7 a 8 horas, sin insomnio' },
+                    { id: 'otros', label: 'Actividad Física / Otros', placeholder: 'Ej: Ejercicio 3 veces por semana o sedentario' }
+                  ].map(fis => (
+                    <div key={fis.id} className="hm-data-item">
+                      <label>{fis.label}</label>
+                      {isEditing ? (
+                        <input 
+                          type="text" 
+                          placeholder={fis.placeholder}
+                          className="hm-input" 
+                          value={formData.noPatologicos.fisiologicos[fis.id]} 
+                          onChange={e => handleNestedChange('noPatologicos', 'fisiologicos', fis.id, e.target.value)} 
+                        />
+                      ) : (
+                        <p>{formData.noPatologicos?.fisiologicos?.[fis.id] || '-'}</p>
+                      )}
                     </div>
                   ))}
                 </div>
