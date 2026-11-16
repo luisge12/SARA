@@ -158,23 +158,37 @@ export function PortalPacienteHistoriaMedica() {
         formData.heredofamiliares?.padres?.causas ? `Causas en padres: ${formData.heredofamiliares.padres.causas}` : null
       ].filter(Boolean).join('. ') || 'Sin antecedentes familiares reportados por el paciente.';
 
+      const cleanPat = (val) => {
+        if (!val || val.toLowerCase() === 'no' || val.toLowerCase().startsWith('niega')) return null;
+        return val.startsWith('Sí: ') ? val.replace('Sí: ', '') : (val === 'Sí' ? 'Sí' : val);
+      };
+
       const enfPat = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
         .filter(e => formData.patologicos?.enfermedades?.[e])
         .join(', ');
       const patOtras = formData.patologicos?.enfermedades?.otrasDetalle 
         ? `Otras: ${formData.patologicos.enfermedades.otrasDetalle}` 
         : '';
+      const alergiasClean = cleanPat(formData.patologicos?.alergicos);
+      const traumClean = cleanPat(formData.patologicos?.traumatologicos);
+      const otrosClean = cleanPat(formData.patologicos?.otros);
+      const infClean = cleanPat(formData.patologicos?.infancia);
+      const adClean = cleanPat(formData.patologicos?.adulto);
+
       const summaryPersonal = [
         enfPat ? `Patologías: ${enfPat}` : null,
         patOtras || null,
-        formData.patologicos?.alergicos ? `Alergias: ${formData.patologicos.alergicos}` : null,
-        formData.patologicos?.traumatologicos ? `Traumatismos: ${formData.patologicos.traumatologicos}` : null,
-        formData.patologicos?.infancia ? `Infancia: ${formData.patologicos.infancia}` : null,
-        formData.patologicos?.adulto ? `Adulto: ${formData.patologicos.adulto}` : null
+        alergiasClean ? `Alergias: ${alergiasClean}` : null,
+        traumClean ? `Traumatismos: ${traumClean}` : null,
+        otrosClean ? `Otros: ${otrosClean}` : null,
+        infClean ? `Infancia: ${infClean}` : null,
+        adClean ? `Adulto: ${adClean}` : null
       ].filter(Boolean).join('. ') || 'Sin antecedentes patológicos reportados por el paciente.';
 
-      const summarySurgical = formData.patologicos?.quirurgicos 
-        || (formData.gineco?.cirugias ? `Ginecológicas: ${formData.gineco.cirugias}` : null) 
+      const quirurgicosClean = cleanPat(formData.patologicos?.quirurgicos);
+      const ginecoCirugiasClean = cleanPat(formData.gineco?.cirugias);
+      const summarySurgical = quirurgicosClean 
+        || (ginecoCirugiasClean ? `Ginecológicas: ${ginecoCirugiasClean}` : null) 
         || 'Niega antecedentes quirúrgicos.';
 
       const dataToSave = {
@@ -619,13 +633,57 @@ export function PortalPacienteHistoriaMedica() {
                   </p>
                 )}
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                  {['quirurgicos', 'traumatologicos', 'alergicos', 'otros'].map(pat => (
-                    <div key={pat} className="hm-data-item">
-                      <label style={{ textTransform: 'capitalize' }}>{pat}</label>
-                      {isEditing ? <input type="text" className="hm-input" value={formData.patologicos[pat]} onChange={e => handleNestedChange('patologicos', null, pat, e.target.value)} /> : <p>{formData.patologicos?.[pat] || '-'}</p>}
-                    </div>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+                  {[
+                    { id: 'quirurgicos', label: 'Cirugías Previas', placeholder: '¿Cuáles y hace cuánto tiempo? (Ej: Apendicectomía hace 3 años)' },
+                    { id: 'alergicos', label: 'Alergias (Medicamentos / Alimentos)', placeholder: '¿A qué sustancias? (Ej: Penicilina, AINEs, Mariscos)' },
+                    { id: 'traumatologicos', label: 'Traumatismos o Fracturas', placeholder: '¿Cuáles lesiones? (Ej: Fractura de clavícula)' },
+                    { id: 'otros', label: 'Otros Antecedentes Clínicos', placeholder: 'Cualquier otro antecedente relevante...' }
+                  ].map(pat => {
+                    const currentVal = formData.patologicos?.[pat.id] || '';
+                    const isYes = currentVal && !['no', 'niega'].includes(currentVal.toLowerCase()) && !currentVal.toLowerCase().startsWith('no');
+
+                    return (
+                      <div key={pat.id} className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>{pat.label}</label>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.35rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleNestedChange('patologicos', null, pat.id, 'No')}
+                                className={`hm-checkbox-label ${!isYes && currentVal ? 'is-checked' : ''}`}
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.45rem', fontSize: '0.85rem' }}
+                              >
+                                No
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleNestedChange('patologicos', null, pat.id, 'Sí')}
+                                className={`hm-checkbox-label ${isYes ? 'is-checked' : ''}`}
+                                style={{ flex: 1, justifyContent: 'center', padding: '0.45rem', fontSize: '0.85rem' }}
+                              >
+                                Sí
+                              </button>
+                            </div>
+                            {isYes && (
+                              <input 
+                                type="text" 
+                                placeholder={pat.placeholder} 
+                                className="hm-input" 
+                                value={currentVal.startsWith('Sí: ') ? currentVal.replace('Sí: ', '') : (currentVal === 'Sí' ? '' : currentVal)}
+                                onChange={e => handleNestedChange('patologicos', null, pat.id, e.target.value ? `Sí: ${e.target.value}` : 'Sí')}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{ margin: '0.25rem 0', fontWeight: 600, color: isYes ? '#dc2626' : (currentVal ? '#16a34a' : 'inherit'), fontSize: '0.9rem' }}>
+                            {currentVal || 'No reportado'}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
