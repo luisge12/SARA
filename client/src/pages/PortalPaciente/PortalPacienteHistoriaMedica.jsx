@@ -481,15 +481,15 @@ export function PortalPacienteHistoriaMedica() {
                 </div>
                 <label>Enfermedades Familiares:</label>
                 {isEditing ? (
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     {['diabetes', 'hipertension', 'tuberculosis', 'cancer', 'otras'].map(enf => (
-                      <label key={enf} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', textTransform: 'capitalize' }}>
+                      <label key={enf} className={`hm-checkbox-label ${formData.heredofamiliares.enfermedades[enf] ? 'is-checked' : ''}`} style={{ textTransform: 'capitalize' }}>
                         <input type="checkbox" checked={formData.heredofamiliares.enfermedades[enf]} onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', enf, e.target.checked)} />
                         {enf}
                       </label>
                     ))}
                     {formData.heredofamiliares.enfermedades.otras && (
-                      <input type="text" placeholder="Especificar..." className="hm-input" value={formData.heredofamiliares.enfermedades.otrasDetalle} onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', 'otrasDetalle', e.target.value)} />
+                      <input type="text" placeholder="Especificar otra enfermedad..." className="hm-input" style={{ maxWidth: '280px' }} value={formData.heredofamiliares.enfermedades.otrasDetalle} onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', 'otrasDetalle', e.target.value)} />
                     )}
                   </div>
                 ) : (
@@ -538,15 +538,15 @@ export function PortalPacienteHistoriaMedica() {
                 </div>
                 <label>Enfermedades Padecidas:</label>
                 {isEditing ? (
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center' }}>
                     {['diabetes', 'hipertension', 'tuberculosis', 'cancer', 'otras'].map(enf => (
-                      <label key={enf} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', textTransform: 'capitalize' }}>
+                      <label key={enf} className={`hm-checkbox-label ${formData.patologicos.enfermedades[enf] ? 'is-checked' : ''}`} style={{ textTransform: 'capitalize' }}>
                         <input type="checkbox" checked={formData.patologicos.enfermedades[enf]} onChange={e => handleNestedChange('patologicos', 'enfermedades', enf, e.target.checked)} />
                         {enf}
                       </label>
                     ))}
                     {formData.patologicos.enfermedades.otras && (
-                      <input type="text" placeholder="Especificar..." className="hm-input" value={formData.patologicos.enfermedades.otrasDetalle} onChange={e => handleNestedChange('patologicos', 'enfermedades', 'otrasDetalle', e.target.value)} />
+                      <input type="text" placeholder="Especificar otra patología..." className="hm-input" style={{ maxWidth: '280px' }} value={formData.patologicos.enfermedades.otrasDetalle} onChange={e => handleNestedChange('patologicos', 'enfermedades', 'otrasDetalle', e.target.value)} />
                     )}
                   </div>
                 ) : (
@@ -587,14 +587,16 @@ export function PortalPacienteHistoriaMedica() {
                   <div className="hm-data-item" style={{ marginBottom: '1rem' }}>
                     <label>Anticonceptivos</label>
                     {isEditing ? (
-                      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <label><input type="checkbox" checked={formData.gineco.anticonceptivos} onChange={e => handleNestedChange('gineco', null, 'anticonceptivos', e.target.checked)} /> Usa</label>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <label className={`hm-checkbox-label ${formData.gineco.anticonceptivos ? 'is-checked' : ''}`}>
+                          <input type="checkbox" checked={formData.gineco.anticonceptivos} onChange={e => handleNestedChange('gineco', null, 'anticonceptivos', e.target.checked)} /> Usa Anticonceptivos
+                        </label>
                         {formData.gineco.anticonceptivos && (
-                          <>
-                            <input type="text" placeholder="Tipo" className="hm-input" value={formData.gineco.antiTipo} onChange={e => handleNestedChange('gineco', null, 'antiTipo', e.target.value)} />
-                            <input type="text" placeholder="Tiempo" className="hm-input" value={formData.gineco.antiTiempo} onChange={e => handleNestedChange('gineco', null, 'antiTiempo', e.target.value)} />
-                            <input type="text" placeholder="Última toma" className="hm-input" value={formData.gineco.antiUltima} onChange={e => handleNestedChange('gineco', null, 'antiUltima', e.target.value)} />
-                          </>
+                          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flexGrow: 1 }}>
+                            <input type="text" placeholder="Tipo (Pastillas, DIU, etc.)" className="hm-input" style={{ flex: '1 1 180px' }} value={formData.gineco.antiTipo} onChange={e => handleNestedChange('gineco', null, 'antiTipo', e.target.value)} />
+                            <input type="text" placeholder="Tiempo de uso" className="hm-input" style={{ flex: '1 1 140px' }} value={formData.gineco.antiTiempo} onChange={e => handleNestedChange('gineco', null, 'antiTiempo', e.target.value)} />
+                            <input type="text" placeholder="Última toma / colocación" className="hm-input" style={{ flex: '1 1 180px' }} value={formData.gineco.antiUltima} onChange={e => handleNestedChange('gineco', null, 'antiUltima', e.target.value)} />
+                          </div>
                         )}
                       </div>
                     ) : (

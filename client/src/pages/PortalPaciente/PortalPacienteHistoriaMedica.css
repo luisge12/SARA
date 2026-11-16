@@ -143,3 +143,114 @@
   color: var(--color-text-muted);
   font-weight: 500;
 }
+
+/* ==========================================================================
+   ESTILOS UNIFICADOS PARA INPUTS Y FORMULARIOS (SARA PATIENT PORTAL)
+   ========================================================================== */
+.hm-input,
+.hm-textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0f172a;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md, 8px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.hm-input:focus,
+.hm-textarea:focus {
+  border-color: var(--color-primary, #2ab7ca);
+  box-shadow: 0 0 0 3px rgba(42, 183, 202, 0.18);
+  background-color: #ffffff;
+}
+
+.hm-input::placeholder,
+.hm-textarea::placeholder {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.hm-input:hover,
+.hm-textarea:hover {
+  border-color: #94a3b8;
+}
+
+.hm-textarea {
+  resize: vertical;
+  min-height: 95px;
+  line-height: 1.5;
+}
+
+/* Grupos y Bloques de Formulario */
+.hm-form-group {
+  background: rgba(248, 250, 252, 0.85);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hm-form-group h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-primary, #2ab7ca);
+  letter-spacing: 0.5px;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-transform: uppercase;
+}
+
+.hm-form-group h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0.5rem 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Checkbox estilizados tipo tag/botón */
+.hm-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.hm-checkbox-label:hover {
+  border-color: var(--color-primary, #2ab7ca);
+  background-color: rgba(42, 183, 202, 0.05);
+}
+
+.hm-checkbox-label.is-checked {
+  background-color: rgba(42, 183, 202, 0.12);
+  border-color: var(--color-primary, #2ab7ca);
+  color: var(--color-primary, #2ab7ca);
+  font-weight: 600;
+}
+
+.hm-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary, #2ab7ca);
+  cursor: pointer;
+  margin: 0;
+}
