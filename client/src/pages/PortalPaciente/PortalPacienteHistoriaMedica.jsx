@@ -158,37 +158,23 @@ export function PortalPacienteHistoriaMedica() {
         formData.heredofamiliares?.padres?.causas ? `Causas en padres: ${formData.heredofamiliares.padres.causas}` : null
       ].filter(Boolean).join('. ') || 'Sin antecedentes familiares reportados por el paciente.';
 
-      const cleanPat = (val) => {
-        if (!val || val.toLowerCase() === 'no' || val.toLowerCase().startsWith('niega')) return null;
-        return val.startsWith('Sí: ') ? val.replace('Sí: ', '') : (val === 'Sí' ? 'Sí' : val);
-      };
-
       const enfPat = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
         .filter(e => formData.patologicos?.enfermedades?.[e])
         .join(', ');
       const patOtras = formData.patologicos?.enfermedades?.otrasDetalle 
         ? `Otras: ${formData.patologicos.enfermedades.otrasDetalle}` 
         : '';
-      const alergiasClean = cleanPat(formData.patologicos?.alergicos);
-      const traumClean = cleanPat(formData.patologicos?.traumatologicos);
-      const otrosClean = cleanPat(formData.patologicos?.otros);
-      const infClean = cleanPat(formData.patologicos?.infancia);
-      const adClean = cleanPat(formData.patologicos?.adulto);
-
       const summaryPersonal = [
         enfPat ? `Patologías: ${enfPat}` : null,
         patOtras || null,
-        alergiasClean ? `Alergias: ${alergiasClean}` : null,
-        traumClean ? `Traumatismos: ${traumClean}` : null,
-        otrosClean ? `Otros: ${otrosClean}` : null,
-        infClean ? `Infancia: ${infClean}` : null,
-        adClean ? `Adulto: ${adClean}` : null
+        formData.patologicos?.alergicos ? `Alergias: ${formData.patologicos.alergicos}` : null,
+        formData.patologicos?.traumatologicos ? `Traumatismos: ${formData.patologicos.traumatologicos}` : null,
+        formData.patologicos?.infancia ? `Infancia: ${formData.patologicos.infancia}` : null,
+        formData.patologicos?.adulto ? `Adulto: ${formData.patologicos.adulto}` : null
       ].filter(Boolean).join('. ') || 'Sin antecedentes patológicos reportados por el paciente.';
 
-      const quirurgicosClean = cleanPat(formData.patologicos?.quirurgicos);
-      const ginecoCirugiasClean = cleanPat(formData.gineco?.cirugias);
-      const summarySurgical = quirurgicosClean 
-        || (ginecoCirugiasClean ? `Ginecológicas: ${ginecoCirugiasClean}` : null) 
+      const summarySurgical = formData.patologicos?.quirurgicos 
+        || (formData.gineco?.cirugias ? `Ginecológicas: ${formData.gineco.cirugias}` : null) 
         || 'Niega antecedentes quirúrgicos.';
 
       const dataToSave = {
@@ -633,6 +619,7 @@ export function PortalPacienteHistoriaMedica() {
                   </p>
                 )}
                 
+                <h4>Otros Antecedentes Personales:</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
                   {[
                     { id: 'quirurgicos', label: 'Cirugías Previas', placeholder: '¿Cuáles y hace cuánto tiempo? (Ej: Apendicectomía hace 3 años)' },
