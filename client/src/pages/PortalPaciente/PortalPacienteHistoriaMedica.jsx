@@ -670,17 +670,53 @@ export function PortalPacienteHistoriaMedica() {
               {/* ANTECEDENTES PERSONALES PATOLOGICOS */}
               <div className="hm-form-group">
                 <h3>ANTECEDENTES PERSONALES PATOLOGICOS</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div className="hm-data-item">
-                    <label>Infancia</label>
-                    {isEditing ? <input type="text" className="hm-input" value={formData.patologicos.infancia} onChange={e => handleNestedChange('patologicos', null, 'infancia', e.target.value)} /> : <p>{formData.patologicos?.infancia || '-'}</p>}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                      Enfermedades importantes en la niñez
+                    </label>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.4rem' }}>
+                      Ej: Asma infantil, varicela, sarampión o "Ninguna"
+                    </span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        placeholder="Ej: Varicela en la infancia, o Ninguna"
+                        className="hm-input"
+                        value={formData.patologicos.infancia}
+                        onChange={e => handleNestedChange('patologicos', null, 'infancia', e.target.value)}
+                      />
+                    ) : (
+                      <p style={{ margin: '0.25rem 0', fontWeight: 500, color: formData.patologicos?.infancia ? '#1e293b' : '#64748b' }}>
+                        {formData.patologicos?.infancia || 'No reportadas'}
+                      </p>
+                    )}
                   </div>
-                  <div className="hm-data-item">
-                    <label>Adulto</label>
-                    {isEditing ? <input type="text" className="hm-input" value={formData.patologicos.adulto} onChange={e => handleNestedChange('patologicos', null, 'adulto', e.target.value)} /> : <p>{formData.patologicos?.adulto || '-'}</p>}
+                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
+                      Enfermedades previas en la adultez
+                    </label>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.4rem' }}>
+                      Ej: Gastritis crónica, cálculos renales o "Ninguna"
+                    </span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        placeholder="Ej: Gastritis diagnosticada en 2021, o Ninguna"
+                        className="hm-input"
+                        value={formData.patologicos.adulto}
+                        onChange={e => handleNestedChange('patologicos', null, 'adulto', e.target.value)}
+                      />
+                    ) : (
+                      <p style={{ margin: '0.25rem 0', fontWeight: 500, color: formData.patologicos?.adulto ? '#1e293b' : '#64748b' }}>
+                        {formData.patologicos?.adulto || 'No reportadas'}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <label>Enfermedades Padecidas:</label>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.4rem', display: 'block' }}>
+                  Diagnósticos / Enfermedades Frecuentes:
+                </label>
                 {isEditing ? (
                   <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center' }}>
                     {['diabetes', 'hipertension', 'tuberculosis', 'cancer', 'otras'].map(enf => (
