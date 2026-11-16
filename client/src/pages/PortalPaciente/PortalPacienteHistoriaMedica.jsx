@@ -333,29 +333,6 @@ export function PortalPacienteHistoriaMedica() {
         </div>
       )}
 
-      {!isEditing && (
-        <div style={{
-          backgroundColor: 'rgba(42, 183, 202, 0.08)',
-          border: '1px solid var(--color-primary)',
-          borderRadius: '12px',
-          padding: '1rem 1.25rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.85rem'
-        }}>
-          <Activity size={24} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-          <div>
-            <strong style={{ color: 'var(--color-primary)', fontSize: '0.95rem', display: 'block', marginBottom: '0.15rem' }}>
-              Completa tu Historia Clínica y Anamnesis
-            </strong>
-            <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.85rem', lineHeight: '1.4' }}>
-              Completa tus antecedentes familiares, hábitos, patologías, alergias, cirugías y motivo de consulta usando el botón <strong>"Llenar / Modificar Historia"</strong>. Toda la información será consultada directamente por tu médico tratante en la clínica.
-            </p>
-          </div>
-        </div>
-      )}
-
       <div className="historia-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>Historia Médica del Paciente</h1>
