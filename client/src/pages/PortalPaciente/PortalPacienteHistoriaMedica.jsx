@@ -135,6 +135,33 @@ export function PortalPacienteHistoriaMedica() {
     });
   };
 
+  const togglePatologicoTag = (field, tag) => {
+    setFormData(prev => {
+      const currentStr = prev.patologicos?.[field] || '';
+      const currentTags = currentStr ? currentStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+      let newTags = [];
+
+      if (tag === 'Ninguna') {
+        newTags = currentTags.some(t => t.toLowerCase() === 'ninguna') ? [] : ['Ninguna'];
+      } else {
+        const withoutNone = currentTags.filter(t => t.toLowerCase() !== 'ninguna');
+        if (withoutNone.some(t => t.toLowerCase() === tag.toLowerCase())) {
+          newTags = withoutNone.filter(t => t.toLowerCase() !== tag.toLowerCase());
+        } else {
+          newTags = [...withoutNone, tag];
+        }
+      }
+
+      return {
+        ...prev,
+        patologicos: {
+          ...(prev.patologicos || {}),
+          [field]: newTags.join(', ')
+        }
+      };
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setSuccessBanner('');
@@ -670,47 +697,201 @@ export function PortalPacienteHistoriaMedica() {
               {/* ANTECEDENTES PERSONALES PATOLOGICOS */}
               <div className="hm-form-group">
                 <h3>ANTECEDENTES PERSONALES PATOLOGICOS</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
-                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
-                      Enfermedades importantes en la niñez
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                  {/* Niñez */}
+                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.4rem', display: 'block' }}>
+                      Enfermedades importantes en la niñez:
                     </label>
-                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.4rem' }}>
-                      Ej: Asma infantil, varicela, sarampión o "Ninguna"
-                    </span>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        placeholder="Ej: Varicela en la infancia, o Ninguna"
-                        className="hm-input"
-                        value={formData.patologicos.infancia}
-                        onChange={e => handleNestedChange('patologicos', null, 'infancia', e.target.value)}
-                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {[
+                            'Varicela (Lechina)',
+                            'Asma Infantil',
+                            'Alergias Respiratorias',
+                            'Bronquitis / Neumonía',
+                            'Sarampión / Rubeola',
+                            'Ninguna'
+                          ].map(tag => {
+                            const currentStr = formData.patologicos?.infancia || '';
+                            const isSelected = currentStr
+                              .split(',')
+                              .map(s => s.trim().toLowerCase())
+                              .includes(tag.toLowerCase());
+                            return (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => togglePatologicoTag('infancia', tag)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  padding: '0.35rem 0.75rem',
+                                  borderRadius: '8px',
+                                  fontSize: '0.82rem',
+                                  fontWeight: isSelected ? 600 : 500,
+                                  border: isSelected ? '1px solid #2563eb' : '1px solid #cbd5e1',
+                                  backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                                  color: isSelected ? '#1d4ed8' : '#334155',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {isSelected ? '✓ ' : '+ '}{tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Otra condición de la niñez (opcional)..."
+                          className="hm-input"
+                          style={{ fontSize: '0.82rem', marginTop: '0.2rem' }}
+                          value={
+                            (formData.patologicos?.infancia || '')
+                              .split(',')
+                              .map(s => s.trim())
+                              .filter(s => s && ![
+                                'varicela (lechina)',
+                                'asma infantil',
+                                'alergias respiratorias',
+                                'bronquitis / neumonía',
+                                'sarampión / rubeola',
+                                'ninguna'
+                              ].includes(s.toLowerCase()))
+                              .join(', ')
+                          }
+                          onChange={e => {
+                            const customVal = e.target.value;
+                            const standardTags = (formData.patologicos?.infancia || '')
+                              .split(',')
+                              .map(s => s.trim())
+                              .filter(s => [
+                                'varicela (lechina)',
+                                'asma infantil',
+                                'alergias respiratorias',
+                                'bronquitis / neumonía',
+                                'sarampión / rubeola',
+                                'ninguna'
+                              ].includes(s.toLowerCase()));
+                            const combined = [...standardTags, customVal].filter(Boolean).join(', ');
+                            handleNestedChange('patologicos', null, 'infancia', combined);
+                          }}
+                        />
+                      </div>
                     ) : (
-                      <p style={{ margin: '0.25rem 0', fontWeight: 500, color: formData.patologicos?.infancia ? '#1e293b' : '#64748b' }}>
-                        {formData.patologicos?.infancia || 'No reportadas'}
-                      </p>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center', minHeight: '32px' }}>
+                        {(formData.patologicos?.infancia ? formData.patologicos.infancia.split(',').map(s => s.trim()).filter(Boolean) : []).length > 0 ? (
+                          formData.patologicos.infancia.split(',').map(s => s.trim()).filter(Boolean).map((item, idx) => (
+                            <span key={idx} style={{ background: '#f1f5f9', color: '#1e293b', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 500, border: '1px solid #e2e8f0' }}>
+                              {item}
+                            </span>
+                          ))
+                        ) : (
+                          <span style={{ color: '#64748b', fontStyle: 'italic', fontSize: '0.85rem' }}>No reportadas</span>
+                        )}
+                      </div>
                     )}
                   </div>
-                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                    <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1e293b' }}>
-                      Enfermedades previas en la adultez
+
+                  {/* Adultez */}
+                  <div className="hm-data-item" style={{ background: '#ffffff', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.4rem', display: 'block' }}>
+                      Enfermedades previas en la adultez:
                     </label>
-                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginBottom: '0.4rem' }}>
-                      Ej: Gastritis crónica, cálculos renales o "Ninguna"
-                    </span>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        placeholder="Ej: Gastritis diagnosticada en 2021, o Ninguna"
-                        className="hm-input"
-                        value={formData.patologicos.adulto}
-                        onChange={e => handleNestedChange('patologicos', null, 'adulto', e.target.value)}
-                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {[
+                            'Gastritis / Reflujo',
+                            'Cálculos Renales / Biliares',
+                            'Colesterol / Triglicéridos Altos',
+                            'Problemas Tiroideos',
+                            'Ansiedad / Depresión',
+                            'Artritis / Dolor de Columna',
+                            'Ninguna'
+                          ].map(tag => {
+                            const currentStr = formData.patologicos?.adulto || '';
+                            const isSelected = currentStr
+                              .split(',')
+                              .map(s => s.trim().toLowerCase())
+                              .includes(tag.toLowerCase());
+                            return (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => togglePatologicoTag('adulto', tag)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  padding: '0.35rem 0.75rem',
+                                  borderRadius: '8px',
+                                  fontSize: '0.82rem',
+                                  fontWeight: isSelected ? 600 : 500,
+                                  border: isSelected ? '1px solid #2563eb' : '1px solid #cbd5e1',
+                                  backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                                  color: isSelected ? '#1d4ed8' : '#334155',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                {isSelected ? '✓ ' : '+ '}{tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Otra condición o diagnóstico previo (opcional)..."
+                          className="hm-input"
+                          style={{ fontSize: '0.82rem', marginTop: '0.2rem' }}
+                          value={
+                            (formData.patologicos?.adulto || '')
+                              .split(',')
+                              .map(s => s.trim())
+                              .filter(s => s && ![
+                                'gastritis / reflujo',
+                                'cálculos renales / biliares',
+                                'colesterol / triglicéridos altos',
+                                'problemas tiroideos',
+                                'ansiedad / depresión',
+                                'artritis / dolor de columna',
+                                'ninguna'
+                              ].includes(s.toLowerCase()))
+                              .join(', ')
+                          }
+                          onChange={e => {
+                            const customVal = e.target.value;
+                            const standardTags = (formData.patologicos?.adulto || '')
+                              .split(',')
+                              .map(s => s.trim())
+                              .filter(s => [
+                                'gastritis / reflujo',
+                                'cálculos renales / biliares',
+                                'colesterol / triglicéridos altos',
+                                'problemas tiroideos',
+                                'ansiedad / depresión',
+                                'artritis / dolor de columna',
+                                'ninguna'
+                              ].includes(s.toLowerCase()));
+                            const combined = [...standardTags, customVal].filter(Boolean).join(', ');
+                            handleNestedChange('patologicos', null, 'adulto', combined);
+                          }}
+                        />
+                      </div>
                     ) : (
-                      <p style={{ margin: '0.25rem 0', fontWeight: 500, color: formData.patologicos?.adulto ? '#1e293b' : '#64748b' }}>
-                        {formData.patologicos?.adulto || 'No reportadas'}
-                      </p>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center', minHeight: '32px' }}>
+                        {(formData.patologicos?.adulto ? formData.patologicos.adulto.split(',').map(s => s.trim()).filter(Boolean) : []).length > 0 ? (
+                          formData.patologicos.adulto.split(',').map(s => s.trim()).filter(Boolean).map((item, idx) => (
+                            <span key={idx} style={{ background: '#f1f5f9', color: '#1e293b', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 500, border: '1px solid #e2e8f0' }}>
+                              {item}
+                            </span>
+                          ))
+                        ) : (
+                          <span style={{ color: '#64748b', fontStyle: 'italic', fontSize: '0.85rem' }}>No reportadas</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
