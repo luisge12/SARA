@@ -410,12 +410,14 @@ export function PortalPacienteHistoriaMedica() {
                 <span>{medicoTratante}</span>
               </div>
               <div className="hm-data-item">
-                <label>Referente</label>
-                <span>{referente}</span>
+                <label>Seguro / Remitido por</label>
+                <span>{referente !== '-' ? referente : 'Sin seguro reportado (Particular)'}</span>
               </div>
               <div className="hm-data-item">
-                <label>Próxima Cita / Control</label>
-                <span className="hm-highlight">{proximaCita}</span>
+                <label>Próxima Cita Programada</label>
+                <span className={proximaCita !== '-' ? "hm-highlight" : ""}>
+                  {proximaCita !== '-' ? proximaCita : 'Sin citas programadas'}
+                </span>
               </div>
               <div className="hm-data-item hm-col-span-2">
                 <label>Dirección</label>
@@ -658,6 +660,36 @@ export function PortalPacienteHistoriaMedica() {
                 </div>
               </div>
 
+              {isEditing && (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--border-color)',
+                  marginTop: '1.5rem'
+                }}>
+                  <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleSave} 
+                    disabled={saving} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      padding: '0.85rem 1.85rem',
+                      fontSize: '1rem',
+                      fontWeight: 700
+                    }}
+                  >
+                    <Save size={18} /> {saving ? 'Guardando...' : 'Guardar Historia Médica'}
+                  </Button>
+                </div>
+              )}
+
             </div>
           </section>
 
@@ -740,6 +772,49 @@ export function PortalPacienteHistoriaMedica() {
 
             </div>
           </section>
+        </div>
+      )}
+
+      {/* Barra Flotante Inferior de Guardado Rápido */}
+      {isEditing && (
+        <div style={{
+          position: 'sticky',
+          bottom: '1rem',
+          zIndex: 100,
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid var(--color-primary)',
+          borderRadius: '14px',
+          padding: '0.85rem 1.5rem',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.15)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '1rem',
+          margin: '1.5rem auto 1rem auto',
+          maxWidth: '1200px',
+          width: 'calc(100% - 2rem)',
+          animation: 'fadeIn 0.2s',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Activity size={20} color="var(--color-primary)" />
+            <span style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
+              Editando Historia Clínica... Recuerda guardar tus cambios.
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={saving} 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700 }}
+            >
+              <Save size={16} /> {saving ? 'Guardando...' : 'Guardar Historia'}
+            </Button>
+          </div>
         </div>
       )}
 
