@@ -558,31 +558,75 @@ export function PortalPacienteHistoriaMedica() {
                   })}
                 </div>
 
-                <h4>2) Hábitos Fisiológicos y Diarios:</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                <h4>2) Estilo de Vida y Hábitos Diarios:</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
                   {[
-                    { id: 'alimentacion', label: 'Alimentación / Comidas', placeholder: 'Ej: 3 comidas al día, balanceada' },
-                    { id: 'dipsia', label: 'Consumo de Agua (Sed)', placeholder: 'Ej: Normal, aprox. 2 litros al día' },
-                    { id: 'diuresis', label: 'Hábito al Orinar', placeholder: 'Ej: Normal, 4 a 5 veces al día' },
-                    { id: 'catarsis', label: 'Evacuación Intestinal', placeholder: 'Ej: Normal, 1 vez al día' },
-                    { id: 'somnia', label: 'Horas / Calidad de Sueño', placeholder: 'Ej: 7 a 8 horas, sin insomnio' },
-                    { id: 'otros', label: 'Actividad Física / Otros', placeholder: 'Ej: Ejercicio 3 veces por semana o sedentario' }
-                  ].map(fis => (
-                    <div key={fis.id} className="hm-data-item">
-                      <label>{fis.label}</label>
-                      {isEditing ? (
-                        <input 
-                          type="text" 
-                          placeholder={fis.placeholder}
-                          className="hm-input" 
-                          value={formData.noPatologicos.fisiologicos[fis.id]} 
-                          onChange={e => handleNestedChange('noPatologicos', 'fisiologicos', fis.id, e.target.value)} 
-                        />
-                      ) : (
-                        <p>{formData.noPatologicos?.fisiologicos?.[fis.id] || '-'}</p>
-                      )}
-                    </div>
-                  ))}
+                    {
+                      id: 'somnia',
+                      label: 'Horas y Calidad de Sueño',
+                      options: ['7 - 8 hrs (Normal)', 'Menos de 6 hrs', 'Dificultad para dormir / Insomnio']
+                    },
+                    {
+                      id: 'otros',
+                      label: 'Nivel de Actividad Física',
+                      options: ['Sedentario', 'Actividad Moderada (Caminatas)', 'Ejercicio Regular (3+ veces/sem)']
+                    },
+                    {
+                      id: 'alimentacion',
+                      label: 'Patrón de Alimentación',
+                      options: ['Regular / 3 comidas al día', 'Irregular / Salta comidas', 'Dieta especial o restrictiva']
+                    },
+                    {
+                      id: 'dipsia',
+                      label: 'Consumo de Agua Diario',
+                      options: ['Adecuado (1.5 a 2L/día)', 'Poco consumo (< 1L/día)', 'Abundante (> 2.5L/día)']
+                    }
+                  ].map(hab => {
+                    const currentVal = formData.noPatologicos?.fisiologicos?.[hab.id] || '';
+
+                    return (
+                      <div key={hab.id} className="hm-data-item" style={{ background: '#ffffff', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                        <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>{hab.label}</label>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                            {hab.options.map(opt => {
+                              const isSelected = currentVal === opt;
+                              return (
+                                <button
+                                  key={opt}
+                                  type="button"
+                                  onClick={() => handleNestedChange('noPatologicos', 'fisiologicos', hab.id, opt)}
+                                  className={`hm-checkbox-label ${isSelected ? 'is-checked' : ''}`}
+                                  style={{
+                                    fontSize: '0.82rem',
+                                    padding: '0.4rem 0.65rem',
+                                    textAlign: 'left',
+                                    justifyContent: 'flex-start',
+                                    borderRadius: '6px'
+                                  }}
+                                >
+                                  <span style={{
+                                    width: '12px',
+                                    height: '12px',
+                                    borderRadius: '50%',
+                                    border: isSelected ? '4px solid var(--color-primary)' : '2px solid #cbd5e1',
+                                    backgroundColor: '#ffffff',
+                                    marginRight: '6px',
+                                    flexShrink: 0
+                                  }}></span>
+                                  {opt}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p style={{ margin: '0.25rem 0', fontWeight: 600, color: currentVal ? 'var(--color-primary)' : 'inherit', fontSize: '0.9rem' }}>
+                            {currentVal || 'No reportado'}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
