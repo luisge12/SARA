@@ -14,10 +14,7 @@ const defaultFormData = {
   escolaridad: '',
   religion: '',
   heredofamiliares: {
-    padres: { vivos: '', fallecidos: '', causas: '' },
-    hermanos: { vivos: '', fallecidos: '', causas: '' },
-    hijos: { vivos: '', fallecidos: '', causas: '' },
-    enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '' }
+    enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, tiroides: false, otras: false, otrasDetalle: '' }
   },
   noPatologicos: {
     toxicos: { alcohol: '', tabaco: '', drogas: '' },
@@ -81,10 +78,7 @@ export function PortalPacienteHistoriaMedica() {
           escolaridad: cf.escolaridad || '',
           religion: cf.religion || '',
           heredofamiliares: {
-            padres: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.padres || {}) },
-            hermanos: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.hermanos || {}) },
-            hijos: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.hijos || {}) },
-            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '', ...(cf.heredofamiliares?.enfermedades || {}) }
+            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, tiroides: false, otras: false, otrasDetalle: '', ...(cf.heredofamiliares?.enfermedades || {}) }
           },
           noPatologicos: {
             toxicos: { alcohol: '', tabaco: '', drogas: '', ...(cf.noPatologicos?.toxicos || {}) },
@@ -146,17 +140,21 @@ export function PortalPacienteHistoriaMedica() {
     setSuccessBanner('');
     try {
       // 1. Resúmenes legibles para que el médico tratante los visualice inmediatamente
-      const enfHeredo = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
-        .filter(e => formData.heredofamiliares?.enfermedades?.[e])
-        .join(', ');
+      const enfHeredo = [
+        formData.heredofamiliares?.enfermedades?.diabetes ? 'Diabetes' : null,
+        formData.heredofamiliares?.enfermedades?.hipertension ? 'Hipertensión / Cardíacas' : null,
+        formData.heredofamiliares?.enfermedades?.cancer ? 'Cáncer' : null,
+        formData.heredofamiliares?.enfermedades?.tuberculosis ? 'Tuberculosis' : null,
+        formData.heredofamiliares?.enfermedades?.tiroides ? 'Enf. Tiroideas' : null
+      ].filter(Boolean).join(', ');
+
       const heredoOtras = formData.heredofamiliares?.enfermedades?.otrasDetalle 
-        ? `Otras: ${formData.heredofamiliares.enfermedades.otrasDetalle}` 
+        ? `Detalles: ${formData.heredofamiliares.enfermedades.otrasDetalle}` 
         : '';
       const summaryFamily = [
         enfHeredo ? `Enfermedades familiares: ${enfHeredo}` : null,
-        heredoOtras || null,
-        formData.heredofamiliares?.padres?.causas ? `Causas en padres: ${formData.heredofamiliares.padres.causas}` : null
-      ].filter(Boolean).join('. ') || 'Sin antecedentes familiares reportados por el paciente.';
+        heredoOtras || null
+      ].filter(Boolean).join('. ') || 'Sin antecedentes familiares de relevancia reportados.';
 
       const enfPat = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
         .filter(e => formData.patologicos?.enfermedades?.[e])
@@ -465,40 +463,79 @@ export function PortalPacienteHistoriaMedica() {
               {/* ANTECEDENTES HEREDOFAMILIARES */}
               <div className="hm-form-group">
                 <h3>ANTECEDENTES HEREDOFAMILIARES</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                  {['padres', 'hermanos', 'hijos'].map(rel => (
-                    <div key={rel} className="hm-data-item">
-                      <label style={{ textTransform: 'capitalize' }}>{rel}</label>
-                      {isEditing ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          <input type="text" placeholder="Vivos" className="hm-input" value={formData.heredofamiliares[rel].vivos} onChange={e => handleNestedChange('heredofamiliares', rel, 'vivos', e.target.value)} />
-                          <input type="text" placeholder="Fallecidos" className="hm-input" value={formData.heredofamiliares[rel].fallecidos} onChange={e => handleNestedChange('heredofamiliares', rel, 'fallecidos', e.target.value)} />
-                          <input type="text" placeholder="Causas" className="hm-input" value={formData.heredofamiliares[rel].causas} onChange={e => handleNestedChange('heredofamiliares', rel, 'causas', e.target.value)} />
-                        </div>
-                      ) : (
-                        <p>Vivos: {formData.heredofamiliares?.[rel]?.vivos || '-'} | Fallecidos: {formData.heredofamiliares?.[rel]?.fallecidos || '-'} <br/> Causas: {formData.heredofamiliares?.[rel]?.causas || '-'}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <label>Enfermedades Familiares:</label>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '-0.25rem', marginBottom: '0.85rem' }}>
+                  ¿Algún familiar directo (padres, abuelos o hermanos) padece o ha padecido alguna de estas condiciones?
+                </p>
+
                 {isEditing ? (
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {['diabetes', 'hipertension', 'tuberculosis', 'cancer', 'otras'].map(enf => (
-                      <label key={enf} className={`hm-checkbox-label ${formData.heredofamiliares.enfermedades[enf] ? 'is-checked' : ''}`} style={{ textTransform: 'capitalize' }}>
-                        <input type="checkbox" checked={formData.heredofamiliares.enfermedades[enf]} onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', enf, e.target.checked)} />
-                        {enf}
-                      </label>
-                    ))}
-                    {formData.heredofamiliares.enfermedades.otras && (
-                      <input type="text" placeholder="Especificar otra enfermedad..." className="hm-input" style={{ maxWidth: '280px' }} value={formData.heredofamiliares.enfermedades.otrasDetalle} onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', 'otrasDetalle', e.target.value)} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {[
+                        { id: 'diabetes', label: 'Diabetes' },
+                        { id: 'hipertension', label: 'Hipertensión / Enf. Cardíacas' },
+                        { id: 'cancer', label: 'Cáncer' },
+                        { id: 'tiroides', label: 'Problemas de Tiroides' },
+                        { id: 'tuberculosis', label: 'Tuberculosis / Pulmonares' },
+                        { id: 'otras', label: 'Otras condiciones' }
+                      ].map(enf => (
+                        <label
+                          key={enf.id}
+                          className={`hm-checkbox-label ${formData.heredofamiliares?.enfermedades?.[enf.id] ? 'is-checked' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!formData.heredofamiliares?.enfermedades?.[enf.id]}
+                            onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', enf.id, e.target.checked)}
+                          />
+                          {enf.label}
+                        </label>
+                      ))}
+                    </div>
+
+                    {(formData.heredofamiliares?.enfermedades?.cancer || formData.heredofamiliares?.enfermedades?.otras) && (
+                      <div style={{ marginTop: '0.25rem' }}>
+                        <input
+                          type="text"
+                          placeholder="Especificar parentesco y detalle (Ej: Madre - Cáncer de mama / Abuelo - Asma)..."
+                          className="hm-input"
+                          value={formData.heredofamiliares?.enfermedades?.otrasDetalle || ''}
+                          onChange={e => handleNestedChange('heredofamiliares', 'enfermedades', 'otrasDetalle', e.target.value)}
+                        />
+                      </div>
                     )}
                   </div>
                 ) : (
-                  <p>
-                    {['diabetes', 'hipertension', 'tuberculosis', 'cancer'].filter(e => formData.heredofamiliares?.enfermedades?.[e]).join(', ') || 'Ninguna'}
-                    {formData.heredofamiliares?.enfermedades?.otras && ` - Otras: ${formData.heredofamiliares.enfermedades.otrasDetalle}`}
-                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', minHeight: '32px' }}>
+                    {(() => {
+                      const active = [
+                        formData.heredofamiliares?.enfermedades?.diabetes ? 'Diabetes' : null,
+                        formData.heredofamiliares?.enfermedades?.hipertension ? 'Hipertensión / Cardíacas' : null,
+                        formData.heredofamiliares?.enfermedades?.cancer ? 'Cáncer' : null,
+                        formData.heredofamiliares?.enfermedades?.tiroides ? 'Problemas de Tiroides' : null,
+                        formData.heredofamiliares?.enfermedades?.tuberculosis ? 'Tuberculosis / Pulmonares' : null,
+                        formData.heredofamiliares?.enfermedades?.otras ? 'Otras' : null
+                      ].filter(Boolean);
+
+                      if (active.length === 0) {
+                        return <p style={{ color: '#64748b', fontStyle: 'italic', margin: 0 }}>Sin antecedentes familiares de relevancia reportados</p>;
+                      }
+
+                      return (
+                        <>
+                          {active.map((label, idx) => (
+                            <span key={idx} style={{ background: '#f1f5f9', color: '#0f172a', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500, border: '1px solid #e2e8f0' }}>
+                              {label}
+                            </span>
+                          ))}
+                          {formData.heredofamiliares?.enfermedades?.otrasDetalle && (
+                            <span style={{ fontSize: '0.85rem', color: '#475569', marginLeft: '0.25rem' }}>
+                              ({formData.heredofamiliares.enfermedades.otrasDetalle})
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 )}
               </div>
 
