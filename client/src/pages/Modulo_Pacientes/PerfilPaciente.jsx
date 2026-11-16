@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Edit, FileText, Upload, Calendar, CalendarPlus, Activity, DollarSign, User, Phone, 
   Droplet, Ruler, Scale, Mail, MapPin, Building2, CheckCircle, Clock, Plus, 
-  Shield, Sparkles, AlertCircle, Heart, Stethoscope, Trash2
+  Shield, Sparkles, AlertCircle, Heart, Stethoscope, Trash2, ClipboardList
 } from 'lucide-react';
 import MedicalImageViewer from '../../components/MedicalImageViewer';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -617,6 +617,77 @@ export default function PerfilPaciente() {
                           {profile.familyHistory || 'Sin antecedentes familiares de relevancia reportados.'}
                         </p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Tarjeta 3: Anamnesis e Historia Reportada por el Paciente en el Portal */}
+                  <div className="ficha-card" style={{ gridColumn: '1 / -1' }}>
+                    <div className="ficha-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <ClipboardList size={20} color="#2ab7ca" />
+                        <h3>Anamnesis e Historia Reportada por el Paciente (Portal Web)</h3>
+                      </div>
+                      {profile.customFields && Object.keys(profile.customFields).length > 0 && (
+                        <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.6rem', borderRadius: '12px', fontWeight: 600 }}>
+                          Completada por el Paciente
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="ficha-items-list">
+                      {/* Padecimiento Actual / Motivo */}
+                      <div>
+                        <span className="ficha-item-label">Motivo de Consulta y Padecimiento Actual</span>
+                        <p style={{ margin: '0.35rem 0', color: '#1e293b', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '45px' }}>
+                          {profile.customFields?.padecimientoActual || profile.motivoConsulta || 'El paciente aún no ha reportado motivo previo en el portal.'}
+                        </p>
+                      </div>
+
+                      {/* Datos Sociodemográficos */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Ocupación:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.ocupacion || '-'}</div></div>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Estado Civil:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.customFields?.estadoCivil || '-'}</div></div>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Nacionalidad:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.customFields?.nacionalidad || '-'}</div></div>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Residencia:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.customFields?.residencia || '-'}</div></div>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Escolaridad:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.customFields?.escolaridad || '-'}</div></div>
+                        <div><strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Religión:</strong> <div style={{ fontSize: '0.9rem', color: '#1e293b' }}>{profile.customFields?.religion || '-'}</div></div>
+                      </div>
+
+                      {/* Hábitos No Patológicos */}
+                      <div>
+                        <span className="ficha-item-label">Hábitos Tóxicos y Fisiológicos</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                          <div>
+                            <strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Hábitos Tóxicos:</strong>
+                            <div style={{ fontSize: '0.88rem', color: '#1e293b', marginTop: '0.2rem' }}>
+                              Alcohol: {profile.customFields?.noPatologicos?.toxicos?.alcohol || 'No reportado'} • Tabaco: {profile.customFields?.noPatologicos?.toxicos?.tabaco || 'No'} • Drogas: {profile.customFields?.noPatologicos?.toxicos?.drogas || 'No'}
+                            </div>
+                          </div>
+                          <div>
+                            <strong style={{ fontSize: '0.8rem', color: '#64748b' }}>Fisiológicos:</strong>
+                            <div style={{ fontSize: '0.88rem', color: '#1e293b', marginTop: '0.2rem' }}>
+                              Alimentación: {profile.customFields?.noPatologicos?.fisiologicos?.alimentacion || '-'} • Diuresis: {profile.customFields?.noPatologicos?.fisiologicos?.diuresis || '-'} • Sueño: {profile.customFields?.noPatologicos?.fisiologicos?.somnia || '-'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Interrogatorio por aparatos y sistemas */}
+                      {profile.customFields?.aparatosSistemas && (
+                        <div>
+                          <span className="ficha-item-label">Interrogatorio por Aparatos y Sistemas (Síntomas Reportados)</span>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.5rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}>
+                            {Object.entries(profile.customFields.aparatosSistemas).map(([sys, val]) => val ? (
+                              <div key={sys} style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>
+                                <strong style={{ textTransform: 'capitalize', color: '#0369a1' }}>{sys}:</strong> <span style={{ color: '#1e293b' }}>{val}</span>
+                              </div>
+                            ) : null)}
+                            {Object.values(profile.customFields.aparatosSistemas).every(v => !v) && (
+                              <span style={{ color: '#64748b' }}>Sin síntomas particulares reportados por aparatos.</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

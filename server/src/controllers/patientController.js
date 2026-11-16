@@ -82,7 +82,11 @@ module.exports = {
     try {
       const { id } = req.params;
       const data = req.body;
-      const userId = req.user ? req.user.id : null; // El usuario que hace la modificación (Recepcionista o Médico)
+      const userId = req.user ? req.user.id : null; // El usuario que hace la modificación (Recepcionista o Médico o Paciente)
+
+      if (req.user?.role === 'Paciente' && String(req.user.id) !== String(id)) {
+        return res.status(403).json({ error: 'Acceso denegado. No puedes modificar los datos de otro paciente.' });
+      }
 
       const patient = await User.findOne({ where: { id, role: 'Paciente' } });
       if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });

@@ -1,19 +1,65 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PortalPacienteHistoriaMedica.css';
-import { User, Activity, Heart, Weight, Printer } from 'lucide-react';
+import { User, Activity, Heart, Weight, Printer, ArrowLeft, LogOut, CheckCircle, Save, Edit3 } from 'lucide-react';
 import { portalApi } from '../../services/api';
 import { Button } from '../../components/Button';
 import { MedicalDocumentModal } from '../../components/MedicalDocumentModal';
 
+const defaultFormData = {
+  ocupacion: '',
+  estadoCivil: '',
+  nacionalidad: '',
+  residencia: '',
+  escolaridad: '',
+  religion: '',
+  heredofamiliares: {
+    padres: { vivos: '', fallecidos: '', causas: '' },
+    hermanos: { vivos: '', fallecidos: '', causas: '' },
+    hijos: { vivos: '', fallecidos: '', causas: '' },
+    enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '' }
+  },
+  noPatologicos: {
+    toxicos: { alcohol: '', tabaco: '', drogas: '' },
+    fisiologicos: { alimentacion: '', dipsia: '', diuresis: '', catarsis: '', somnia: '', otros: '' }
+  },
+  patologicos: {
+    infancia: '', adulto: '',
+    enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '' },
+    quirurgicos: '', traumatologicos: '', alergicos: '', otros: ''
+  },
+  gineco: {
+    fum: '', fpp: '', edadGestacional: '',
+    menarca: '', rm: '', irs: '', numParejas: '', flujoGenital: '',
+    gestas: '', partos: '', cesareas: '', abortos: '',
+    anticonceptivos: false, antiTipo: '', antiTiempo: '', antiUltima: '',
+    cirugias: '', otros: ''
+  },
+  padecimientoActual: '',
+  aparatosSistemas: {
+    respiratorio: '', digestivo: '', cardiovascular: '', renal: '', genital: '',
+    endocrino: '', hematopoyetico: '', piel: '', musculo: '', nervioso: '',
+    sentidos: '', generales: ''
+  }
+};
+
 export function PortalPacienteHistoriaMedica() {
+  const navigate = useNavigate();
   const userStr = localStorage.getItem('portal_user');
   const user = userStr ? JSON.parse(userStr) : {};
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(defaultFormData);
   const [saving, setSaving] = useState(false);
+  const [successBanner, setSuccessBanner] = useState('');
+
+  const handleLogout = () => {
+    localStorage.removeItem('portal_token');
+    localStorage.removeItem('portal_user');
+    navigate('/users/login');
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -22,41 +68,51 @@ export function PortalPacienteHistoriaMedica() {
         return;
       }
       try {
+        const res = await portalApi.get(`/api/patients/${user.id}/profile`);
+        setProfileData(res.data);
         const p = res.data?.patientProfile || {};
+        const cf = p.customFields || {};
+
         setFormData({
           ocupacion: p.ocupacion || '',
-          estadoCivil: p.customFields?.estadoCivil || '',
-          nacionalidad: p.customFields?.nacionalidad || '',
-          residencia: p.customFields?.residencia || '',
-          escolaridad: p.customFields?.escolaridad || '',
-          religion: p.customFields?.religion || '',
-          heredofamiliares: p.customFields?.heredofamiliares || {
-            padres: { vivos: '', fallecidos: '', causas: '' },
-            hermanos: { vivos: '', fallecidos: '', causas: '' },
-            hijos: { vivos: '', fallecidos: '', causas: '' },
-            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: '', otrasDetalle: '' }
+          estadoCivil: cf.estadoCivil || '',
+          nacionalidad: cf.nacionalidad || '',
+          residencia: cf.residencia || '',
+          escolaridad: cf.escolaridad || '',
+          religion: cf.religion || '',
+          heredofamiliares: {
+            padres: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.padres || {}) },
+            hermanos: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.hermanos || {}) },
+            hijos: { vivos: '', fallecidos: '', causas: '', ...(cf.heredofamiliares?.hijos || {}) },
+            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '', ...(cf.heredofamiliares?.enfermedades || {}) }
           },
-          noPatologicos: p.customFields?.noPatologicos || {
-            toxicos: { alcohol: '', tabaco: '', drogas: '' },
-            fisiologicos: { alimentacion: '', dipsia: '', diuresis: '', catarsis: '', somnia: '', otros: '' }
+          noPatologicos: {
+            toxicos: { alcohol: '', tabaco: '', drogas: '', ...(cf.noPatologicos?.toxicos || {}) },
+            fisiologicos: { alimentacion: '', dipsia: '', diuresis: '', catarsis: '', somnia: '', otros: '', ...(cf.noPatologicos?.fisiologicos || {}) }
           },
-          patologicos: p.customFields?.patologicos || {
-            infancia: '', adulto: '',
-            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: '', otrasDetalle: '' },
-            quirurgicos: '', traumatologicos: '', alergicos: '', otros: ''
+          patologicos: {
+            infancia: cf.patologicos?.infancia || '',
+            adulto: cf.patologicos?.adulto || '',
+            enfermedades: { diabetes: false, hipertension: false, tuberculosis: false, cancer: false, otras: false, otrasDetalle: '', ...(cf.patologicos?.enfermedades || {}) },
+            quirurgicos: cf.patologicos?.quirurgicos || p.surgicalHistory || '',
+            traumatologicos: cf.patologicos?.traumatologicos || '',
+            alergicos: cf.patologicos?.alergicos || '',
+            otros: cf.patologicos?.otros || ''
           },
-          gineco: p.customFields?.gineco || {
+          gineco: {
             fum: '', fpp: '', edadGestacional: '',
             menarca: '', rm: '', irs: '', numParejas: '', flujoGenital: '',
             gestas: '', partos: '', cesareas: '', abortos: '',
             anticonceptivos: false, antiTipo: '', antiTiempo: '', antiUltima: '',
-            cirugias: '', otros: ''
+            cirugias: '', otros: '',
+            ...(cf.gineco || {})
           },
-          padecimientoActual: p.customFields?.padecimientoActual || '',
-          aparatosSistemas: p.customFields?.aparatosSistemas || {
+          padecimientoActual: cf.padecimientoActual || p.motivoConsulta || p.enfermedadActual || '',
+          aparatosSistemas: {
             respiratorio: '', digestivo: '', cardiovascular: '', renal: '', genital: '',
             endocrino: '', hematopoyetico: '', piel: '', musculo: '', nervioso: '',
-            sentidos: '', generales: ''
+            sentidos: '', generales: '',
+            ...(cf.aparatosSistemas || {})
           }
         });
       } catch (err) {
@@ -75,9 +131,9 @@ export function PortalPacienteHistoriaMedica() {
 
   const handleNestedChange = (section, subsection, field, value) => {
     setFormData(prev => {
-      const newSection = { ...prev[section] };
+      const newSection = { ...(prev[section] || {}) };
       if (subsection) {
-        newSection[subsection] = { ...newSection[subsection], [field]: value };
+        newSection[subsection] = { ...(newSection[subsection] || {}), [field]: value };
       } else {
         newSection[field] = value;
       }
@@ -87,9 +143,47 @@ export function PortalPacienteHistoriaMedica() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSuccessBanner('');
     try {
+      // 1. Resúmenes legibles para que el médico tratante los visualice inmediatamente
+      const enfHeredo = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
+        .filter(e => formData.heredofamiliares?.enfermedades?.[e])
+        .join(', ');
+      const heredoOtras = formData.heredofamiliares?.enfermedades?.otrasDetalle 
+        ? `Otras: ${formData.heredofamiliares.enfermedades.otrasDetalle}` 
+        : '';
+      const summaryFamily = [
+        enfHeredo ? `Enfermedades familiares: ${enfHeredo}` : null,
+        heredoOtras || null,
+        formData.heredofamiliares?.padres?.causas ? `Causas en padres: ${formData.heredofamiliares.padres.causas}` : null
+      ].filter(Boolean).join('. ') || 'Sin antecedentes familiares reportados por el paciente.';
+
+      const enfPat = ['diabetes', 'hipertension', 'tuberculosis', 'cancer']
+        .filter(e => formData.patologicos?.enfermedades?.[e])
+        .join(', ');
+      const patOtras = formData.patologicos?.enfermedades?.otrasDetalle 
+        ? `Otras: ${formData.patologicos.enfermedades.otrasDetalle}` 
+        : '';
+      const summaryPersonal = [
+        enfPat ? `Patologías: ${enfPat}` : null,
+        patOtras || null,
+        formData.patologicos?.alergicos ? `Alergias: ${formData.patologicos.alergicos}` : null,
+        formData.patologicos?.traumatologicos ? `Traumatismos: ${formData.patologicos.traumatologicos}` : null,
+        formData.patologicos?.infancia ? `Infancia: ${formData.patologicos.infancia}` : null,
+        formData.patologicos?.adulto ? `Adulto: ${formData.patologicos.adulto}` : null
+      ].filter(Boolean).join('. ') || 'Sin antecedentes patológicos reportados por el paciente.';
+
+      const summarySurgical = formData.patologicos?.quirurgicos 
+        || (formData.gineco?.cirugias ? `Ginecológicas: ${formData.gineco.cirugias}` : null) 
+        || 'Niega antecedentes quirúrgicos.';
+
       const dataToSave = {
         ocupacion: formData.ocupacion,
+        motivoConsulta: formData.padecimientoActual,
+        enfermedadActual: formData.padecimientoActual,
+        personalHistory: summaryPersonal,
+        surgicalHistory: summarySurgical,
+        familyHistory: summaryFamily,
         customFields: {
           estadoCivil: formData.estadoCivil,
           nacionalidad: formData.nacionalidad,
@@ -104,15 +198,17 @@ export function PortalPacienteHistoriaMedica() {
           aparatosSistemas: formData.aparatosSistemas
         }
       };
+
       await portalApi.put(`/api/patients/${user.id}/profile`, dataToSave);
       setIsEditing(false);
       // Recargar datos
       const res = await portalApi.get(`/api/patients/${user.id}/profile`);
       setProfileData(res.data);
-      alert('Historia médica actualizada correctamente.');
+      setSuccessBanner('¡Historia médica guardada y sincronizada con éxito con tu equipo médico!');
+      setTimeout(() => setSuccessBanner(''), 6000);
     } catch (err) {
       console.error('Error al guardar:', err);
-      alert('Hubo un error al guardar los datos.');
+      alert('Hubo un error al guardar los datos. Verifica tu conexión.');
     } finally {
       setSaving(false);
     }
@@ -162,20 +258,129 @@ export function PortalPacienteHistoriaMedica() {
 
   return (
     <div className="historia-medica-container">
+      {/* Barra de Navegación del Portal */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '0.75rem 1.25rem',
+        marginBottom: '1.5rem',
+        backgroundColor: 'var(--color-bg-card)',
+        borderRadius: '12px',
+        border: '1px solid var(--border-color)',
+        boxShadow: 'var(--shadow-sm)',
+        flexWrap: 'wrap',
+        gap: '0.75rem'
+      }}>
+        <button
+          onClick={() => navigate('/users/dashboard')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: 'none',
+            border: 'none',
+            color: 'var(--color-primary)',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}
+        >
+          <ArrowLeft size={18} /> Volver al Inicio
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+            Paciente: <strong style={{ color: 'var(--color-text-main)' }}>{nombre}</strong>
+          </span>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '0.4rem 0.8rem',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            <LogOut size={15} /> Salir
+          </button>
+        </div>
+      </div>
+
+      {successBanner && (
+        <div style={{
+          backgroundColor: 'rgba(16, 185, 129, 0.15)',
+          border: '1px solid #10b981',
+          color: '#065f46',
+          padding: '0.9rem 1.25rem',
+          borderRadius: '10px',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          fontWeight: 600,
+          animation: 'fadeIn 0.3s'
+        }}>
+          <CheckCircle size={22} color="#10b981" />
+          <span>{successBanner}</span>
+        </div>
+      )}
+
+      {!isEditing && (
+        <div style={{
+          backgroundColor: 'rgba(42, 183, 202, 0.08)',
+          border: '1px solid var(--color-primary)',
+          borderRadius: '12px',
+          padding: '1.25rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem', maxWidth: '750px' }}>
+            <Activity size={28} color="var(--color-primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ color: 'var(--color-primary)', fontSize: '1.05rem', display: 'block', marginBottom: '0.2rem' }}>
+                Completa tu Historia Clínica y Anamnesis
+              </strong>
+              <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.88rem', lineHeight: '1.4' }}>
+                Completa tus antecedentes médicos familiares, hábitos, patologías, alergias, cirugías y motivo de consulta. Toda la información que ingreses aquí será consultada directamente por tu médico tratante en la clínica.
+              </p>
+            </div>
+          </div>
+          <Button variant="primary" onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Edit3 size={16} /> Llenar / Modificar Historia
+          </Button>
+        </div>
+      )}
+
       <div className="historia-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1>Historia Médica</h1>
-          <p>Resumen de tu información clínica y datos personales. Puedes actualizar tus antecedentes y anamnesis.</p>
+          <h1>Historia Médica del Paciente</h1>
+          <p>Consulta tus datos clínicos y actualiza tus antecedentes para tu próxima consulta médica.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           {isEditing ? (
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)} disabled={saving}>Cancelar</Button>
-              <Button onClick={handleSave} disabled={saving}>{saving ? 'Guardando...' : 'Guardar Cambios'}</Button>
+              <Button onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar Historia'}
+              </Button>
             </>
           ) : (
             <>
-              <Button variant="primary" onClick={() => setIsEditing(true)}>Actualizar mi Historia</Button>
+              <Button variant="primary" onClick={() => setIsEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <Edit3 size={16} /> Actualizar mi Historia
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setShowPrintModal(true)}
