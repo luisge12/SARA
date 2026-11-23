@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ClipboardList, Calendar, LogOut, ArrowRight, ShieldCheck, FileText, Paperclip, Download, X, Image } from 'lucide-react';
+import { Activity, ClipboardList, Calendar, LogOut, ArrowRight, ShieldCheck, FileText, Paperclip, Download, X, Image, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { portalApi } from '../../services/api';
 
 export function PortalPacienteDashboard() {
@@ -8,6 +8,8 @@ export function PortalPacienteDashboard() {
   const user = JSON.parse(localStorage.getItem('portal_user') || '{}');
   const [studies, setStudies] = useState([]);
   const [loadingStudies, setLoadingStudies] = useState(true);
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [viewingAttachment, setViewingAttachment] = useState(null);
 
   const handleLogout = () => {
@@ -17,6 +19,19 @@ export function PortalPacienteDashboard() {
     localStorage.removeItem('user');
     localStorage.removeItem('session_expires_at');
     navigate('/login');
+  };
+
+  const fetchAppointments = async () => {
+    if (!user?.id) return;
+    try {
+      setLoadingAppointments(true);
+      const res = await portalApi.get(`/api/appointments?patientId=${user.id}`);
+      setAppointments(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.warn('Error fetching patient appointments:', err);
+    } finally {
+      setLoadingAppointments(false);
+    }
   };
 
   useEffect(() => {
@@ -32,6 +47,11 @@ export function PortalPacienteDashboard() {
       }
     };
     fetchStudies();
+    fetchAppointments();
+
+    const handleReq = () => fetchAppointments();
+    window.addEventListener('patientAppointmentRequested', handleReq);
+    return () => window.removeEventListener('patientAppointmentRequested', handleReq);
   }, [user?.id]);
 
   return (
@@ -170,6 +190,143 @@ export function PortalPacienteDashboard() {
               Ver Parámetros <ArrowRight size={15} />
             </span>
           </div>
+        </div>
+
+        {/* Sección: Mis Citas Médicas y Consultas */}
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(42, 183, 202, 0.15)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Calendar size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--color-text-main)', fontSize: '1.2rem', fontWeight: 700 }}>
+                  Mis Citas Médicas y Consultas
+                </h3>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                  Estado de tus turnos programados y solicitudes de consulta enviadas
+                </p>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-primary)', backgroundColor: 'rgba(42, 183, 202, 0.1)', padding: '0.25rem 0.75rem', borderRadius: '12px' }}>
+              {appointments.length} {appointments.length === 1 ? 'cita registrada' : 'citas registradas'}
+            </span>
+          </div>
+
+          {loadingAppointments ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+              Cargando tus citas médicas...
+            </div>
+          ) : appointments.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem 1rem', background: 'var(--color-bg-card)', borderRadius: '12px', border: '1px dashed var(--border-color)' }}>
+              <Calendar size={36} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem', opacity: 0.6 }} />
+              <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                No tienes citas programadas actualmente. Puedes solicitar una consulta con tu médico desde el menú lateral.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+              {appointments.map(apt => {
+                const isUnscheduled = !apt.appointmentDate || isNaN(new Date(apt.appointmentDate).getTime());
+                const dateObj = isUnscheduled ? null : new Date(apt.appointmentDate);
+                const isSolicitada = apt.status === 'Solicitada';
+                const isConfirmada = apt.status === 'Confirmada';
+                const isCancelada = apt.status === 'Cancelada';
+
+                return (
+                  <div 
+                    key={apt.id}
+                    style={{
+                      backgroundColor: 'var(--color-bg-card)',
+                      borderRadius: '12px',
+                      border: isSolicitada ? '1px solid #fde68a' : isConfirmada ? '1px solid #bbf7d0' : '1px solid var(--border-color)',
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem',
+                      boxShadow: 'var(--shadow-sm)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        color: 'var(--color-primary)'
+                      }}>
+                        <Calendar size={15} />
+                        {isUnscheduled 
+                          ? 'Fecha por coordinar' 
+                          : dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+                        }
+                      </span>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '12px',
+                        backgroundColor: isSolicitada ? '#fef3c7' : isConfirmada ? '#dcfce7' : isCancelada ? '#fee2e2' : '#f1f5f9',
+                        color: isSolicitada ? '#92400e' : isConfirmada ? '#15803d' : isCancelada ? '#dc2626' : '#475569'
+                      }}>
+                        {apt.status || 'Solicitada'}
+                      </span>
+                    </div>
+
+                    {!isUnscheduled && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                        <Clock size={14} />
+                        <span>{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span>• Sede {apt.sedeAtencion || 'CENTRAL'}</span>
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: '0.88rem', color: 'var(--color-text-main)' }}>
+                      <div><strong>Médico:</strong> {apt.doctor?.name || 'Por asignar por el centro'}</div>
+                      <div><strong>Motivo:</strong> {apt.reason || 'Consulta Médica General'}</div>
+                    </div>
+
+                    {isSolicitada && (
+                      <div style={{
+                        marginTop: 'auto',
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#fffbeb',
+                        borderRadius: '6px',
+                        border: '1px solid #fef3c7',
+                        fontSize: '0.78rem',
+                        color: '#92400e',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}>
+                        <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                        <span>Solicitud recibida. Nuestro equipo confirmará tu horario a la brevedad.</span>
+                      </div>
+                    )}
+
+                    {isConfirmada && (
+                      <div style={{
+                        marginTop: 'auto',
+                        padding: '0.5rem 0.75rem',
+                        backgroundColor: '#f0fdf4',
+                        borderRadius: '6px',
+                        border: '1px solid #dcfce7',
+                        fontSize: '0.78rem',
+                        color: '#15803d',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}>
+                        <CheckCircle size={14} style={{ flexShrink: 0 }} />
+                        <span>Cita confirmada en sistema. Por favor acudir 10 minutos antes.</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Sección: Mis Estudios y Resultados de Laboratorio */}

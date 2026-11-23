@@ -7,6 +7,7 @@ import { Calendar, X, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { getClinicSedes } from '../services/clinicSettings';
 
 export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, appointmentToEdit = null, initialDate = null, initialDoctorName = null }) {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -20,7 +21,11 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
   const [appointmentDate, setAppointmentDate] = useState('');
   const [reason, setReason] = useState(appointmentToEdit ? (appointmentToEdit.reason || '') : '');
   const [duration, setDuration] = useState(appointmentToEdit ? (appointmentToEdit.duration || 30) : 30);
-  const [status, setStatus] = useState(appointmentToEdit ? (appointmentToEdit.status || 'Confirmada') : 'Confirmada');
+  const [status, setStatus] = useState(
+    appointmentToEdit 
+      ? (appointmentToEdit.status === 'Solicitada' ? 'Confirmada' : (appointmentToEdit.status || 'Confirmada'))
+      : 'Confirmada'
+  );
   const [notes, setNotes] = useState(appointmentToEdit ? (appointmentToEdit.notes || '') : '');
 
   // Payment State
@@ -78,6 +83,12 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
               setDoctorId(doctorList[0].id);
             }
           }
+        } else {
+          // Si estamos editando y no tiene doctor asignado aún (ej. cita Solicitada), preasignar
+          if ((!appointmentToEdit.doctorId && !appointmentToEdit.doctor?.id) && doctorList.length > 0) {
+            const currentDoc = doctorList.find(d => d.id === currentUser.id);
+            setDoctorId(currentDoc ? currentDoc.id : doctorList[0].id);
+          }
         }
       } catch (err) {
         console.error('Error al obtener lista de usuarios para citas:', err);
@@ -92,12 +103,24 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
     // Configurar fecha de la cita
     if (appointmentToEdit && appointmentToEdit.appointmentDate) {
       const d = new Date(appointmentToEdit.appointmentDate);
-      const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      setAppointmentDate(localIso);
+      if (!isNaN(d.getTime())) {
+        const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        setAppointmentDate(localIso);
+      } else {
+        const now = new Date();
+        const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        setAppointmentDate(localIso);
+      }
     } else if (initialDate) {
       const d = new Date(initialDate);
-      const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-      setAppointmentDate(localIso);
+      if (!isNaN(d.getTime())) {
+        const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        setAppointmentDate(localIso);
+      } else {
+        const now = new Date();
+        const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        setAppointmentDate(localIso);
+      }
     } else {
       const now = new Date();
       const localIso = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);

@@ -8,6 +8,7 @@ import './Sidebar.css';
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const location = useLocation();
 
   // Cerrar menú móvil al cambiar de ruta
@@ -15,9 +16,34 @@ export function Sidebar() {
     setIsMobileOpen(false);
   }, [location]);
 
+  // Consultar citas solicitadas pendientes para alerta en tiempo real
+  useEffect(() => {
+    const fetchPendingAppointments = async () => {
+      try {
+        const res = await api.get('/api/appointments?status=Solicitada');
+        if (Array.isArray(res.data)) {
+          setPendingCount(res.data.length);
+        }
+      } catch (err) {
+        // Silencioso
+      }
+    };
+
+    fetchPendingAppointments();
+    const interval = setInterval(fetchPendingAppointments, 20000);
+
+    const handleCreated = () => fetchPendingAppointments();
+    window.addEventListener('appointmentCreated', handleCreated);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('appointmentCreated', handleCreated);
+    };
+  }, []);
+
   const navItems = [
     { name: 'Pacientes y Citas', path: '/pacientes', icon: Users, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
-    { name: 'Calendario de Citas', path: '/citas', icon: Calendar, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
+    { name: 'Calendario de Citas', path: '/citas', icon: Calendar, badge: pendingCount, allowedGroups: ['ADMINISTRADOR', 'RECEPCIONISTA', 'MEDICO', 'MASTER'] },
     { name: 'Estudios y Procedimientos', path: '/modulo6', icon: FileText, allowedGroups: ['MEDICO', 'RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Gestión Administrativa', path: '/modulo3', icon: Wallet, allowedGroups: ['RECEPCIONISTA', 'ADMINISTRADOR', 'MASTER'] },
     { name: 'Estadísticas', path: '/modulo7', icon: BarChart3, allowedGroups: ['ADMINISTRADOR', 'MASTER'] },
@@ -67,16 +93,27 @@ export function Sidebar() {
         <nav className="sidebar-nav">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
+            const hasBadge = item.badge && item.badge > 0;
             return (
               <NavLink
                 key={item.name}
                 to={item.path}
                 className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                title={isCollapsed && !isMobileOpen ? item.name : ''}
+                title={isCollapsed && !isMobileOpen ? (hasBadge ? `${item.name} (${item.badge} pendientes)` : item.name) : ''}
                 onClick={() => setIsMobileOpen(false)}
               >
-                <Icon size={20} className="sidebar-icon" />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Icon size={20} className="sidebar-icon" />
+                  {isCollapsed && hasBadge && (
+                    <span className="sidebar-badge-dot" title={`${item.badge} solicitudes pendientes`} />
+                  )}
+                </div>
                 <span className="link-text">{item.name}</span>
+                {!isCollapsed && hasBadge && (
+                  <span className="sidebar-badge" title={`${item.badge} solicitudes pendientes`}>
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}

@@ -230,6 +230,7 @@ function Modulo_CitasMedicas() {
     try {
       await api.put(`/api/appointments/${id}`, { status: newStatus });
       fetchAppointments();
+      window.dispatchEvent(new Event('appointmentCreated'));
     } catch (err) {
       console.error('Error al actualizar estado de la cita:', err);
       alert('Error al actualizar el estado de la cita.');
@@ -243,6 +244,7 @@ function Modulo_CitasMedicas() {
     try {
       await api.delete(`/api/appointments/${id}`);
       fetchAppointments();
+      window.dispatchEvent(new Event('appointmentCreated'));
     } catch (err) {
       console.error('Error al eliminar la cita:', err);
       alert('Error al eliminar la cita médica.');
@@ -895,6 +897,145 @@ function Modulo_CitasMedicas() {
                   })}
                 </div>
               )}
+            </div>
+          </Card>
+        )}
+
+        {/* Bandeja de Solicitudes de Citas Web Pendientes */}
+        {solicitadasCount > 0 && (
+          <Card 
+            className="glass-panel" 
+            style={{ 
+              marginBottom: '1.5rem', 
+              border: '2px solid #f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.04)',
+              borderRadius: 'var(--radius-md)',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.85rem 1.25rem',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              borderBottom: '1px solid rgba(245, 158, 11, 0.25)',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  backgroundColor: '#f59e0b',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <AlertCircle size={17} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', color: '#b45309' }}>
+                    Solicitudes de Citas Web Pendientes ({solicitadasCount})
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                    Citas solicitadas por pacientes que requieren asignación de médico y confirmación de fecha.
+                  </p>
+                </div>
+              </div>
+              <span style={{
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                padding: '0.2rem 0.65rem',
+                borderRadius: '12px',
+                backgroundColor: '#fef3c7',
+                color: '#92400e',
+                border: '1px solid #fde68a'
+              }}>
+                Requiere Atención
+              </span>
+            </div>
+
+            <div style={{
+              padding: '1rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '1rem'
+            }}>
+              {appointments.filter(a => a.status === 'Solicitada').map(apt => {
+                const patientName = apt.patient?.name || apt.patient?.username || 'Paciente Desconocido';
+                const patientCedula = apt.patient?.identificationNumber;
+                const isUnscheduled = !apt.appointmentDate || isNaN(new Date(apt.appointmentDate).getTime());
+                const requestedDate = isUnscheduled 
+                  ? 'Fecha por coordinar' 
+                  : new Date(apt.appointmentDate).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+
+                return (
+                  <div
+                    key={apt.id}
+                    style={{
+                      background: 'var(--color-bg-card)',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.98rem', color: 'var(--color-text-main)' }}>{patientName}</strong>
+                        {patientCedula && (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginLeft: '6px' }}>
+                            (C.I. {patientCedula})
+                          </span>
+                        )}
+                      </div>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: '700',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: apt.priority === 'Emergencia' || apt.priority === 'Alta' ? '#fee2e2' : '#fef3c7',
+                        color: apt.priority === 'Emergencia' || apt.priority === 'Alta' ? '#dc2626' : '#92400e',
+                        border: '1px solid currentColor'
+                      }}>
+                        {apt.priority || 'Normal'}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                      <div><strong>Motivo:</strong> {apt.reason || 'Consulta médica'}</div>
+                      <div><strong>Fecha estimada/deseada:</strong> {requestedDate}</div>
+                      <div><strong>Sede solicitada:</strong> {apt.sedeAtencion || 'CENTRAL'}</div>
+                      {apt.notes && <div><strong>Notas:</strong> {apt.notes}</div>}
+                    </div>
+
+                    <div style={{ marginTop: 'auto', paddingTop: '0.6rem', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant="outline"
+                        style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem', color: '#dc2626', borderColor: '#fca5a5' }}
+                        onClick={() => handleUpdateStatus(apt.id, 'Cancelada')}
+                      >
+                        <XCircle size={14} style={{ marginRight: '4px' }} /> Rechazar
+                      </Button>
+                      <Button
+                        style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', backgroundColor: '#10b981', color: 'white', borderColor: '#10b981' }}
+                        onClick={() => {
+                          setAppointmentToEdit(apt);
+                          setShowModal(true);
+                        }}
+                      >
+                        <CheckCircle size={14} style={{ marginRight: '4px' }} /> Asignar y Confirmar
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
         )}

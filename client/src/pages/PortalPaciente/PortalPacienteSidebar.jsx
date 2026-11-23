@@ -28,7 +28,12 @@ export function PortalPacienteSidebar() {
   };
 
   const [showRequestModal, setShowRequestModal] = React.useState(false);
-  const [requestForm, setRequestForm] = React.useState({ reason: '', priority: 'Normal' });
+  const [requestForm, setRequestForm] = React.useState({ 
+    reason: '', 
+    priority: 'Normal',
+    preferredDate: '',
+    preferredShift: 'Indiferente'
+  });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleRequestSubmit = async (e) => {
@@ -36,10 +41,17 @@ export function PortalPacienteSidebar() {
     if (!user?.id) return;
     setIsSubmitting(true);
     try {
-      await portalApi.post(`/api/patients/${user.id}/request-appointment`, requestForm);
-      alert('Solicitud enviada con éxito. El médico será notificado y la agendará pronto.');
+      const payload = {
+        reason: requestForm.reason,
+        priority: requestForm.priority,
+        preferredDate: requestForm.preferredDate || null,
+        notes: requestForm.preferredShift !== 'Indiferente' ? `Turno preferido: ${requestForm.preferredShift}` : ''
+      };
+      await portalApi.post(`/api/patients/${user.id}/request-appointment`, payload);
+      alert('Solicitud enviada con éxito. El equipo médico y de recepción han sido notificados para su agendamiento.');
       setShowRequestModal(false);
-      setRequestForm({ reason: '', priority: 'Normal' });
+      setRequestForm({ reason: '', priority: 'Normal', preferredDate: '', preferredShift: 'Indiferente' });
+      window.dispatchEvent(new Event('patientAppointmentRequested'));
     } catch (err) {
       console.error(err);
       alert('Error al enviar la solicitud.');
@@ -148,6 +160,32 @@ export function PortalPacienteSidebar() {
                   <option value="Normal">Normal</option>
                   <option value="Alta">Alta</option>
                   <option value="Emergencia">Emergencia</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <label>Fecha Preferida (Opcional)</label>
+                <input 
+                  type="date"
+                  className="hm-input"
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}
+                  value={requestForm.preferredDate}
+                  onChange={e => setRequestForm({...requestForm, preferredDate: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <label>Horario Preferido</label>
+                <select 
+                  className="hm-input"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)' }}
+                  value={requestForm.preferredShift}
+                  onChange={e => setRequestForm({...requestForm, preferredShift: e.target.value})}
+                >
+                  <option value="Indiferente">Cualquier horario disponible</option>
+                  <option value="Mañana (08:00 - 12:00)">Mañana (08:00 - 12:00)</option>
+                  <option value="Tarde (13:00 - 17:00)">Tarde (13:00 - 17:00)</option>
                 </select>
               </div>
               <div className="modal-footer" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>

@@ -365,4 +365,43 @@
   background: var(--color-accent);
 }
 
+/* Badges de Solicitudes de Citas */
+.sidebar-badge {
+  margin-left: auto;
+  background-color: #ef4444;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  animation: pulse-sidebar-badge 2s infinite ease-in-out;
+}
+
+.sidebar-badge-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  border: 1.5px solid rgba(34, 80, 93, 0.95);
+  box-shadow: 0 0 6px #ef4444;
+  animation: pulse-sidebar-badge 2s infinite ease-in-out;
+}
+
+@keyframes pulse-sidebar-badge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
 

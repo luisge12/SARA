@@ -244,18 +244,35 @@ module.exports = {
   requestAppointment: async (req, res) => {
     try {
       const { id } = req.params;
-      const { reason, priority } = req.body;
+      const { reason, priority, preferredDate, preferredDoctorId, notes } = req.body;
       
       const patient = await User.findOne({ where: { id, role: 'Paciente' } });
       if (!patient) return res.status(404).json({ error: 'Paciente no encontrado' });
 
+      // Validar si el paciente envió una fecha preferida
+      let apptDate = null;
+      if (preferredDate) {
+        const d = new Date(preferredDate);
+        if (!isNaN(d.getTime())) {
+          apptDate = d;
+        }
+      }
+
+      let validDoctorId = null;
+      if (preferredDoctorId) {
+        const doc = await User.findByPk(preferredDoctorId);
+        if (doc) validDoctorId = doc.id;
+      }
+
       const appointment = await Appointment.create({
         patientId: patient.id,
+        doctorId: validDoctorId,
         sedeAtencion: patient.sedeAtencion || 'CENTRAL',
         reason: reason || 'Solicitud de consulta',
         priority: priority || 'Normal',
         status: 'Solicitada',
-        appointmentDate: null // Aún sin agendar por un médico
+        appointmentDate: apptDate,
+        notes: notes || ''
       });
 
       // Si tenemos WebSockets activos en app, enviamos notificación al front-end médico
@@ -264,7 +281,8 @@ module.exports = {
           appointmentId: appointment.id,
           patientName: patient.name,
           reason,
-          priority
+          priority,
+          appointmentDate: apptDate
         });
       }
 

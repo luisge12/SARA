@@ -4,7 +4,7 @@ import {
   ArrowLeft, Edit, FileText, Upload, Calendar, CalendarPlus, Activity, DollarSign, User, Phone, 
   Droplet, Ruler, Scale, Mail, MapPin, Building2, CheckCircle, Clock, Plus, 
   Shield, Sparkles, AlertCircle, Heart, Stethoscope, Trash2, ClipboardList,
-  Paperclip, Image, Download, X, Eye
+  Paperclip, Image, Download, X, Eye, Edit3, XCircle
 } from 'lucide-react';
 import MedicalImageViewer from '../../components/MedicalImageViewer';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -30,6 +30,7 @@ export default function PerfilPaciente() {
   const [studies, setStudies] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [selectedAppointmentForEdit, setSelectedAppointmentForEdit] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudy, setSelectedStudy] = useState(null); // Para ver el informe
   const [invoices, setInvoices] = useState([]);
@@ -256,6 +257,18 @@ export default function PerfilPaciente() {
       console.error('Error fetching patient profile:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelAppointment = async (apptId) => {
+    if (!window.confirm('¿Estás seguro de cancelar o rechazar esta cita médica?')) return;
+    try {
+      await api.put(`/api/appointments/${apptId}`, { status: 'Cancelada' });
+      fetchPatientData();
+      window.dispatchEvent(new Event('appointmentCreated'));
+    } catch (err) {
+      console.error('Error al cancelar cita:', err);
+      alert('Error al cancelar la cita médica.');
     }
   };
 
@@ -1170,14 +1183,18 @@ export default function PerfilPaciente() {
                 ) : (
                   <div className="citas-list-grid">
                     {appointments.map(apt => {
-                      const aptDate = new Date(apt.appointmentDate);
-                      const statusClass = (apt.status || 'confirmada').toLowerCase();
+                      const isUnscheduled = !apt.appointmentDate || isNaN(new Date(apt.appointmentDate).getTime());
+                      const aptDate = isUnscheduled ? null : new Date(apt.appointmentDate);
+                      const statusClass = (apt.status || 'confirmada').toLowerCase().replace(/\s+/g, '-');
                       return (
-                        <div key={apt.id} className="cita-card-perfil">
+                        <div key={apt.id} className="cita-card-perfil" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                           <div className="cita-card-header">
                             <span className="cita-date-badge">
                               <Calendar size={15} color="#3b82f6" />
-                              {aptDate.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+                              {isUnscheduled 
+                                ? 'Fecha por coordinar' 
+                                : aptDate.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+                              }
                             </span>
                             <span className={`cita-status-tag ${statusClass}`}>
                               {apt.status || 'Confirmada'}
@@ -1186,7 +1203,12 @@ export default function PerfilPaciente() {
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#64748b', fontSize: '0.85rem' }}>
                             <Clock size={14} />
-                            <span>{aptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span>
+                              {isUnscheduled 
+                                ? 'Horario pendiente' 
+                                : aptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              }
+                            </span>
                             <span>• Sede {apt.sedeAtencion || 'CENTRAL'}</span>
                           </div>
 
@@ -1197,6 +1219,11 @@ export default function PerfilPaciente() {
                             <p style={{ margin: 0, fontSize: '0.88rem', color: '#475569' }}>
                               <strong>Motivo:</strong> {apt.reason || 'Consulta Médica General'}
                             </p>
+                            {apt.priority && apt.priority !== 'Normal' && (
+                              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: apt.priority === 'Emergencia' || apt.priority === 'Alta' ? '#dc2626' : '#ea580c', fontWeight: 600 }}>
+                                Prioridad: {apt.priority}
+                              </p>
+                            )}
                           </div>
 
                           {apt.totalAmount > 0 && (
@@ -1207,6 +1234,57 @@ export default function PerfilPaciente() {
                               </span>
                             </div>
                           )}
+
+                          {/* Acciones de Cita (Aceptar, Agendar, Rechazar o Cancelar) */}
+                          <div style={{ marginTop: 'auto', paddingTop: '0.6rem', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            {apt.status === 'Solicitada' ? (
+                              <>
+                                <button
+                                  className="btn-outline"
+                                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem', color: '#dc2626', borderColor: '#fca5a5' }}
+                                  onClick={() => handleCancelAppointment(apt.id)}
+                                >
+                                  <XCircle size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                                  Rechazar
+                                </button>
+                                <button
+                                  className="btn-primary"
+                                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', backgroundColor: '#10b981', borderColor: '#10b981' }}
+                                  onClick={() => {
+                                    setSelectedAppointmentForEdit(apt);
+                                    setShowAppointmentModal(true);
+                                  }}
+                                >
+                                  <CheckCircle size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                                  Aceptar / Agendar
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="btn-outline"
+                                  style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem' }}
+                                  onClick={() => {
+                                    setSelectedAppointmentForEdit(apt);
+                                    setShowAppointmentModal(true);
+                                  }}
+                                >
+                                  <Edit3 size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                                  Editar / Reprogramar
+                                </button>
+                                {apt.status !== 'Cancelada' && apt.status !== 'Completada' && (
+                                  <button
+                                    className="btn-outline"
+                                    style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem', color: '#dc2626', borderColor: '#fca5a5' }}
+                                    onClick={() => handleCancelAppointment(apt.id)}
+                                  >
+                                    <XCircle size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                                    Cancelar
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -1258,13 +1336,18 @@ export default function PerfilPaciente() {
 
       {showAppointmentModal && (
         <AppointmentModal
-          onClose={() => setShowAppointmentModal(false)}
+          onClose={() => {
+            setShowAppointmentModal(false);
+            setSelectedAppointmentForEdit(null);
+          }}
           onSuccess={() => {
             setShowAppointmentModal(false);
+            setSelectedAppointmentForEdit(null);
             fetchPatientData();
             window.dispatchEvent(new Event('appointmentCreated'));
           }}
           initialPatientId={patient?.id}
+          appointmentToEdit={selectedAppointmentForEdit}
         />
       )}
 
