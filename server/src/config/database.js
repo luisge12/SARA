@@ -342,6 +342,27 @@ const initDatabase = async () => {
     await Study.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo Study:', err));
     await CustomFormTemplate.sync({ alter: true }).catch(err => console.error('Error al sincronizar modelo CustomFormTemplate:', err));
 
+    // Garantizar que las columnas críticas de usuarios y estudios existan siempre en PostgreSQL
+    const criticalQueries = [
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS shift VARCHAR(50);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS academic_degree VARCHAR(150);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS specialty VARCHAR(150);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(50);',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE;',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE;',
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS clinic_id INTEGER DEFAULT 1;',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT \'[]\'::jsonb;',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS biopsy_sample VARCHAR(255);',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS technique_or_region VARCHAR(255);',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS total_amount DECIMAL(10,2) DEFAULT 0.00;',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS paid_amount DECIMAL(10,2) DEFAULT 0.00;',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT \'Pendiente\';',
+      'ALTER TABLE medical_studies ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT \'{}\'::jsonb;'
+    ];
+    for (const q of criticalQueries) {
+      await sequelize.query(q).catch(() => {});
+    }
+
     // Asegurar que exista la clínica principal con ID 1 y licencia activa de 30 días
     try {
       const clinicCount = await Clinic.count();

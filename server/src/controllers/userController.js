@@ -138,7 +138,11 @@ module.exports = {
       });
     } catch (error) {
       console.error('Error en login:', error);
-      return res.status(500).json({ error: 'Error interno del servidor' });
+      const isDbError = error.name?.includes('Sequelize') || error.message?.includes('connect') || error.message?.includes('database');
+      const errorMsg = isDbError 
+        ? 'Error de conexión o sincronización con la base de datos. Intente nuevamente en unos segundos.' 
+        : (error.message || 'Error interno del servidor al procesar la autenticación');
+      return res.status(500).json({ error: errorMsg });
     }
   },
   createUser: async (req, res) => {
