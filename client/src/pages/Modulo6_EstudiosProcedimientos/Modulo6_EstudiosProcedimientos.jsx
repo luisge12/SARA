@@ -201,7 +201,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
         recommendations: formData.recommendations,
         status: formData.status,
         totalAmount: formData.totalAmount ? parseFloat(formData.totalAmount) : 0,
-        attachments: [],
+        attachments: editingStudyId ? (studies.find(s => s.id === editingStudyId)?.attachments || []) : [],
         metadata: {
           ...(editingStudyId ? (studies.find(s => s.id === editingStudyId)?.metadata || {}) : {}),
           doctorName: formData.doctorName,

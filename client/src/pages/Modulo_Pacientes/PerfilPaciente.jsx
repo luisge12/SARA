@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Edit, FileText, Upload, Calendar, CalendarPlus, Activity, DollarSign, User, Phone, 
   Droplet, Ruler, Scale, Mail, MapPin, Building2, CheckCircle, Clock, Plus, 
-  Shield, Sparkles, AlertCircle, Heart, Stethoscope, Trash2, ClipboardList
+  Shield, Sparkles, AlertCircle, Heart, Stethoscope, Trash2, ClipboardList,
+  Paperclip, Image, Download, X, Eye
 } from 'lucide-react';
 import MedicalImageViewer from '../../components/MedicalImageViewer';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -39,6 +40,20 @@ export default function PerfilPaciente() {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = (currentUser.role || '').toUpperCase();
   const canManageStudies = ['MASTER', 'ADMINISTRADOR', 'MEDICO', 'MÉDICO', 'DIRECTOR MÉDICO', 'MÉDICO TRATANTE'].includes(userRole);
+  const canAttachFiles = ['MASTER', 'ADMINISTRADOR', 'MEDICO', 'MÉDICO', 'DIRECTOR MÉDICO', 'MÉDICO TRATANTE', 'RECEPCIONISTA', 'ASISTENTE ADMINISTRATIVO', 'ASISTENTE MEDICO'].includes(userRole);
+
+  // Estados para Archivos Adjuntos (PDFs y Fotos) de Estudios
+  const [uploadingAttachmentStudyId, setUploadingAttachmentStudyId] = useState(null);
+  const [viewingAttachment, setViewingAttachment] = useState(null);
+  const [showQuickUploadModal, setShowQuickUploadModal] = useState(false);
+  const [quickUploadForm, setQuickUploadForm] = useState({
+    category: 'Laboratorio Clínico',
+    studyType: '',
+    date: new Date().toISOString().split('T')[0],
+    diagnosticImpression: '',
+    file: null
+  });
+  const [isSubmittingQuickUpload, setIsSubmittingQuickUpload] = useState(false);
 
   // Catálogo de Especialidades y Estudios Médicos Universales
   const STUDY_CATEGORIES = {
@@ -249,6 +264,107 @@ export default function PerfilPaciente() {
     fetchDoctors();
     fetchPatientStudyTemplates();
   }, [id]);
+
+  // Handlers para archivos adjuntos de estudios (PDFs y Fotos)
+  const handleUploadToStudy = async (studyId, fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const formData = new FormData();
+    for (let i = 0; i < fileList.length; i++) {
+      formData.append('files', fileList[i]);
+    }
+
+    try {
+      setUploadingAttachmentStudyId(studyId);
+      const res = await api.post(`/api/studies/${studyId}/attachments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setStudies(prev => prev.map(s => {
+        if (s.id === studyId) {
+          return { ...s, attachments: res.data.attachments };
+        }
+        return s;
+      }));
+    } catch (err) {
+      console.error('Error al subir adjunto:', err);
+      alert(err.response?.data?.error || 'Error al subir el archivo al estudio');
+    } finally {
+      setUploadingAttachmentStudyId(null);
+    }
+  };
+
+  const handleDeleteAttachment = async (studyId, attachmentId) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este archivo adjunto?')) return;
+    try {
+      const res = await api.delete(`/api/studies/${studyId}/attachments/${attachmentId}`);
+      setStudies(prev => prev.map(s => {
+        if (s.id === studyId) {
+          return { ...s, attachments: res.data.attachments };
+        }
+        return s;
+      }));
+    } catch (err) {
+      console.error('Error al eliminar adjunto:', err);
+      alert(err.response?.data?.error || 'Error al eliminar el archivo adjunto');
+    }
+  };
+
+  const handleQuickUploadSubmit = async (e) => {
+    e.preventDefault();
+    if (!quickUploadForm.file) {
+      alert('Por favor selecciona un archivo PDF o imagen.');
+      return;
+    }
+    if (!quickUploadForm.studyType.trim()) {
+      alert('Por favor indica el nombre o tipo de estudio (ej: Hematología Completa).');
+      return;
+    }
+
+    try {
+      setIsSubmittingQuickUpload(true);
+      // 1. Registrar estudio base
+      const studyPayload = {
+        patientId: id,
+        studyType: quickUploadForm.studyType.trim(),
+        category: quickUploadForm.category,
+        date: quickUploadForm.date || new Date().toISOString().split('T')[0],
+        status: 'Completado',
+        diagnosticImpression: quickUploadForm.diagnosticImpression || 'Resultado adjunto en expediente',
+        findings: 'Resultado escaneado / PDF adjuntado directamente al expediente.',
+        recommendations: 'Consultar archivo adjunto original.'
+      };
+
+      const createRes = await api.post('/api/studies', studyPayload);
+      const createdStudy = createRes.data.study;
+
+      // 2. Subir archivo adjunto al estudio creado
+      const formData = new FormData();
+      formData.append('files', quickUploadForm.file);
+
+      const attachRes = await api.post(`/api/studies/${createdStudy.id}/attachments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const finalStudy = {
+        ...createdStudy,
+        attachments: attachRes.data.attachments
+      };
+
+      setStudies(prev => [finalStudy, ...prev]);
+      setShowQuickUploadModal(false);
+      setQuickUploadForm({
+        category: 'Laboratorio Clínico',
+        studyType: '',
+        date: new Date().toISOString().split('T')[0],
+        diagnosticImpression: '',
+        file: null
+      });
+    } catch (err) {
+      console.error('Error al guardar estudio con adjunto:', err);
+      alert(err.response?.data?.error || 'Error al procesar la subida del estudio');
+    } finally {
+      setIsSubmittingQuickUpload(false);
+    }
+  };
 
   const handleCategoryChange = (e) => {
     const newCat = e.target.value;
@@ -798,29 +914,20 @@ export default function PerfilPaciente() {
                         onClick={handleOpenStudyModal}
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#0284c7', borderColor: '#0284c7' }}
                       >
-                        <Plus size={18} /> Registrar Estudio Médico
+                        <Plus size={18} /> Redactar Informe Clínico
                       </button>
                     )}
-                    <label className="btn-upload" style={{ margin: 0 }}>
-                      <Upload size={18} /> Subir Orden (PDF)
-                      <input type="file" accept="application/pdf" hidden />
-                    </label>
-                    <button className="btn-upload" onClick={() => setShowImageUpload(!showImageUpload)}>
-                      <Upload size={18} /> Subir Imagen (DICOM/JPG/PNG)
-                    </button>
-                  </div>
-                </div>
-
-                {showImageUpload && (
-                  <div className="image-upload-area mt-4">
-                    <input type="file" accept=".dcm,image/jpeg,image/png" onChange={handleImageUpload} />
-                    {selectedImage && (
-                      <div className="viewer-wrapper mt-4">
-                        <MedicalImageViewer imageUrl={selectedImage} />
-                      </div>
+                    {canAttachFiles && (
+                      <button
+                        className="btn-upload"
+                        onClick={() => setShowQuickUploadModal(true)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#059669', borderColor: '#059669', color: '#ffffff' }}
+                      >
+                        <Paperclip size={18} /> Adjuntar Estudio / Laboratorio Externo
+                      </button>
                     )}
                   </div>
-                )}
+                </div>
 
                 <div className="estudios-list mt-4">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -922,15 +1029,98 @@ export default function PerfilPaciente() {
                               </p>
                             )}
                             <p className="study-preview"><strong>Impresión Diagnóstica:</strong> {study.diagnosticImpression || 'Sin impresión registrada'}</p>
+
+                            {/* Sección de Documentos y Archivos Adjuntos */}
+                            {study.attachments && study.attachments.length > 0 && (
+                              <div style={{ marginTop: '0.75rem', marginBottom: '0.5rem', padding: '0.6rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <Paperclip size={14} color="#0284c7" /> Archivos Adjuntos ({study.attachments.length}):
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                  {study.attachments.map(att => {
+                                    const isPdf = att.isPdf || (att.filename && att.filename.toLowerCase().endsWith('.pdf'));
+                                    return (
+                                      <div key={att.id || att.filename} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#ffffff', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.82rem' }}>
+                                        <button 
+                                          type="button"
+                                          onClick={() => setViewingAttachment(att)}
+                                          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: '#0369a1', fontWeight: 600, padding: 0, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                          title={`Ver ${att.originalName || att.filename}`}
+                                        >
+                                          {isPdf ? (
+                                            <FileText size={15} color="#dc2626" style={{ flexShrink: 0 }} />
+                                          ) : (
+                                            <Image size={15} color="#0284c7" style={{ flexShrink: 0 }} />
+                                          )}
+                                          <span style={{ textDecoration: 'underline' }}>{att.originalName || att.filename}</span>
+                                        </button>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                                            {att.size ? `${(att.size / 1024).toFixed(0)} KB` : ''}
+                                          </span>
+                                          <a 
+                                            href={att.url} 
+                                            download={att.originalName || att.filename}
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            style={{ color: '#0284c7', display: 'flex', alignItems: 'center', padding: '2px' }}
+                                            title="Descargar archivo"
+                                          >
+                                            <Download size={13} />
+                                          </a>
+                                          {canAttachFiles && (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleDeleteAttachment(study.id, att.id || att.filename)}
+                                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+                                              title="Eliminar adjunto"
+                                            >
+                                              <Trash2 size={13} />
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap' }}>
                             <button 
                               className="btn-secondary btn-small" 
-                              style={{ flex: 1 }}
+                              style={{ flex: 1, minWidth: '100px' }}
                               onClick={() => setSelectedStudy(study)}
                             >
-                              <FileText size={16} /> Ver Informe
+                              <FileText size={15} /> Ver Informe
                             </button>
+                            {canAttachFiles && (
+                              <label 
+                                className="btn-secondary btn-small"
+                                style={{
+                                  cursor: uploadingAttachmentStudyId === study.id ? 'wait' : 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  color: '#059669',
+                                  borderColor: '#a7f3d0',
+                                  backgroundColor: '#f0fdf4'
+                                }}
+                                title="Adjuntar PDF de laboratorio o foto a este estudio"
+                              >
+                                <Paperclip size={14} /> {uploadingAttachmentStudyId === study.id ? 'Subiendo...' : 'Adjuntar'}
+                                <input 
+                                  type="file" 
+                                  accept=".pdf,.png,.jpg,.jpeg,.webp,.dcm" 
+                                  hidden 
+                                  disabled={uploadingAttachmentStudyId === study.id}
+                                  onChange={(e) => {
+                                    handleUploadToStudy(study.id, e.target.files);
+                                    e.target.value = '';
+                                  }} 
+                                />
+                              </label>
+                            )}
                             {canManageStudies && (
                               <button
                                 className="btn-secondary btn-small"
@@ -938,7 +1128,7 @@ export default function PerfilPaciente() {
                                 onClick={() => handleDeleteStudy(study.id)}
                                 title="Eliminar estudio médico"
                               >
-                                <Trash2 size={16} />
+                                <Trash2 size={15} />
                               </button>
                             )}
                           </div>
@@ -1525,6 +1715,226 @@ export default function PerfilPaciente() {
             <div className="report-modal-footer">
               <button className="btn-primary" onClick={handleDownloadPDF}>Descargar PDF</button>
               <button className="btn-secondary" onClick={() => setSelectedInvoice(null)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA SUBIDA RÁPIDA DE ESTUDIOS / LABORATORIOS EXTERNOS */}
+      {showQuickUploadModal && (
+        <div className="report-modal-overlay" style={{ zIndex: 1100, backgroundColor: 'rgba(15, 23, 42, 0.65)' }}>
+          <div className="report-modal-content" style={{ maxWidth: '560px', width: '92%', borderRadius: '16px', padding: '1.75rem', backgroundColor: '#ffffff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Paperclip size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 700 }}>Adjuntar Estudio o Laboratorio</h3>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Carga el resultado en PDF o imagen al expediente</p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowQuickUploadModal(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Selector de Archivo */}
+              <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', backgroundColor: '#f8fafc', transition: 'border-color 0.2s' }}>
+                <input 
+                  type="file" 
+                  id="quick-study-file"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,.dcm"
+                  required
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files && e.target.files[0];
+                    if (f) {
+                      setQuickUploadForm(prev => ({
+                        ...prev,
+                        file: f,
+                        studyType: prev.studyType || f.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ")
+                      }));
+                    }
+                  }}
+                />
+                <label htmlFor="quick-study-file" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                  <Upload size={28} color="#0284c7" />
+                  {quickUploadForm.file ? (
+                    <div>
+                      <span style={{ fontWeight: 600, color: '#0369a1', fontSize: '0.9rem', display: 'block' }}>
+                        {quickUploadForm.file.name}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        {(quickUploadForm.file.size / 1024).toFixed(0)} KB • Haz clic para cambiar archivo
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem', display: 'block' }}>
+                        Haz clic aquí para seleccionar el archivo
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Formatos soportados: PDF, JPG, PNG, WEBP (Hasta 25 MB)
+                      </span>
+                    </div>
+                  )}
+                </label>
+              </div>
+
+              {/* Categoría */}
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                  Categoría del Estudio:
+                </label>
+                <select 
+                  className="hm-input"
+                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  value={quickUploadForm.category}
+                  onChange={(e) => setQuickUploadForm({ ...quickUploadForm, category: e.target.value })}
+                >
+                  {Object.keys(STUDY_CATEGORIES).map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                  <option value="Laboratorio Clínico">Laboratorio Clínico</option>
+                  <option value="Otros Estudios">Otros Estudios</option>
+                </select>
+              </div>
+
+              {/* Nombre / Tipo de Estudio */}
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                  Nombre / Tipo de Estudio:
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Ej: Hematología Completa, Perfil Lipídico, Rayos X de Tórax..."
+                  required
+                  className="hm-input"
+                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  value={quickUploadForm.studyType}
+                  onChange={(e) => setQuickUploadForm({ ...quickUploadForm, studyType: e.target.value })}
+                />
+              </div>
+
+              {/* Fecha */}
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                  Fecha de Realización o Emisión:
+                </label>
+                <input 
+                  type="date" 
+                  className="hm-input"
+                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                  value={quickUploadForm.date}
+                  onChange={(e) => setQuickUploadForm({ ...quickUploadForm, date: e.target.value })}
+                />
+              </div>
+
+              {/* Observación / Impresión */}
+              <div>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '0.35rem' }}>
+                  Nota u Observación Breve (Opcional):
+                </label>
+                <textarea 
+                  rows={2}
+                  placeholder="Ej: Paciente presenta valores normales / Valores de plaquetas en seguimiento..."
+                  className="hm-textarea"
+                  style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                  value={quickUploadForm.diagnosticImpression}
+                  onChange={(e) => setQuickUploadForm({ ...quickUploadForm, diagnosticImpression: e.target.value })}
+                />
+              </div>
+
+              {/* Botones */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+                <button 
+                  type="button" 
+                  className="btn-secondary"
+                  disabled={isSubmittingQuickUpload}
+                  onClick={() => setShowQuickUploadModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary"
+                  disabled={isSubmittingQuickUpload}
+                  style={{ backgroundColor: '#059669', borderColor: '#059669', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  {isSubmittingQuickUpload ? 'Subiendo archivo...' : 'Guardar y Adjuntar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL VISOR DE ARCHIVOS ADJUNTOS (PDFs E IMÁGENES) */}
+      {viewingAttachment && (
+        <div className="report-modal-overlay" style={{ zIndex: 1200, backgroundColor: 'rgba(15, 23, 42, 0.85)' }}>
+          <div style={{ width: '92%', maxWidth: '1100px', height: '90vh', backgroundColor: '#ffffff', borderRadius: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            {/* Header del visor */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                {viewingAttachment.isPdf || (viewingAttachment.filename && viewingAttachment.filename.toLowerCase().endsWith('.pdf')) ? (
+                  <FileText size={20} color="#dc2626" style={{ flexShrink: 0 }} />
+                ) : (
+                  <Image size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+                )}
+                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {viewingAttachment.originalName || viewingAttachment.filename}
+                </span>
+                {viewingAttachment.size && (
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', backgroundColor: '#e2e8f0', padding: '0.15rem 0.5rem', borderRadius: '12px' }}>
+                    {(viewingAttachment.size / 1024).toFixed(0)} KB
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <a
+                  href={viewingAttachment.url}
+                  download={viewingAttachment.originalName || viewingAttachment.filename}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary btn-small"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}
+                >
+                  <Download size={15} /> Descargar
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setViewingAttachment(null)}
+                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                  title="Cerrar visor"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+            </div>
+
+            {/* Contenido del visor */}
+            <div style={{ flex: 1, backgroundColor: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {viewingAttachment.isPdf || (viewingAttachment.filename && viewingAttachment.filename.toLowerCase().endsWith('.pdf')) ? (
+                <iframe 
+                  src={viewingAttachment.url} 
+                  title="Visor de PDF" 
+                  style={{ width: '100%', height: '100%', border: 'none' }} 
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto' }}>
+                  <img 
+                    src={viewingAttachment.url} 
+                    alt="Visor de Imagen de Estudio" 
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)' }} 
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

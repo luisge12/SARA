@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ClipboardList, Calendar, LogOut, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Activity, ClipboardList, Calendar, LogOut, ArrowRight, ShieldCheck, FileText, Paperclip, Download, X, Image } from 'lucide-react';
+import { portalApi } from '../../services/api';
 
 export function PortalPacienteDashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('portal_user') || '{}');
+  const [studies, setStudies] = useState([]);
+  const [loadingStudies, setLoadingStudies] = useState(true);
+  const [viewingAttachment, setViewingAttachment] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem('portal_token');
@@ -14,6 +18,21 @@ export function PortalPacienteDashboard() {
     localStorage.removeItem('session_expires_at');
     navigate('/login');
   };
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchStudies = async () => {
+      try {
+        const res = await portalApi.get(`/api/studies/patient/${user.id}`);
+        setStudies(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.warn('Error fetching patient studies:', err);
+      } finally {
+        setLoadingStudies(false);
+      }
+    };
+    fetchStudies();
+  }, [user?.id]);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg-main)', padding: '2rem 1rem' }}>
@@ -151,9 +170,173 @@ export function PortalPacienteDashboard() {
               Ver Parámetros <ArrowRight size={15} />
             </span>
           </div>
+        </div>
 
+        {/* Sección: Mis Estudios y Resultados de Laboratorio */}
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(2, 132, 199, 0.12)', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--color-text-main)', fontSize: '1.2rem', fontWeight: 700 }}>
+                  Mis Estudios y Resultados de Laboratorio
+                </h3>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                  Descarga tus informes clínicos, pruebas de laboratorio y estudios en PDF
+                </p>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0284c7', backgroundColor: '#e0f2fe', padding: '0.25rem 0.75rem', borderRadius: '12px' }}>
+              {studies.length} {studies.length === 1 ? 'estudio registrado' : 'estudios registrados'}
+            </span>
+          </div>
+
+          {loadingStudies ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+              Cargando tus estudios médicos...
+            </div>
+          ) : studies.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: 'var(--color-bg-card)', borderRadius: '14px', border: '1px dashed var(--border-color)' }}>
+              <FileText size={38} color="#94a3b8" style={{ marginBottom: '0.5rem', opacity: 0.6 }} />
+              <h4 style={{ margin: '0 0 0.35rem 0', color: 'var(--color-text-main)', fontSize: '1.05rem' }}>
+                No tienes estudios ni laboratorios registrados aún
+              </h4>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem', margin: 0, maxWidth: '440px', marginInline: 'auto' }}>
+                Cuando tu médico o el laboratorio cargue tus resultados y exámenes, aparecerán automáticamente aquí para que los consultes o descargues en PDF.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {studies.map(study => (
+                <div key={study.id} style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.75rem', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '1.05rem' }}>
+                        {study.studyType}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0284c7', backgroundColor: '#e0f2fe', padding: '0.15rem 0.5rem', borderRadius: '10px' }}>
+                        {study.category || 'General'}
+                      </span>
+                    </div>
+
+                    <p style={{ margin: '0 0 0.4rem 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                      <strong>Fecha:</strong> {new Date(study.date || study.created_at).toLocaleDateString()} • Sede {study.sede || 'CENTRAL'}
+                    </p>
+                    {study.doctor?.name && (
+                      <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                        <strong>Médico:</strong> {study.doctor.name}
+                      </p>
+                    )}
+
+                    {study.diagnosticImpression && (
+                      <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: 'var(--color-text-main)', background: '#f8fafc', padding: '0.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        <strong>Impresión:</strong> {study.diagnosticImpression}
+                      </p>
+                    )}
+
+                    {/* Archivos adjuntos para descargar */}
+                    {study.attachments && study.attachments.length > 0 ? (
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Paperclip size={13} color="#0284c7" /> Archivos disponibles para descargar:
+                        </span>
+                        {study.attachments.map(att => {
+                          const isPdf = att.isPdf || (att.filename && att.filename.toLowerCase().endsWith('.pdf'));
+                          return (
+                            <div key={att.id || att.filename} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.4rem 0.6rem', backgroundColor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', fontSize: '0.82rem' }}>
+                              <button
+                                type="button"
+                                onClick={() => setViewingAttachment(att)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: '#0369a1', fontWeight: 600, padding: 0, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                title={`Ver ${att.originalName || att.filename}`}
+                              >
+                                {isPdf ? <FileText size={15} color="#dc2626" /> : <Image size={15} color="#0284c7" />}
+                                <span style={{ textDecoration: 'underline' }}>{att.originalName || att.filename}</span>
+                              </button>
+                              <a
+                                href={att.url}
+                                download={att.originalName || att.filename}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '3px', fontWeight: 600, fontSize: '0.78rem', textDecoration: 'none', backgroundColor: '#ffffff', padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                                title="Descargar archivo"
+                              >
+                                <Download size={13} /> Descargar
+                              </a>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                        Sin archivos adjuntos cargados aún.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* MODAL VISOR DE ARCHIVO PARA EL PACIENTE */}
+      {viewingAttachment && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1200, backgroundColor: 'rgba(15, 23, 42, 0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ width: '92%', maxWidth: '1000px', height: '88vh', backgroundColor: '#ffffff', borderRadius: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }}>
+                {viewingAttachment.isPdf || (viewingAttachment.filename && viewingAttachment.filename.toLowerCase().endsWith('.pdf')) ? (
+                  <FileText size={20} color="#dc2626" style={{ flexShrink: 0 }} />
+                ) : (
+                  <Image size={20} color="#0284c7" style={{ flexShrink: 0 }} />
+                )}
+                <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {viewingAttachment.originalName || viewingAttachment.filename}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <a
+                  href={viewingAttachment.url}
+                  download={viewingAttachment.originalName || viewingAttachment.filename}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  <Download size={15} /> Descargar
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setViewingAttachment(null)}
+                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                >
+                  <X size={22} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ flex: 1, backgroundColor: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {viewingAttachment.isPdf || (viewingAttachment.filename && viewingAttachment.filename.toLowerCase().endsWith('.pdf')) ? (
+                <iframe 
+                  src={viewingAttachment.url} 
+                  title="Visor de PDF" 
+                  style={{ width: '100%', height: '100%', border: 'none' }} 
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto' }}>
+                  <img 
+                    src={viewingAttachment.url} 
+                    alt="Visor de Estudio" 
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '4px' }} 
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

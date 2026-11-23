@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const Study = require('../models/Study');
 const User = require('../models/User');
 const PatientProfile = require('../models/PatientProfile');
@@ -115,6 +117,12 @@ module.exports = {
   getPatientStudies: async (req, res) => {
     try {
       const { patientId } = req.params;
+
+      // Validación de seguridad para rol Paciente: solo puede consultar sus propios estudios
+      if (req.user && (req.user.role === 'Paciente' || req.user.role === 'PACIENTE') && String(req.user.id) !== String(patientId)) {
+        return res.status(403).json({ error: 'No tienes autorización para consultar los estudios de otro usuario.' });
+      }
+
       const { category } = req.query;
       const whereClause = { patientId };
       if (category && category !== 'Todos') {
@@ -221,11 +229,112 @@ module.exports = {
         return res.status(404).json({ error: 'Estudio no encontrado' });
       }
 
+      // Eliminar archivos físicos adjuntos si existen
+      if (Array.isArray(study.attachments)) {
+        for (const att of study.attachments) {
+          if (att.filename) {
+            const filePath = path.join(__dirname, '../../uploads/studies', att.filename);
+            if (fs.existsSync(filePath)) {
+              try { fs.unlinkSync(filePath); } catch (_) {}
+            }
+          }
+        }
+      }
+
       await study.destroy();
       return res.json({ message: 'Estudio eliminado exitosamente' });
     } catch (error) {
       console.error('Error al eliminar estudio:', error);
       return res.status(500).json({ error: 'Error al eliminar el estudio', details: error.message });
+    }
+  },
+
+  // Subir y asociar archivos adjuntos a un estudio
+  uploadAttachments: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const study = await Study.findByPk(id);
+
+      if (!study) {
+        // Si no existe el estudio, limpiar archivos recién subidos
+        if (req.files && Array.isArray(req.files)) {
+          req.files.forEach(f => {
+            try { fs.unlinkSync(f.path); } catch (_) {}
+          });
+        }
+        return res.status(404).json({ error: 'Estudio no encontrado' });
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No se recibió ningún archivo para adjuntar' });
+      }
+
+      const newAttachments = req.files.map(f => {
+        const isPdf = f.mimetype === 'application/pdf' || f.originalname.toLowerCase().endsWith('.pdf');
+        return {
+          id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+          originalName: f.originalname,
+          filename: f.filename,
+          mimetype: f.mimetype,
+          size: f.size,
+          isPdf,
+          url: `/api/uploads/studies/${f.filename}`,
+          uploadedAt: new Date().toISOString(),
+          uploadedBy: req.user ? (req.user.name || req.user.username) : 'Personal Médico'
+        };
+      });
+
+      const currentAttachments = Array.isArray(study.attachments) ? study.attachments : [];
+      study.attachments = [...currentAttachments, ...newAttachments];
+      await study.save();
+
+      return res.status(200).json({
+        message: 'Archivos adjuntados con éxito',
+        attachments: study.attachments,
+        newAttachments
+      });
+    } catch (error) {
+      console.error('Error al subir adjuntos a estudio:', error);
+      return res.status(500).json({ error: 'Error al procesar archivos adjuntos', details: error.message });
+    }
+  },
+
+  // Eliminar un archivo adjunto específico de un estudio
+  deleteAttachment: async (req, res) => {
+    try {
+      const { id, attachmentId } = req.params;
+      const study = await Study.findByPk(id);
+
+      if (!study) {
+        return res.status(404).json({ error: 'Estudio no encontrado' });
+      }
+
+      const currentAttachments = Array.isArray(study.attachments) ? study.attachments : [];
+      const target = currentAttachments.find(a => a.id === attachmentId || a.filename === attachmentId);
+
+      if (!target) {
+        return res.status(404).json({ error: 'Archivo adjunto no encontrado en este estudio' });
+      }
+
+      // Eliminar archivo físico de disco
+      if (target.filename) {
+        const filePath = path.join(__dirname, '../../uploads/studies', target.filename);
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (_) {}
+        }
+      }
+
+      // Actualizar registro en base de datos
+      study.attachments = currentAttachments.filter(a => a.id !== attachmentId && a.filename !== attachmentId);
+      await study.save();
+
+      return res.json({
+        message: 'Archivo adjunto eliminado con éxito',
+        attachments: study.attachments
+      });
+    } catch (error) {
+      console.error('Error al eliminar archivo adjunto:', error);
+      return res.status(500).json({ error: 'Error al eliminar archivo adjunto', details: error.message });
     }
   }
 };

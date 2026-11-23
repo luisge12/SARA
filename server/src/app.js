@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const socketIo = require('socket.io');
 const cors = require('cors');
 require('dotenv').config();
@@ -59,6 +60,10 @@ const studyRoutes = require('./routes/studyRoutes');
 const formTemplateRoutes = require('./routes/formTemplateRoutes');
 const licenseRoutes = require('./routes/licenseRoutes');
 const { verifyClinicLicense } = require('./middlewares/licenseMiddleware');
+
+// Servir archivos estáticos subidos (PDFs, imágenes de estudios clínicos)
+app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middleware global para protección de licencias
 app.use(verifyClinicLicense);
