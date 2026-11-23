@@ -47,6 +47,11 @@ export const ProtectedRoute = ({ children, allowedGroups }) => {
     if (normalized === 'supermaster') {
       return <Navigate to="/supermaster" replace />;
     }
+
+    // Los pacientes únicamente tienen acceso a su portal de usuario
+    if (normalized === 'paciente') {
+      return <Navigate to="/users/dashboard" replace />;
+    }
     
     // Si no se requieren grupos específicos, solo estar logueado basta
     if (!allowedGroups || allowedGroups.length === 0) {

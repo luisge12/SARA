@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, User, AlertTriangle, ExternalLink, X, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import api from '../services/api';
@@ -46,7 +46,6 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [showPatientModal, setShowPatientModal] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
 
   // Actualizar la fecha y hora cada minuto
@@ -57,14 +56,16 @@ export function Login() {
 
   // Si ya existe una sesión activa, redirigir automáticamente al panel correspondiente
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    const token = localStorage.getItem('token') || localStorage.getItem('portal_token');
+    const userStr = localStorage.getItem('user') || localStorage.getItem('portal_user');
     const expiresAt = localStorage.getItem('session_expires_at');
 
     // Si el tiempo límite ya pasó, limpiar silenciosamente sin alertas
     if (expiresAt && Date.now() > Number(expiresAt)) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      localStorage.removeItem('portal_token');
+      localStorage.removeItem('portal_user');
       localStorage.removeItem('session_expires_at');
       return;
     }
@@ -73,7 +74,9 @@ export function Login() {
       try {
         const user = JSON.parse(userStr);
         const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
-        if (isSuper) {
+        if (user.role === 'Paciente') {
+          navigate('/users/dashboard', { replace: true });
+        } else if (isSuper) {
           navigate('/supermaster', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
@@ -81,6 +84,8 @@ export function Login() {
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('portal_token');
+        localStorage.removeItem('portal_user');
         localStorage.removeItem('session_expires_at');
       }
     }
@@ -94,17 +99,13 @@ export function Login() {
       const response = await api.post('/api/users/login', { username, password });
       const { token, user, license } = response.data;
       
-      // Bloqueo de Pacientes en la App Principal (Clínica)
-      if (user.role === 'Paciente') {
-        setShowPatientModal(true);
-        return;
-      }
-      
       // Guardar sesión y fijar expiración estricta a 24 horas exactas
       const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
       localStorage.setItem('session_expires_at', expiresAt);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('portal_token', token);
+      localStorage.setItem('portal_user', JSON.stringify(user));
 
       // Sincronizar el nombre de la clínica activa desde la licencia/backend
       if (license && license.clinicName) {
@@ -119,9 +120,11 @@ export function Login() {
         }
       }
       
-      // Redirigir según el rol
+      // Redirigir inteligentemente según el rol
       const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
-      if (isSuper) {
+      if (user.role === 'Paciente') {
+        navigate('/users/dashboard');
+      } else if (isSuper) {
         navigate('/supermaster');
       } else {
         navigate('/dashboard');
@@ -244,29 +247,6 @@ export function Login() {
           </Button>
         </form>
       </div>
-
-      {showPatientModal && (
-        <div className="patient-modal-overlay">
-          <div className="patient-modal-content">
-            <button className="patient-modal-close" onClick={() => setShowPatientModal(false)}>
-              <X size={20} />
-            </button>
-            <div className="patient-modal-icon-wrapper">
-              <AlertTriangle size={32} className="patient-modal-icon" />
-            </div>
-            <h2 className="patient-modal-title">Acceso Denegado</h2>
-            <p className="patient-modal-text">
-              Tu cuenta está registrada como <strong>Paciente</strong>. Por motivos de seguridad y privacidad, el acceso a esta plataforma administrativa está restringido.
-            </p>
-            <p className="patient-modal-text">
-              Por favor, dirígete al <strong>Portal de Usuarios</strong> para consultar tu información clínica, citas y documentos.
-            </p>
-            <Link to="/users" className="patient-modal-link-btn">
-              Ir al Portal de Usuarios <ExternalLink size={16} style={{ marginLeft: '8px' }} />
-            </Link>
-          </div>
-        </div>
-      )}
 
       <footer className="login-footer-text">
         <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap' }}>

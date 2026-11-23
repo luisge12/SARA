@@ -21,9 +21,9 @@ import { PortalPacienteHistoriaMedica } from './pages/PortalPaciente/PortalPacie
 import { PortalPacienteProtectedRoute } from './pages/PortalPaciente/PortalPacienteProtectedRoute';
 
 function PortalPacienteIndex() {
-  const token = localStorage.getItem('portal_token');
+  const token = localStorage.getItem('portal_token') || localStorage.getItem('token');
   if (!token) {
-    return <Navigate to="/users/login" replace />;
+    return <Navigate to="/login" replace />;
   }
   return <Navigate to="/users/dashboard" replace />;
 }
@@ -101,7 +101,7 @@ function App() {
 
         {/* Rutas del Portal del Paciente */}
         <Route path="/users" element={<PortalPacienteIndex />} />
-        <Route path="/users/login" element={<PortalPacienteLogin />} />
+        <Route path="/users/login" element={<Navigate to="/login" replace />} />
         <Route path="/users/dashboard" element={
           <PortalPacienteProtectedRoute>
             <PortalPacienteDashboard />

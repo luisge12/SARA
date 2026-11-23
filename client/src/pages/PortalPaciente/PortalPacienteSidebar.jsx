@@ -20,8 +20,11 @@ export function PortalPacienteSidebar() {
   const handleLogout = () => {
     localStorage.removeItem('portal_token');
     localStorage.removeItem('portal_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('session_expires_at');
     setIsMobileMenuOpen(false);
-    navigate('/users/login');
+    navigate('/login');
   };
 
   const [showRequestModal, setShowRequestModal] = React.useState(false);
