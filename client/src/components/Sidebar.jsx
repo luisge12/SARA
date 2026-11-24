@@ -93,7 +93,7 @@ export function Sidebar() {
         <nav className="sidebar-nav">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
-            const hasBadge = item.badge && item.badge > 0;
+            const hasBadge = Boolean(item.badge && item.badge > 0);
             return (
               <NavLink
                 key={item.name}
@@ -104,16 +104,16 @@ export function Sidebar() {
               >
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                   <Icon size={20} className="sidebar-icon" />
-                  {isCollapsed && hasBadge && (
+                  {isCollapsed && hasBadge ? (
                     <span className="sidebar-badge-dot" title={`${item.badge} solicitudes pendientes`} />
-                  )}
+                  ) : null}
                 </div>
                 <span className="link-text">{item.name}</span>
-                {!isCollapsed && hasBadge && (
+                {!isCollapsed && hasBadge ? (
                   <span className="sidebar-badge" title={`${item.badge} solicitudes pendientes`}>
                     {item.badge}
                   </span>
-                )}
+                ) : null}
               </NavLink>
             );
           })}
