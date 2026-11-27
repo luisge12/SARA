@@ -195,6 +195,14 @@ module.exports = {
 
       const downloadType = (req.query.type || 'exe').toLowerCase();
 
+      // Opción Mac: Paquete nativo para macOS (SARA.app)
+      if (downloadType === 'mac' || downloadType === 'apple' || downloadType === 'macos') {
+        const macPath = path.join(downloadsDir, 'SARA_Mac_v2.4.0.zip');
+        if (fs.existsSync(macPath)) {
+          return res.download(macPath, 'SARA_Mac_v2.4.0.zip');
+        }
+      }
+
       // Opción 1: Paquete portable en archivo ZIP
       if (downloadType === 'portable' || downloadType === 'zip') {
         const zipPath = path.join(downloadsDir, 'SARA_Portable_v2.4.0.zip');
@@ -213,15 +221,17 @@ module.exports = {
 
       // Opción 3 (Predeterminada): Instalador asistido SARA_Setup_v2.4.0.exe
       const filePath = path.join(downloadsDir, 'SARA_Setup_v2.4.0.exe');
-      if (!fs.existsSync(filePath)) {
-        const csSource = path.join(__dirname, '../../scripts/SaraInstaller.cs');
-        const cscCompiler = 'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe';
-        if (fs.existsSync(csSource) && fs.existsSync(cscCompiler)) {
-          execSync(`"${cscCompiler}" /target:winexe /out:"${filePath}" /r:System.Windows.Forms.dll /r:System.Drawing.dll "${csSource}"`);
-        }
+      if (fs.existsSync(filePath)) {
+        return res.download(filePath, 'SARA_Setup_v2.4.0.exe');
       }
 
-      return res.download(filePath, 'SARA_Setup_v2.4.0.exe');
+      // Si existe SARA.exe directo, ofrecerlo como respaldo
+      const fallbackApp = path.join(downloadsDir, 'SARA.exe');
+      if (fs.existsSync(fallbackApp)) {
+        return res.download(fallbackApp, 'SARA.exe');
+      }
+
+      return res.status(404).json({ error: 'Archivo instalador no disponible en el servidor.' });
     } catch (error) {
       console.error('Error al descargar instalador:', error);
       return res.status(500).json({ error: 'Error al procesar la descarga del instalador' });

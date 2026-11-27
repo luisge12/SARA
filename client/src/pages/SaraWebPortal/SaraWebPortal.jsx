@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Download, Shield, Lock, Laptop, HardDrive, CheckCircle2, 
-  ExternalLink, Users, Activity, LogIn
+  ExternalLink, Users, Activity, LogIn, Apple
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -46,7 +46,10 @@ export default function SaraWebPortal() {
     let downloadUrl = `/api/licenses/download/setup?t=${Date.now()}`;
     let filename = 'SARA_Setup_v2.4.0.exe';
 
-    if (type === 'portable') {
+    if (type === 'mac' || type === 'apple') {
+      downloadUrl = `/api/licenses/download/setup?type=mac&t=${Date.now()}`;
+      filename = 'SARA_Mac_v2.4.0.zip';
+    } else if (type === 'portable') {
       downloadUrl = `/api/licenses/download/setup?type=portable&t=${Date.now()}`;
       filename = 'SARA_Portable_v2.4.0.zip';
     } else if (type === 'direct') {
@@ -142,13 +145,22 @@ export default function SaraWebPortal() {
         </p>
 
         {/* Botonera de Acción Primaria */}
-        <div className="hero-cta-group">
+        <div className="hero-cta-group" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button 
             className="btn-hero-download"
             onClick={() => handleStartDownload('exe')}
           >
             <Download size={20} />
             <span>Descargar para Windows</span>
+          </button>
+
+          <button 
+            className="btn-hero-download"
+            style={{ backgroundColor: '#1e293b', borderColor: '#475569' }}
+            onClick={() => handleStartDownload('mac')}
+          >
+            <Apple size={20} />
+            <span>Descargar para Mac</span>
           </button>
 
           <button 
@@ -205,6 +217,37 @@ export default function SaraWebPortal() {
             >
               <Download size={18} />
               <span>Descargar Instalador (.exe)</span>
+            </button>
+          </div>
+
+          {/* Tarjeta Mac: SARA para macOS */}
+          <div className="download-card">
+            <div className="card-os-icon">
+              <Apple size={32} color="#f8fafc" />
+            </div>
+
+            <div className="card-title-group">
+              <h3>SARA para macOS (.app)</h3>
+              <div className="card-meta-row">
+                <span>Versión {downloadInfo.version}</span>
+                <span>&bull;</span>
+                <span>Universal (M1/M2/M3 & Intel)</span>
+              </div>
+            </div>
+
+            <ul className="card-features-list">
+              <li><CheckCircle2 size={16} /> Paquete nativo de aplicación para Mac</li>
+              <li><CheckCircle2 size={16} /> Compatible con Apple Silicon e Intel</li>
+              <li><CheckCircle2 size={16} /> Arrastrar y soltar en la carpeta Aplicaciones</li>
+              <li><CheckCircle2 size={16} /> Modo ventana nativa e icono en el Dock</li>
+            </ul>
+
+            <button 
+              className="btn-card-download secondary"
+              onClick={() => handleStartDownload('mac')}
+            >
+              <Download size={18} />
+              <span>Descargar para Mac (.zip)</span>
             </button>
           </div>
 
@@ -367,6 +410,8 @@ export default function SaraWebPortal() {
             <p style={{ color: 'var(--portal-text-muted)', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 1.5rem' }}>
               {downloadError ? (
                 downloadError
+              ) : downloadingType === 'mac' ? (
+                <>El paquete nativo <strong>SARA_Mac_v2.4.0.zip</strong> se está guardando en tu carpeta de Descargas. Al descomprimirlo, arrastra <strong>SARA.app</strong> a tu carpeta de Aplicaciones.</>
               ) : downloadingType === 'portable' ? (
                 <>El paquete <strong>SARA_Portable_v2.4.0.zip</strong> se está guardando en tu carpeta de Descargas. Solo debes descomprimirlo y ejecutar <code>SARA.exe</code>.</>
               ) : downloadingType === 'direct' ? (
@@ -379,11 +424,20 @@ export default function SaraWebPortal() {
             {!downloadError && (
               <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '1rem', borderRadius: '10px', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
                 <span style={{ display: 'block', fontWeight: 700, color: '#38bdf8', marginBottom: '0.4rem' }}>
-                  💡 Instrucciones si Windows SmartScreen muestra un aviso:
+                  {downloadingType === 'mac' ? '🍎 Instrucciones para macOS:' : '💡 Instrucciones para Windows:'}
                 </span>
                 <p style={{ margin: 0, color: 'var(--portal-text-muted)' }}>
-                  1. Haz clic en <strong>"Más información"</strong> en la ventana emergente.<br />
-                  2. Luego haz clic en <strong>"Ejecutar de todas formas"</strong> para iniciar SARA de manera segura.
+                  {downloadingType === 'mac' ? (
+                    <>
+                      1. Descomprime el archivo y arrastra <strong>SARA.app</strong> a tu carpeta <strong>Aplicaciones</strong>.<br />
+                      2. La primera vez, haz <strong>clic derecho</strong> en <code>SARA.app</code> y elige <strong>Abrir</strong> para iniciar.
+                    </>
+                  ) : (
+                    <>
+                      1. Al ejecutar el instalador, haz clic en <strong>"Instalar SARA"</strong>.<br />
+                      2. Se creará automáticamente el acceso directo en tu Escritorio para abrir la aplicación.
+                    </>
+                  )}
                 </p>
               </div>
             )}
