@@ -306,7 +306,7 @@ export default function SuperMasterPanel() {
             style={{ fontSize: '0.82rem', padding: '0.45rem 0.85rem' }}
             title="Ver página de descargas del software"
           >
-            📥 Portal de Descargas
+            Portal de Descargas
           </Link>
 
           <button 
@@ -350,7 +350,7 @@ export default function SuperMasterPanel() {
         }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#ffffff' }}>
-              Bienvenido, {currentUser?.name || currentUser?.username} 👑
+              Bienvenido, {currentUser?.name || currentUser?.username}
             </h2>
             <p style={{ margin: '0.25rem 0 0', fontSize: '0.86rem', color: 'var(--portal-text-muted)' }}>
               Potestad exclusiva: Creación de cuentas <strong>Master</strong> para clínicas y emisión criptográfica de licencias.
@@ -358,7 +358,7 @@ export default function SuperMasterPanel() {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700, padding: '4px 10px', borderRadius: '20px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-              👑 Super Master Oficial
+              Super Master Oficial
             </span>
           </div>
         </div>
@@ -763,7 +763,7 @@ export default function SuperMasterPanel() {
                   {/* Nombre de la Clínica */}
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: '#38bdf8', marginBottom: '0.4rem', fontWeight: 700 }}>
-                      🏥 Nombre de la Clínica *:
+                      Nombre de la Clínica *:
                     </label>
                     <input 
                       type="text"
@@ -813,7 +813,7 @@ export default function SuperMasterPanel() {
                   {/* Usuario Master */}
                   <div>
                     <label style={{ display: 'block', fontSize: '0.85rem', color: '#fbbf24', marginBottom: '0.4rem', fontWeight: 700 }}>
-                      👑 Usuario Master para la Clínica *:
+                      Usuario Master para la Clínica *:
                     </label>
                     <input 
                       type="text"
@@ -909,7 +909,7 @@ export default function SuperMasterPanel() {
                         </td>
                         <td>
                           <span className="badge-status-pill active" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                            👑 Master de Clínica
+                            Master de Clínica
                           </span>
                         </td>
                         <td>

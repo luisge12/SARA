@@ -58,7 +58,7 @@ export function PortalPacienteHistoriaMedica() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('session_expires_at');
-    navigate('/login');
+    navigate('/users/login');
   };
 
   useEffect(() => {

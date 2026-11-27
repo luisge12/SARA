@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, AlertTriangle, ExternalLink, X, AlertCircle } from 'lucide-react';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import api from '../services/api';
@@ -8,11 +8,11 @@ import './Login.css';
 
 const PatientNetworkBg = () => (
   <svg className="network-bg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <path 
-      d="M 100 150 L 250 100 L 400 200 L 550 150 L 700 250 M 250 100 L 300 300 L 400 200 M 300 300 L 150 450 L 100 150 M 550 150 L 600 350 L 400 200 M 600 350 L 700 500 L 700 250 M 300 300 L 450 450 L 600 350 M 450 450 L 250 550 L 150 450" 
-      stroke="rgba(42, 183, 202, 0.25)" 
-      strokeWidth="2" 
-      fill="none" 
+    <path
+      d="M 100 150 L 250 100 L 400 200 L 550 150 L 700 250 M 250 100 L 300 300 L 400 200 M 300 300 L 150 450 L 100 150 M 550 150 L 600 350 L 400 200 M 600 350 L 700 500 L 700 250 M 300 300 L 450 450 L 600 350 M 450 450 L 250 550 L 150 450"
+      stroke="rgba(42, 183, 202, 0.25)"
+      strokeWidth="2"
+      fill="none"
     />
     <g fill="rgba(34, 80, 93, 0.4)">
       <circle cx="100" cy="150" r="15" />
@@ -44,9 +44,43 @@ export function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPatientModal, setShowPatientModal] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
+  const [hideDownloadLink, setHideDownloadLink] = useState(() => {
+    try {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://');
+      const isDownloaded = localStorage.getItem('sara_app_downloaded') === 'true';
+      return isStandalone || isDownloaded;
+    } catch {
+      return false;
+    }
+  });
+
+  // Ocultar enlace de descarga automáticamente si se instala o abre en modo app
+  useEffect(() => {
+    const mq = window.matchMedia('(display-mode: standalone)');
+    const handleDisplayModeChange = (e) => {
+      if (e.matches) setHideDownloadLink(true);
+    };
+    const handleAppInstalled = () => {
+      try {
+        localStorage.setItem('sara_app_downloaded', 'true');
+      } catch { }
+      setHideDownloadLink(true);
+    };
+    mq.addEventListener?.('change', handleDisplayModeChange);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => {
+      mq.removeEventListener?.('change', handleDisplayModeChange);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   // Actualizar la fecha y hora cada minuto
   useEffect(() => {
@@ -54,88 +88,29 @@ export function Login() {
     return () => clearInterval(timer);
   }, []);
 
-  // Si ya existe una sesión activa, redirigir automáticamente al panel correspondiente
-  useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('portal_token');
-    const userStr = localStorage.getItem('user') || localStorage.getItem('portal_user');
-    const expiresAt = localStorage.getItem('session_expires_at');
-
-    // Si el tiempo límite ya pasó, limpiar silenciosamente sin alertas
-    if (expiresAt && Date.now() > Number(expiresAt)) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('portal_token');
-      localStorage.removeItem('portal_user');
-      localStorage.removeItem('session_expires_at');
-      return;
-    }
-
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
-        if (user.role === 'Paciente') {
-          navigate('/users/dashboard', { replace: true });
-        } else if (isSuper) {
-          navigate('/supermaster', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('portal_token');
-        localStorage.removeItem('portal_user');
-        localStorage.removeItem('session_expires_at');
-      }
-    }
-  }, [navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    
+
     try {
       const response = await api.post('/api/users/login', { username, password });
-      const { token, user, license } = response.data;
-      
-      // Guardar sesión y fijar expiración estricta a 24 horas exactas
-      const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
-      localStorage.setItem('session_expires_at', expiresAt);
+      const { token, user } = response.data;
+
+      // Bloqueo de Pacientes en la App Principal (Clínica)
+      if (user.role === 'Paciente') {
+        setShowPatientModal(true);
+        return;
+      }
+
+      // Guardar token y datos de usuario en localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('portal_token', token);
-      localStorage.setItem('portal_user', JSON.stringify(user));
 
-      // Sincronizar el nombre de la clínica activa desde la licencia/backend
-      if (license && license.clinicName) {
-        try {
-          const currentSettings = JSON.parse(localStorage.getItem('sara_clinic_settings') || '{}');
-          localStorage.setItem('sara_clinic_settings', JSON.stringify({
-            ...currentSettings,
-            name: license.clinicName
-          }));
-        } catch (e) {
-          console.warn('Error al sincronizar configuración de clínica en login:', e);
-        }
-      }
-      
-      // Redirigir inteligentemente según el rol
-      const isSuper = user.role === 'SuperMaster' || user.role === 'Super Master' || user.username?.toLowerCase() === 'luisge';
-      if (user.role === 'Paciente') {
-        navigate('/users/dashboard');
-      } else if (isSuper) {
-        navigate('/supermaster');
-      } else {
-        navigate('/dashboard');
-      }
+      // Redirigir al Dashboard nuevo de SARA
+      navigate('/dashboard');
     } catch (err) {
       console.error('Error de login:', err);
-      const errMsg = err.response?.data?.error 
-        || err.response?.data?.message 
-        || (typeof err.response?.data === 'string' ? err.response.data : null)
-        || err.message 
-        || 'Error de conexión con el servidor backend';
+      const errMsg = err.response?.data?.error || 'Error de conexión con el servidor backend';
       setErrorMsg(errMsg);
     }
   };
@@ -158,7 +133,7 @@ export function Login() {
       <div className="login-bg-shape login-bg-shape-1"></div>
       <div className="login-bg-shape login-bg-shape-2"></div>
       <PatientNetworkBg />
-      
+
       <div className="login-card glass-panel">
         <div className="login-header">
           <h1 className="login-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3.5rem', letterSpacing: '4px', marginBottom: '0.25rem', color: 'var(--color-primary)' }}>
@@ -191,52 +166,21 @@ export function Login() {
             </div>
           )}
 
-          <Input 
+          <Input
             label="Usuario"
-            type="text" 
-            placeholder="Ingrese su usuario" 
+            type="text"
+            placeholder="Ingrese su usuario"
             icon={<User size={18} />}
             value={username}
             onChange={(e) => { setUsername(e.target.value); setErrorMsg(''); }}
             required
           />
-          
-          <Input 
+
+          <Input
             label="Contraseña"
-            type={showPassword ? 'text' : 'password'} 
-            placeholder="••••••••" 
+            type="password"
+            placeholder="••••••••"
             icon={<Lock size={18} />}
-            rightElement={
-              <button
-                type="button"
-                onClick={() => setShowPassword(prev => !prev)}
-                tabIndex={-1}
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
-                title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '0.25rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: showPassword ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  borderRadius: '6px',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--color-primary)';
-                  e.currentTarget.style.backgroundColor = 'rgba(42, 183, 202, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = showPassword ? 'var(--color-primary)' : 'var(--color-text-muted)';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            }
             value={password}
             onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
             required
@@ -248,15 +192,38 @@ export function Login() {
         </form>
       </div>
 
+      {showPatientModal && (
+        <div className="patient-modal-overlay">
+          <div className="patient-modal-content">
+            <button className="patient-modal-close" onClick={() => setShowPatientModal(false)}>
+              <X size={20} />
+            </button>
+            <div className="patient-modal-icon-wrapper">
+              <AlertTriangle size={32} className="patient-modal-icon" />
+            </div>
+            <h2 className="patient-modal-title">Acceso Denegado</h2>
+            <p className="patient-modal-text">
+              Tu cuenta está registrada como <strong>Paciente</strong>. Por motivos de seguridad y privacidad, el acceso a esta plataforma administrativa está restringido.
+            </p>
+            <p className="patient-modal-text">
+              Por favor, dirígete al <strong>Portal de Usuarios</strong> para consultar tu información clínica, citas y documentos.
+            </p>
+            <Link to="/users" className="patient-modal-link-btn">
+              Ir al Portal de Usuarios <ExternalLink size={16} style={{ marginLeft: '8px' }} />
+            </Link>
+          </div>
+        </div>
+      )}
+
       <footer className="login-footer-text">
         <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', alignItems: 'center', marginBottom: '0.65rem', flexWrap: 'wrap' }}>
           <Link to="/descargas" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            📥 Descargar SARA para Windows (.exe)
+            Descargar SARA para Windows (.exe)
           </Link>
           
         </div>
         <div className="login-footer">
-          © 2026 SARA • Sistema Asistencial de Registro Automatizado
+          Producto Desarrollado para SARA Clínicas
         </div>
       </footer>
     </div>

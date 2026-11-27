@@ -212,7 +212,7 @@ export function MedicalDocumentModal({
                     </div>
                     {item.duration && (
                       <div style={{ marginTop: '0.2rem', fontSize: '0.78rem', color: '#0d9488', fontWeight: 600 }}>
-                        ⏱ Duración: {item.duration}
+                        Duración: {item.duration}
                       </div>
                     )}
                   </div>
@@ -236,7 +236,7 @@ export function MedicalDocumentModal({
 
         <div className="alarm-box">
           <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.2rem', fontSize: '0.82rem' }}>
-            ⚠️ Signos de Alerta (Consultar de Inmediato):
+            Signos de Alerta (Consultar de Inmediato):
           </div>
           <div style={{ fontSize: '0.78rem' }}>Fiebre mayor a 38.5°C persistente, sangrado activo o dolor abdominal intenso que no ceda.</div>
         </div>
@@ -322,7 +322,7 @@ export function MedicalDocumentModal({
               <div className="doc-sheet doc-sheet-dual" id="printable-medical-sheet">
                 {renderMedsPrescription(true)}
                 <div className="dual-cut-divider">
-                  <span>✂️ Corte aquí — Entregar sección superior a Farmacia y sección inferior al Paciente</span>
+                  <span>Corte aquí — Entregar sección superior a Farmacia y sección inferior al Paciente</span>
                 </div>
                 {renderPatientInstructions(true)}
               </div>

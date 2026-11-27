@@ -7,6 +7,23 @@ const Consultation = require('../models/Consultation');
 const AuditLog = require('../models/AuditLog');
 const { Op } = require('sequelize');
 
+const validatePasswordStrength = (password) => {
+  if (typeof password !== 'string') {
+    return 'La contraseña es requerida.';
+  }
+  const missing = [];
+  if (password.length < 8) missing.push('al menos 8 caracteres');
+  if (!/[A-Z]/.test(password)) missing.push('una letra mayúscula');
+  if (!/[a-z]/.test(password)) missing.push('una letra minúscula');
+  if (!/[0-9]/.test(password)) missing.push('un número');
+  if (!/[^A-Za-z0-9]/.test(password)) missing.push('un carácter especial');
+
+  if (missing.length > 0) {
+    return `La contraseña no cumple los requisitos de seguridad: debe incluir ${missing.join(', ')}.`;
+  }
+  return null;
+};
+
 module.exports = {
   getUsers: async (req, res) => {
     try {
@@ -143,6 +160,155 @@ module.exports = {
         ? 'Error de conexión o sincronización con la base de datos. Intente nuevamente en unos segundos.' 
         : (error.message || 'Error interno del servidor al procesar la autenticación');
       return res.status(500).json({ error: errorMsg });
+    }
+  },
+  registerPatient: async (req, res) => {
+    try {
+      const { name, identificationNumber, username, password, email, phone } = req.body;
+
+      const cleanName = typeof name === 'string' ? name.trim() : '';
+      const cleanId = typeof identificationNumber === 'string' ? identificationNumber.trim() : '';
+      const cleanUsername = typeof username === 'string' ? username.trim() : '';
+      const cleanEmail = typeof email === 'string' ? email.trim() : '';
+      const cleanPhone = typeof phone === 'string' ? phone.trim() : '';
+
+      if (!cleanName || cleanName.length < 3) {
+        return res.status(400).json({ error: 'Ingresa tu nombre completo (mínimo 3 caracteres).' });
+      }
+      if (!cleanId || cleanId.length < 4) {
+        return res.status(400).json({ error: 'Ingresa un número de cédula o documento de identidad válido.' });
+      }
+      if (!cleanUsername || cleanUsername.length < 4 || cleanUsername.length > 40) {
+        return res.status(400).json({ error: 'El nombre de usuario debe tener entre 4 y 40 caracteres.' });
+      }
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanUsername)) {
+        return res.status(400).json({ error: 'El nombre de usuario solo puede contener letras, números, puntos, guiones o guion bajo (sin espacios).' });
+      }
+      if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return res.status(400).json({ error: 'El formato del correo electrónico no es válido.' });
+      }
+
+      const passwordError = validatePasswordStrength(password);
+      if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+      }
+
+      const existingUsername = await User.findOne({
+        where: User.sequelize.where(
+          User.sequelize.fn('LOWER', User.sequelize.col('username')),
+          cleanUsername.toLowerCase()
+        )
+      });
+      if (existingUsername) {
+        return res.status(409).json({ error: 'Este nombre de usuario ya está registrado. Por favor elige otro.' });
+      }
+
+      const existingId = await User.findOne({
+        where: {
+          role: 'Paciente',
+          [Op.and]: [
+            User.sequelize.where(
+              User.sequelize.fn('LOWER', User.sequelize.col('identification_number')),
+              cleanId.toLowerCase()
+            )
+          ]
+        }
+      });
+      if (existingId) {
+        return res.status(409).json({ error: 'Ya existe una cuenta de paciente registrada con este documento de identidad. Intenta iniciar sesión.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      const clinicId = 1;
+      const newUser = await User.create({
+        username: cleanUsername,
+        passwordHash,
+        role: 'Paciente',
+        name: cleanName,
+        identificationNumber: cleanId,
+        sedeAtencion: 'CENTRAL',
+        email: cleanEmail || null,
+        phone: cleanPhone || null,
+        clinicId
+      });
+
+      const newProfile = await PatientProfile.create({
+        userId: newUser.id,
+        phone: cleanPhone || null,
+        email: cleanEmail || null,
+        flowType: 'PRIMERA_VEZ',
+        customFields: {}
+      });
+
+      try {
+        const { logPatientAudit, FIELD_LABELS, formatDisplayValue } = require('../services/auditService');
+        const initialFields = {
+          name: newUser.name,
+          identificationNumber: newUser.identificationNumber,
+          sedeAtencion: newUser.sedeAtencion,
+          phone: newUser.phone,
+          email: newUser.email,
+          flowType: 'PRIMERA_VEZ'
+        };
+        const initialDiffs = Object.entries(initialFields)
+          .filter(([_, val]) => val !== null && val !== undefined && val !== '')
+          .map(([key, val]) => ({
+            field: key,
+            label: FIELD_LABELS[key] || key,
+            oldValue: '(autoregistro)',
+            newValue: formatDisplayValue(val)
+          }));
+        await logPatientAudit({
+          patientId: newProfile.id,
+          userId: newUser.id,
+          actionType: 'CREATE_PATIENT',
+          summary: `Paciente autoregistrado desde el Portal del Paciente: ${newUser.name}`,
+          diffs: initialDiffs,
+          metadata: {
+            message: 'Autoregistro desde Portal del Paciente',
+            user: { username: newUser.username, name: newUser.name }
+          }
+        });
+      } catch (auditErr) {
+        console.warn('Aviso al registrar auditoría en autoregistro de paciente:', auditErr.message);
+      }
+
+      const token = jwt.sign(
+        { id: newUser.id, username: newUser.username, role: newUser.role, clinicId },
+        process.env.JWT_SECRET || 'supersecretkey_sara_18992791',
+        { expiresIn: '24h' }
+      );
+
+      const cookieOptions = {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax',
+        path: '/'
+      };
+      if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+        cookieOptions.secure = true;
+      }
+      res.cookie('sara_token', token, cookieOptions);
+
+      return res.status(201).json({
+        message: 'Cuenta de paciente creada exitosamente.',
+        token,
+        expiresIn: 24 * 60 * 60 * 1000,
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          role: newUser.role,
+          name: newUser.name,
+          identificationNumber: newUser.identificationNumber,
+          sedeAtencion: newUser.sedeAtencion,
+          clinicId
+        }
+      });
+    } catch (error) {
+      console.error('Error en autoregistro de paciente:', error);
+      return res.status(500).json({ error: 'No se pudo crear la cuenta en este momento. Intenta nuevamente.' });
     }
   },
   createUser: async (req, res) => {

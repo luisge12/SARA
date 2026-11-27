@@ -679,7 +679,7 @@ export function Dashboard() {
                           </div>
 
                           <p style={{ fontSize: '0.83rem', color: 'var(--color-text-muted)', margin: '0.25rem 0 0' }}>
-                            📞 {phone} | ✉️ {email} | Dr. {doctor} | Sede: <strong>{sede}</strong>
+                            Tel: {phone} | {email} | Dr. {doctor} | Sede: <strong>{sede}</strong>
                           </p>
                         </div>
 

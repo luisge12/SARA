@@ -343,7 +343,7 @@ export function PatientProfileEditor({ patient, onClose }) {
                           color: flowType === 'PRIMERA_VEZ' ? '#ffffff' : '#475569'
                         }}
                       >
-                        🟢 Primera Consulta
+                        Primera Consulta
                       </button>
                       <button
                         type="button"
@@ -359,7 +359,7 @@ export function PatientProfileEditor({ patient, onClose }) {
                           color: flowType === 'RECONSULTA' ? '#ffffff' : '#475569'
                         }}
                       >
-                        🔁 Reconsulta / Llegada
+                        Reconsulta / Llegada
                       </button>
                     </div>
                   </div>

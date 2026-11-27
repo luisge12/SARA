@@ -1565,7 +1565,7 @@ function Modulo_CitasMedicas() {
                           alignItems: 'center',
                           gap: '0.3rem'
                         }}>
-                          🔒 {dayBlockedSlots.length} bloqueo{dayBlockedSlots.length !== 1 ? 's' : ''} hoy
+                          {dayBlockedSlots.length} bloqueo{dayBlockedSlots.length !== 1 ? 's' : ''} hoy
                         </span>
                       )}
                     </div>
@@ -2057,7 +2057,7 @@ function Modulo_CitasMedicas() {
                                   isPastSlot 
                                     ? `Horario pasado (${time}) - Bloqueado para nuevas citas` 
                                     : isCoveredByBlock 
-                                    ? `🔒 Bloqueado: ${coveringBlock.reason} (${coveringBlock.duration}m) - Clic para ver o desbloquear` 
+                                    ? `Bloqueado: ${coveringBlock.reason} (${coveringBlock.duration}m) - Clic para ver o desbloquear` 
                                     : `Clic para agendar cita o bloquear horario (${time} - ${doc})`
                                 }
                                 onMouseOver={e => { 
@@ -2111,11 +2111,11 @@ function Modulo_CitasMedicas() {
                                         boxSizing: 'border-box',
                                         color: '#78350f'
                                       }}
-                                      title={`🔒 Bloqueado: ${block.reason} (${block.duration} min) - ${block.startTime} - Clic para ver o desbloquear`}
+                                      title={`Bloqueado: ${block.reason} (${block.duration} min) - ${block.startTime} - Clic para ver o desbloquear`}
                                     >
                                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.2rem' }}>
                                         <span style={{ fontWeight: '800', fontSize: effectiveDoctors.length > 5 ? '0.66rem' : '0.72rem', display: 'flex', alignItems: 'center', gap: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                          🔒 {block.reason}
+                                          {block.reason}
                                         </span>
                                         {heightPercent >= 120 && (
                                           <span style={{ fontSize: '0.62rem', fontWeight: '800', backgroundColor: 'rgba(180, 83, 9, 0.2)', padding: '1px 4px', borderRadius: '4px', flexShrink: 0 }}>

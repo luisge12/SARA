@@ -12,10 +12,12 @@ const verifyClinicLicense = async (req, res, next) => {
     return next();
   }
 
-  // Permitir la ruta de canje de licencia, login y consulta de estado siempre
+  // Permitir la ruta de canje de licencia, login, autoregistro de pacientes y consulta de estado siempre
   if (
     req.originalUrl.startsWith('/api/licenses') || 
     req.originalUrl.startsWith('/api/users/login') ||
+    req.originalUrl.startsWith('/api/users/register-patient') ||
+    req.originalUrl.startsWith('/api/users/logout') ||
     req.originalUrl === '/status'
   ) {
     return next();

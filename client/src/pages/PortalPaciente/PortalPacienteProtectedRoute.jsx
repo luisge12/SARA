@@ -7,7 +7,7 @@ export function PortalPacienteProtectedRoute({ children }) {
   const userStr = localStorage.getItem('portal_user') || localStorage.getItem('user');
 
   if (!token || !userStr) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/users/login" replace />;
   }
 
   try {
@@ -17,7 +17,7 @@ export function PortalPacienteProtectedRoute({ children }) {
       return <Navigate to="/dashboard" replace />;
     }
   } catch {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/users/login" replace />;
   }
 
   return <PortalPacienteLayout>{children}</PortalPacienteLayout>;

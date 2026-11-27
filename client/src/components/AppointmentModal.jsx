@@ -432,7 +432,7 @@ export function AppointmentModal({ onClose, onSuccess, initialPatientId = null, 
                 gap: '0.85rem'
               }}>
                 <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  💳 Registro Financiero y Control de Pagos
+                  Registro Financiero y Control de Pagos
                 </h4>
 
                 <div className="responsive-grid-1-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>

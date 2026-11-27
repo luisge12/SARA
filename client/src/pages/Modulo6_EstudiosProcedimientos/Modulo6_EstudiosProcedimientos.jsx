@@ -384,7 +384,7 @@ export function Modulo6_EstudiosProcedimientos({ isOpen, onClose, patientId: pro
                         </span>
                       ) : (
                         <span style={{ fontSize: '0.72rem', backgroundColor: '#fef3c7', color: '#b45309', padding: '0.15rem 0.5rem', borderRadius: '9999px', fontWeight: '600' }}>
-                          ⏳ Pendiente en Caja {parseFloat(study.totalAmount) > 0 ? `($${parseFloat(study.totalAmount).toFixed(2)})` : ''}
+                          Pendiente en Caja {parseFloat(study.totalAmount) > 0 ? `($${parseFloat(study.totalAmount).toFixed(2)})` : ''}
                         </span>
                       )}
                     </div>

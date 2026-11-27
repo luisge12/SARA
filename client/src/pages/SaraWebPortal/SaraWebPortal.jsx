@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Download, Shield, Lock, Laptop, HardDrive, CheckCircle2, 
-  ExternalLink, Users, Activity, LogIn, Apple
+  Download, Shield, Laptop, HardDrive, CheckCircle2, 
+  Users, Apple
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -109,18 +109,10 @@ export default function SaraWebPortal() {
           <button 
             className="btn-portal-secondary"
             onClick={() => navigate('/users/login')}
+            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
             title="Acceso para Pacientes a su Historia Médica"
           >
             <Users size={16} /> Portal Pacientes
-          </button>
-
-          <button 
-            className="btn-portal-secondary"
-            onClick={() => navigate('/login')}
-            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
-            title="Iniciar sesión en la Clínica"
-          >
-            <LogIn size={16} /> Iniciar Sesión
           </button>
         </div>
       </nav>
@@ -162,14 +154,6 @@ export default function SaraWebPortal() {
             <Apple size={20} />
             <span>Descargar para Mac</span>
           </button>
-
-          <button 
-            className="btn-hero-web"
-            onClick={() => navigate('/login')}
-          >
-            <span>Acceder a la Versión Web</span>
-            <ExternalLink size={18} />
-          </button>
         </div>
 
         </header>
@@ -181,7 +165,7 @@ export default function SaraWebPortal() {
         <div className="section-header-center">
           <span className="section-tag">Zona de Descarga Oficial</span>
           <h2>Elige tu Formato de Instalación</h2>
-          <p>Instala SARA en tus estaciones médicas de trabajo o accede al instante vía web.</p>
+          <p>Instala SARA en tus estaciones médicas de trabajo en Windows o macOS.</p>
         </div>
 
         <div className="downloads-grid">
@@ -279,37 +263,6 @@ export default function SaraWebPortal() {
             >
               <Download size={18} />
               <span>Descargar Paquete ZIP</span>
-            </button>
-          </div>
-
-          {/* Tarjeta 3: SARA Cloud Web App (PWA) */}
-          <div className="download-card">
-            <div className="card-os-icon">
-              <Activity size={32} color="#fbbf24" />
-            </div>
-
-            <div className="card-title-group">
-              <h3>SARA Cloud Web (PWA)</h3>
-              <div className="card-meta-row">
-                <span>Acceso Inmediato</span>
-                <span>&bull;</span>
-                <span>Multiplataforma</span>
-              </div>
-            </div>
-
-            <ul className="card-features-list">
-              <li><CheckCircle2 size={16} /> Compatible con Tablets, iPads y laptops</li>
-              <li><CheckCircle2 size={16} /> Sin descargar archivos pesados</li>
-              <li><CheckCircle2 size={16} /> Acceso seguro con certificado SSL/HTTPS</li>
-              <li><CheckCircle2 size={16} /> Opción de anclar a la barra de tareas</li>
-            </ul>
-
-            <button 
-              className="btn-card-download secondary"
-              onClick={() => navigate('/login')}
-            >
-              <ExternalLink size={18} />
-              <span>Abrir SARA en el Navegador</span>
             </button>
           </div>
         </div>
@@ -424,7 +377,7 @@ export default function SaraWebPortal() {
             {!downloadError && (
               <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '1rem', borderRadius: '10px', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
                 <span style={{ display: 'block', fontWeight: 700, color: '#38bdf8', marginBottom: '0.4rem' }}>
-                  {downloadingType === 'mac' ? '🍎 Instrucciones para macOS:' : '💡 Instrucciones para Windows:'}
+                  {downloadingType === 'mac' ? 'Instrucciones para macOS:' : 'Instrucciones para Windows:'}
                 </span>
                 <p style={{ margin: 0, color: 'var(--portal-text-muted)' }}>
                   {downloadingType === 'mac' ? (
@@ -463,9 +416,6 @@ export default function SaraWebPortal() {
           </div>
 
           <div className="footer-right">
-            <button className="portal-nav-link" onClick={() => navigate('/login')}>
-              Acceso Clínico
-            </button>
             <button className="portal-nav-link" onClick={() => navigate('/users/login')}>
               Portal Pacientes
             </button>

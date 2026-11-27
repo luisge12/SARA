@@ -56,7 +56,7 @@ const generateSaraAiResponse = (userPrompt) => {
 
   // 1. Citas Médicas
   if (text.includes('cita') || text.includes('agendar') || text.includes('calendario') || text.includes('horario') || text.includes('turnos')) {
-    return `📅 **Gestión de Citas Médicas en SARA:**
+    return `**Gestión de Citas Médicas en SARA:**
 1. Haz clic en el botón **"Agendar Cita"** en la barra lateral o en el Dashboard.
 2. Selecciona la especialidad médica, el médico tratante y la fecha/hora requerida.
 3. Busca al paciente por su número de cédula o ID y asigna la cita.
@@ -65,7 +65,7 @@ const generateSaraAiResponse = (userPrompt) => {
 
   // 2. Registro de Pacientes / Módulo 2
   if (text.includes('paciente') || text.includes('registro') || text.includes('crear') || text.includes('cédula') || text.includes('cedula') || text.includes('ingresar paciente')) {
-    return `👤 **Módulo 2 - Gestión Administrativa de Pacientes:**
+    return `**Módulo 2 - Gestión Administrativa de Pacientes:**
 1. Ve al menú **"Gestión Administrativa"** (Módulo 2).
 2. Haz clic en **"Nuevo Paciente"**.
 3. Ingresa los datos personales: Cédula, Nombres, Apellidos, Fecha de Nacimiento, Teléfono y Dirección.
@@ -74,7 +74,7 @@ const generateSaraAiResponse = (userPrompt) => {
 
   // 3. Registro de Caja / Pagos / Módulo 3
   if (text.includes('caja') || text.includes('pago') || text.includes('factura') || text.includes('cobro') || text.includes('precio') || text.includes('divisa') || text.includes('dólar') || text.includes('bolívar')) {
-    return `💳 **Módulo 3 - Registro de Caja:**
+    return `**Módulo 3 - Registro de Caja:**
 1. Ingresa a **"Registro de Caja"** en el menú de la izquierda.
 2. Selecciona la orden o paciente pendiente por pagar.
 3. Elige el método de pago (Efectivo, Transferencia, Punto de Venta o Divisas).
@@ -83,7 +83,7 @@ const generateSaraAiResponse = (userPrompt) => {
 
   // 4. Historia Clínica / Datos Clínicos / Módulo 4
   if (text.includes('clínic') || text.includes('clinic') || text.includes('médic') || text.includes('medico') || text.includes('diagnóstico') || text.includes('receta') || text.includes('consulta') || text.includes('síntoma')) {
-    return `🩺 **Módulo 4 - Datos Clínicos e Historia Médica:**
+    return `**Módulo 4 - Datos Clínicos e Historia Médica:**
 - Exclusivo para médicos autorizados.
 - Registra el motivo de consulta, examen físico, signos vitales, diagnóstico (CIE-10) y récipe médico.
 - Mantiene el historial clínico inmutable del paciente.`;
@@ -91,36 +91,36 @@ const generateSaraAiResponse = (userPrompt) => {
 
   // 5. Reportes / Estadísticas / Módulo 7
   if (text.includes('reporte') || text.includes('estadística') || text.includes('estadistica') || text.includes('gráfico') || text.includes('grafico') || text.includes('médica estadística')) {
-    return `📊 **Módulo 7 - Gestión Médica Estadística:**
+    return `**Módulo 7 - Gestión Médica Estadística:**
 - Visualiza gráficos e indicadores sobre las consultas realizadas, morbilidad por especialidad y total de cobranzas.
 - Genera resúmenes exportables para la dirección médica del centro.`;
   }
 
   // 6. Mensaje de Voz
   if (text.includes('mensaje de voz') || text.includes('audio') || text.includes('grabación')) {
-    return `🎙️ **Consulta por Voz Recibida:**
+    return `**Consulta por Voz Recibida:**
 He procesado tu mensaje de voz. Puedes preguntarme sobre **agendar citas**, **registrar pacientes**, **cobros en caja**, **historias clínicas** o los **módulos del sistema SARA**.`;
   }
 
   // 7. Saludos e Identidad
   if (text.includes('hola') || text.includes('buenas') || text.includes('saludos') || text.includes('quien eres') || text.includes('quién eres')) {
-    return `¡Hola! 👋 Soy **SARA-AI**, tu asistente médica e inteligente integrada en el sistema SARA.
+    return `¡Hola! Soy **SARA-AI**, tu asistente médica e inteligente integrada en el sistema SARA.
 
 Puedo responder tus dudas sobre el uso de la plataforma, guiarte en el registro de pacientes, gestión de citas, caja o historia médica. ¿En qué te ayudo?`;
   }
 
   // 8. Agradecimiento
   if (text.includes('gracias') || text.includes('excelente') || text.includes('bueno') || text.includes('ok')) {
-    return `¡Con mucho gusto! 😊 Estoy disponible 24/7 en el sistema SARA. ¿Tienes alguna otra consulta?`;
+    return `¡Con mucho gusto! Estoy disponible 24/7 en el sistema SARA. ¿Tienes alguna otra consulta?`;
   }
 
   // 9. Respuesta por defecto con orientación clara
-  return `🤖 Soy **SARA-AI**, tu asistente inteligente del centro médico. Puedes preguntarme directamente sobre:
-1. 📅 **Citas Médicas:** "¿Cómo agendar una cita?"
-2. 👤 **Pacientes:** "¿Cómo registrar un nuevo paciente?"
-3. 💳 **Registro de Caja:** "¿Cómo procesar un pago?"
-4. 🩺 **Datos Clínicos:** "¿Cómo acceder a la historia médica?"
-5. 📊 **Estadísticas:** "¿Dónde ver los reportes del sistema?"`;
+  return `Soy **SARA-AI**, tu asistente inteligente del centro médico. Puedes preguntarme directamente sobre:
+1. **Citas Médicas:** "¿Cómo agendar una cita?"
+2. **Pacientes:** "¿Cómo registrar un nuevo paciente?"
+3. **Registro de Caja:** "¿Cómo procesar un pago?"
+4. **Datos Clínicos:** "¿Cómo acceder a la historia médica?"
+5. **Estadísticas:** "¿Dónde ver los reportes del sistema?"`;
 };
 
 export const SaraAiChat = () => {
@@ -129,7 +129,7 @@ export const SaraAiChat = () => {
     {
       id: 1,
       sender: 'bot',
-      text: '¡Hola! 👋 Soy **SARA-AI**, tu asistente virtual médica e inteligente. ¿En qué te puedo ayudar hoy?',
+      text: '¡Hola! Soy **SARA-AI**, tu asistente virtual médica e inteligente. ¿En qué te puedo ayudar hoy?',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -208,7 +208,7 @@ export const SaraAiChat = () => {
         }
         console.warn('Aviso de voz WebSpeech:', e.error);
         if (e.error === 'not-allowed') {
-          setMicError('Permiso de micrófono no otorgado. Habilita el micrófono en la barra del navegador (icono 🔒).');
+          setMicError('Permiso de micrófono no otorgado. Habilita el micrófono en la barra del navegador (ícono del candado).');
           isListeningRef.current = false;
           setIsListening(false);
         } else if (e.error === 'network') {

@@ -24,7 +24,7 @@ export function PortalPacienteSidebar() {
     localStorage.removeItem('user');
     localStorage.removeItem('session_expires_at');
     setIsMobileMenuOpen(false);
-    navigate('/login');
+    navigate('/users/login');
   };
 
   const [showRequestModal, setShowRequestModal] = React.useState(false);

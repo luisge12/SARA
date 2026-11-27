@@ -91,7 +91,7 @@ const getBcvRate = async (forceRefresh = false) => {
     lastCacheTime = now;
     return directData;
   } catch (error) {
-    console.warn('⚠️ Consulta directa a BCV falló o demoró, usando fallback de contingencia:', error.message);
+    console.warn('Consulta directa a BCV falló o demoró, usando fallback de contingencia:', error.message);
   }
 
   // 2. Fallback de contingencia (DolarAPI)

@@ -350,7 +350,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                   color: consultationFlow === 'PRIMERA_VEZ' ? '#14532d' : '#0369a1',
                   border: consultationFlow === 'PRIMERA_VEZ' ? '1px solid #86efac' : '1px solid #7dd3fc'
                 }}>
-                  {consultationFlow === 'PRIMERA_VEZ' ? '🟢 Primera Consulta' : '🔁 Reconsulta / Seguimiento'}
+                  {consultationFlow === 'PRIMERA_VEZ' ? 'Primera Consulta' : 'Reconsulta / Seguimiento'}
                 </span>
               </div>
               <p style={{ color: '#334155', fontWeight: 600, margin: '0.25rem 0 0 0' }}>ID: <strong style={{ color: '#0f172a' }}>{patient.identificationNumber}</strong></p>
@@ -601,7 +601,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            <span>✅ {templateLoadedMessage}</span>
+            <span>{templateLoadedMessage}</span>
           </div>
         )}
       </div>
@@ -681,7 +681,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 }}
               >
                 <Sparkles size={18} />
-                {generatingAiReason ? 'Sintetizando con IA...' : '✨ Gran Motivo de Consulta con IA'}
+                {generatingAiReason ? 'Sintetizando con IA...' : 'Gran Motivo de Consulta con IA'}
               </button>
             </div>
           </div>
@@ -708,7 +708,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
 
             <textarea
               className="input-field"
-              placeholder="Haga clic en '✨ Gran Motivo de Consulta con IA' para redactar automáticamente a partir de los síntomas, o dicte / escriba libremente la descripción clínica formal..."
+              placeholder="Haga clic en 'Gran Motivo de Consulta con IA' para redactar automáticamente a partir de los síntomas, o dicte / escriba libremente la descripción clínica formal..."
               style={{ minHeight: '110px', resize: 'vertical', width: '100%', lineHeight: '1.6', fontSize: '0.92rem', color: '#0f172a', fontWeight: '500', backgroundColor: '#ffffff', borderColor: '#94a3b8' }}
               value={clinicalSummary}
               onChange={e => setClinicalSummary(e.target.value)}
@@ -937,7 +937,7 @@ export function ClinicalWorkspace({ patient, onBack }) {
                 <option value="">-- Sin Formulario Personalizado Adicional --</option>
                 {customTemplates.map(tmpl => (
                   <option key={tmpl.id} value={tmpl.id}>
-                    {tmpl.title} ({tmpl.category || 'General'}) {tmpl.isGlobal ? '★ Global' : ''}
+                    {tmpl.title} ({tmpl.category || 'General'}) {tmpl.isGlobal ? '- Global' : ''}
                   </option>
                 ))}
               </select>

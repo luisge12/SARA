@@ -101,9 +101,9 @@ export function SpeechMicButton({ onAppendText, title = "Dictar por voz" }) {
           title={interimText || "Escuchando... Puedes hablar ahora o pausar cuando termines"}
         >
           {interimText ? (
-            <span>🗣️ <i>"{interimText}"</i></span>
+            <span><i>"{interimText}"</i></span>
           ) : (
-            <span>🎙️ {showWinTip ? "Habla ahora (o usa Win + H)" : "Escuchando micrófono..."}</span>
+            <span>{showWinTip ? "Habla ahora (o usa Win + H)" : "Escuchando micrófono..."}</span>
           )}
         </span>
       )}

@@ -639,7 +639,6 @@ function Modulo2_GestionAdministrativa() {
                   gap: '0.65rem',
                   lineHeight: '1.4'
                 }}>
-                  <span style={{ fontSize: '1.25rem' }}>📋</span>
                   <span>
                     Al presionar <strong>Crear Usuario</strong>, se registrará el paciente y se <strong>desplegará automáticamente el modal</strong> con su expediente clínico completo (Teléfono, Médico Tratante, Referente, Próxima Cita, Dirección y Antecedentes Médicos y Quirúrgicos).
                   </span>

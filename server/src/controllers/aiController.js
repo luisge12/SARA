@@ -11,7 +11,7 @@ const Appointment = require('../models/Appointment');
 const getGeminiModel = () => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey.trim() === '') {
-    console.warn('⚠️ SARA-AI: GEMINI_API_KEY no encontrada en variables de entorno.');
+    console.warn('SARA-AI: GEMINI_API_KEY no encontrada en variables de entorno.');
     return null;
   }
   try {
@@ -23,7 +23,7 @@ Tu misión es asistir a personal médico, recepcionistas, administradores y paci
 
 Instrucciones de comportamiento:
 - Responde siempre de manera profesional, empática, amable y en español impecable.
-- Utiliza formato Markdown atractivo (negritas, viñetas, listas estructuradas y emojis adecuados).
+- Utiliza formato Markdown claro y profesional (negritas, viñetas y listas estructuradas, sin emojis).
 - Cuando el usuario pregunte por cómo usar la plataforma SARA, guíalo indicando los pasos en los módulos (Módulo 1: Dashboard, Módulo 2: Gestión Administrativa de Pacientes, Módulo 3: Registro de Caja, Módulo 4: Historia Clínica y Datos Médicos, Módulo 7: Reportes y Estadísticas).
 - Si se te proporciona información de pacientes obtenida del sistema, utilízala para responder con precisión.
 - Si te piden un diagnóstico o consulta sobre dolor/síntomas médicos, brinda información médica clara, profesional y tranquilizadora sobre posibles causas comunes o medidas generales de alivio, pero aclara amablemente al final que tus respuestas son puramente orientativas e informativas y que siempre se requiere la evaluación física directa por un médico especialista en UNIMECO.`
@@ -50,7 +50,7 @@ const queryPatientDatabase = async (prompt) => {
         include: [{ model: PatientProfile, as: 'patientProfile' }]
       });
 
-      let response = `📊 **Información de Pacientes en Sistema SARA:**\n`;
+      let response = `**Información de Pacientes en Sistema SARA:**\n`;
       response += `- **Total de pacientes registrados:** ${count}\n\n`;
 
       if (recentPatients.length > 0) {
@@ -85,10 +85,10 @@ const queryPatientDatabase = async (prompt) => {
       });
 
       if (foundPatients && foundPatients.length > 0) {
-        let response = `🔍 **Resultados de Pacientes Encontrados:**\n\n`;
+        let response = `**Resultados de Pacientes Encontrados:**\n\n`;
         foundPatients.forEach(p => {
           const profile = p.patientProfile || {};
-          response += `👤 **Paciente:** ${p.name || p.username}\n`;
+          response += `**Paciente:** ${p.name || p.username}\n`;
           response += `• **Cédula/ID:** ${p.identificationNumber || 'N/A'}\n`;
           response += `• **Teléfono:** ${profile.phone || 'No registrado'}\n`;
           response += `• **Email:** ${profile.email || 'No registrado'}\n`;
@@ -112,7 +112,7 @@ const queryPatientDatabase = async (prompt) => {
 const generateGeminiResponse = async (prompt, patientContext = null) => {
   const instance = getGeminiModel();
   if (!instance || !instance.model) {
-    console.warn('⚠️ SARA-AI: No se pudo instanciar Gemini API.');
+    console.warn('SARA-AI: No se pudo instanciar Gemini API.');
     return null;
   }
 
@@ -122,14 +122,14 @@ const generateGeminiResponse = async (prompt, patientContext = null) => {
       fullPrompt = `[CONTEXTO DE LA BASE DE DATOS DE SARA]:\n${patientContext}\n\n[PREGUNTA DEL USUARIO]:\n${prompt}`;
     }
 
-    console.log(`🤖 SARA-AI enviando consulta a Gemini API: "${prompt}"`);
+    console.log(`SARA-AI enviando consulta a Gemini API: "${prompt}"`);
     const result = await instance.model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
-    console.log(`✅ SARA-AI respuesta generada exitosamente por Gemini (${text.length} caracteres).`);
+    console.log(`SARA-AI respuesta generada exitosamente por Gemini (${text.length} caracteres).`);
     return text;
   } catch (error) {
-    console.error('❌ Error al llamar a Gemini API:', error.message);
+    console.error('Error al llamar a Gemini API:', error.message);
     
     // Fallback a otros modelos de Gemini
     const fallbackModels = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-pro-latest'];
@@ -160,7 +160,7 @@ const generateServerSaraResponse = async (message) => {
   }
 
   if (text.includes('cita') || text.includes('agendar') || text.includes('calendario') || text.includes('horario') || text.includes('turnos')) {
-    return `📅 **Gestión de Citas Médicas en SARA:**
+    return `**Gestión de Citas Médicas en SARA:**
 1. Haz clic en el botón **"Agendar Cita"** en la barra lateral o en el Dashboard.
 2. Selecciona la especialidad médica, el médico tratante y la fecha/hora requerida.
 3. Busca al paciente por su número de cédula o ID y asigna la cita.
@@ -168,12 +168,12 @@ const generateServerSaraResponse = async (message) => {
   }
 
   if (text.includes('hola') || text.includes('buenas') || text.includes('saludos') || text.includes('quien eres') || text.includes('quién eres')) {
-    return `¡Hola! 👋 Soy **SARA-AI**, tu asistente médica e inteligente integrada en el sistema SARA.
+    return `¡Hola! Soy **SARA-AI**, tu asistente médica e inteligente integrada en el sistema SARA.
 
 Puedo buscar datos de pacientes en la base de datos, responder dudas sobre la plataforma, guiarte en el registro de citas, caja o historia médica. ¿En qué te ayudo?`;
   }
 
-  return `🤖 Soy **SARA-AI**, tu asistente inteligente del centro médico. Puedes preguntarme directamente sobre datos de pacientes, citas médicas, registro de caja, historias clínicas o dudas médicas generales.`;
+  return `Soy **SARA-AI**, tu asistente inteligente del centro médico. Puedes preguntarme directamente sobre datos de pacientes, citas médicas, registro de caja, historias clínicas o dudas médicas generales.`;
 };
 
 // Procesar mensajes de texto de SARA-AI
@@ -193,7 +193,7 @@ const handleAiChat = async (req, res) => {
 
     // 3. Si Gemini no respondió o falló, usar respuestas locales / datos de la BD
     if (!aiResponse) {
-      console.warn('⚠️ Usando generador de respuesta local por falta de respuesta de Gemini.');
+      console.warn('Usando generador de respuesta local por falta de respuesta de Gemini.');
       aiResponse = patientData || await generateServerSaraResponse(message);
     }
 

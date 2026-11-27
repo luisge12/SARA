@@ -127,7 +127,7 @@ export function useSpeechToText({ onTranscript, lang = 'es-ES' } = {}) {
         setIsListening(false);
 
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          setErrorMessage('Permiso de micrófono bloqueado. Haz clic en el ícono del candado 🔒 junto a la dirección web y habilita el micrófono.');
+          setErrorMessage('Permiso de micrófono bloqueado. Haz clic en el ícono del candado junto a la dirección web y habilita el micrófono.');
         } else if (event.error === 'audio-capture') {
           setErrorMessage('No se detectó señal de micrófono. Revisa que el micrófono esté conectado y no esté silenciado en Windows.');
         } else if (event.error === 'network') {

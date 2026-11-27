@@ -440,11 +440,11 @@ function Modulo3_GestionAdministrativa() {
                         <td>
                           {item.itemType === 'CITA' ? (
                             <span style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700' }}>
-                              📅 Cita
+                              Cita
                             </span>
                           ) : (
                             <span style={{ backgroundColor: '#f3e8ff', color: '#7e22ce', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700' }}>
-                              🔬 Estudio
+                              Estudio
                             </span>
                           )}
                         </td>
@@ -630,7 +630,7 @@ function Modulo3_GestionAdministrativa() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', marginTop: '-0.35rem' }}>
                 <span style={{ color: isDistributionValid ? '#059669' : '#dc2626', fontWeight: '600' }}>
-                  {isDistributionValid ? '✓ Total distribución: 100%' : `⚠️ La suma debe ser exactamente 100% (Actual: ${totalDistributionPerc.toFixed(1)}%)`}
+                  {isDistributionValid ? '✓ Total distribución: 100%' : `La suma debe ser exactamente 100% (Actual: ${totalDistributionPerc.toFixed(1)}%)`}
                 </span>
                 {!isDistributionValid && (
                   <button 
