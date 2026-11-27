@@ -10,7 +10,7 @@ namespace SaraMedical
         [STAThread]
         static void Main(string[] args)
         {
-            string url = "http://localhost:5173/login";
+            string url = "https://asistentesara.com/login";
             try
             {
                 string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
