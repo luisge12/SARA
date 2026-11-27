@@ -4,6 +4,7 @@ import {
   ExternalLink, Users, Activity, LogIn
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import licenseService from '../../services/licenseService';
 import './SaraWebPortal.css';
 
@@ -23,6 +24,8 @@ export default function SaraWebPortal() {
   });
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadingType, setDownloadingType] = useState('exe');
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
   // Cargar información de descarga al montar
   useEffect(() => {
@@ -33,12 +36,13 @@ export default function SaraWebPortal() {
       .catch(() => {});
   }, []);
 
-  // Iniciar descarga del instalador o versión portable
-  const handleStartDownload = (type = 'exe') => {
+  // Iniciar descarga del instalador o versión portable (vía API blob para evitar que el Service Worker PWA intercepte la ruta)
+  const handleStartDownload = async (type = 'exe') => {
+    if (isDownloading) return;
     setDownloadingType(type);
-    setShowDownloadModal(true);
+    setDownloadError('');
+    setIsDownloading(true);
 
-    // Disparar la descarga real del archivo con cache buster
     let downloadUrl = `/api/licenses/download/setup?t=${Date.now()}`;
     let filename = 'SARA_Setup_v2.4.0.exe';
 
@@ -50,12 +54,31 @@ export default function SaraWebPortal() {
       filename = 'SARA.exe';
     }
 
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const response = await api.get(downloadUrl, { responseType: 'blob' });
+      const contentType = response.headers?.['content-type'] || '';
+
+      if (contentType.includes('text/html') || contentType.includes('application/json')) {
+        throw new Error('El servidor no devolvió un archivo ejecutable válido.');
+      }
+
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: contentType || 'application/octet-stream' }));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+
+      setShowDownloadModal(true);
+    } catch (error) {
+      console.error('Error descargando SARA:', error);
+      setDownloadError('No se pudo descargar el archivo en este momento. Intenta nuevamente en unos segundos.');
+      setShowDownloadModal(true);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -334,31 +357,36 @@ export default function SaraWebPortal() {
       {showDownloadModal && (
         <div className="download-dialog-overlay" onClick={() => setShowDownloadModal(false)}>
           <div className="download-dialog-card" onClick={e => e.stopPropagation()}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', color: '#34d399' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: downloadError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', color: downloadError ? '#f87171' : '#34d399' }}>
               <Download size={28} />
             </div>
 
             <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.4rem' }}>
-              ¡Tu Descarga Ha Comenzado!
+              {downloadError ? 'Error en la Descarga' : '¡Tu Descarga Ha Comenzado!'}
             </h3>
             <p style={{ color: 'var(--portal-text-muted)', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 1.5rem' }}>
-              {downloadingType === 'portable' 
-                ? <>El paquete <strong>SARA_Portable_v2.4.0.zip</strong> se está guardando en tu carpeta de Descargas. Solo debes descomprimirlo y ejecutar <code>SARA.exe</code>.</>
-                : downloadingType === 'direct'
-                ? <>El ejecutable nativo <strong>SARA.exe</strong> se está guardando en tu carpeta de Descargas. Puedes ejecutarlo directamente sin instalar nada.</>
-                : <>El instalador <strong>SARA_Setup_v2.4.0.exe</strong> se está guardando en tu carpeta de Descargas.</>
-              }
+              {downloadError ? (
+                downloadError
+              ) : downloadingType === 'portable' ? (
+                <>El paquete <strong>SARA_Portable_v2.4.0.zip</strong> se está guardando en tu carpeta de Descargas. Solo debes descomprimirlo y ejecutar <code>SARA.exe</code>.</>
+              ) : downloadingType === 'direct' ? (
+                <>El ejecutable nativo <strong>SARA.exe</strong> se está guardando en tu carpeta de Descargas. Puedes ejecutarlo directamente sin instalar nada.</>
+              ) : (
+                <>El instalador <strong>SARA_Setup_v2.4.0.exe</strong> se está guardando en tu carpeta de Descargas.</>
+              )}
             </p>
 
-            <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '1rem', borderRadius: '10px', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
-              <span style={{ display: 'block', fontWeight: 700, color: '#38bdf8', marginBottom: '0.4rem' }}>
-                💡 Instrucciones si Windows SmartScreen muestra un aviso:
-              </span>
-              <p style={{ margin: 0, color: 'var(--portal-text-muted)' }}>
-                1. Haz clic en <strong>"Más información"</strong> en la ventana emergente.<br />
-                2. Luego haz clic en <strong>"Ejecutar de todas formas"</strong> para iniciar SARA de manera segura.
-              </p>
-            </div>
+            {!downloadError && (
+              <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '1rem', borderRadius: '10px', textAlign: 'left', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
+                <span style={{ display: 'block', fontWeight: 700, color: '#38bdf8', marginBottom: '0.4rem' }}>
+                  💡 Instrucciones si Windows SmartScreen muestra un aviso:
+                </span>
+                <p style={{ margin: 0, color: 'var(--portal-text-muted)' }}>
+                  1. Haz clic en <strong>"Más información"</strong> en la ventana emergente.<br />
+                  2. Luego haz clic en <strong>"Ejecutar de todas formas"</strong> para iniciar SARA de manera segura.
+                </p>
+              </div>
+            )}
 
             <button 
               className="btn-card-download primary"

@@ -46,7 +46,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        navigateFallbackDenylist: [/^\/api\//, /^\/uploads\//],
         runtimeCaching: [
+          {
+            // Nunca interceptar ni cachear descargas de instaladores o archivos subidos
+            urlPattern: /^\/api\/(licenses\/download|uploads)\/.*/i,
+            handler: 'NetworkOnly'
+          },
           {
             urlPattern: /^https:\/\/api\.fonts\.coollabs\.io\/.*/i,
             handler: 'CacheFirst',
